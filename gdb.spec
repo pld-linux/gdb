@@ -4,19 +4,13 @@ Summary(fr):	Débugger symbolique pour C et d'autres langages
 Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
-Version:	4.18
-Release:	7
+Version:	5.0
+Release:	1
 License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
-Source0:	ftp://sourceware.cygnus.com/pub/gdb/%{name}-%{version}.tar.bz2
-Patch0:		gdb-info.patch
-Patch1:		gdb-sigtramp.patch
-Patch2:		gdb-sparc.patch
-Patch3:		gdb-xref.patch
-Patch4:		gdb-sparcmin.patch
-Patch5:		gdb-threads.patch
-Patch6:		gdb-shared-readline.patch
+Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
+Patch0:		gdb-shared-readline.patch
 BuildRequires:	ncurses-devel >= 5.0
 BuildRequires:	readline-devel >= 4.1
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -52,12 +46,6 @@ verir.
 %prep
 %setup -q
 %patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p1
 
 %build
 CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \

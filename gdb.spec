@@ -18,6 +18,7 @@ Patch2:		%{name}-readline.patch
 Patch3:		%{name}-info.patch
 Patch4:		%{name}-procfs.patch
 Patch5:		%{name}-ppc-include.patch
+Patch6:		%{name}-passflags.patch
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	readline-devel >= 4.2
 BuildRequires:	XFree86-devel
@@ -74,6 +75,7 @@ verir.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
+%patch6 -p1
 
 %build
 (cd gdb; autoconf)

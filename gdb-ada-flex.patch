@@ -1,0 +1,13 @@
+--- gdb-6.1.1/gdb/Makefile.in.orig	2004-06-23 16:34:32.000000000 +0200
++++ gdb-6.1.1/gdb/Makefile.in	2004-06-23 16:35:11.000000000 +0200
+@@ -1453,8 +1453,8 @@
+ 	mv $@.new ./$*.c
+ .l.c:
+ 	@if [ "$(FLEX)" ] && $(FLEX) --version >/dev/null 2>&1; then \
+-	    echo $(FLEX) -Isit $< ">" $@; \
+-	    $(FLEX) -Isit $< > $@; \
++	    echo $(FLEX) -I -s -i -t $< ">" $@; \
++	    $(FLEX) -I -s -i -t $< > $@; \
+ 	elif [ ! -f $@ -a ! -f $< ]; then \
+ 	    echo "$< missing and flex not available."; \
+ 	    false; \

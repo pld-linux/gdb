@@ -18,12 +18,11 @@ Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
 # Source0-md5:	e2314b7c9c7670b5384deb90701446f4
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
-Patch0:		%{name}-gettext.patch
-Patch1:		%{name}-ncurses.patch
-Patch2:		%{name}-readline.patch
-Patch3:		%{name}-info.patch
-Patch4:		%{name}-procfs.patch
-Patch5:		%{name}-passflags.patch
+Patch0:		%{name}-ncurses.patch
+Patch1:		%{name}-readline.patch
+Patch2:		%{name}-info.patch
+Patch3:		%{name}-procfs.patch
+Patch4:		%{name}-passflags.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	libtool
@@ -85,12 +84,11 @@ verir.
 
 %prep
 %setup -q
-#%patch0 -p1
+%patch0 -p1
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
-%patch5 -p1
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

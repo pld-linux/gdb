@@ -1,0 +1,15 @@
+--- gdb-6.0/gdb/sparc-nat.c.orig	2003-07-07 15:57:29.000000000 +0000
++++ gdb-6.0/gdb/sparc-nat.c	2003-11-08 15:40:12.000000000 +0000
+@@ -20,6 +20,12 @@
+    Foundation, Inc., 59 Temple Place - Suite 330,
+    Boston, MA 02111-1307, USA.  */
+ 
++/* there is struct fpq/fq/fpu definitions conflict
++ * between <asm/reg.h> and <sys/ucontext.h> (included in <signal.h>)
++ * gdb needs <asm/reg.h>, so this is workaround to avoid including
++ * <sys/ucontext.h> contents */
++#define _SYS_UCONTEXT_H 1
++
+ #include "defs.h"
+ #include "inferior.h"
+ #include "target.h"

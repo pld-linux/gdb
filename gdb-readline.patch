@@ -1,7 +1,7 @@
-diff -urN gdb-5.0.org/Makefile.in gdb-5.0/Makefile.in
---- gdb-5.0.org/Makefile.in	Thu May 18 07:00:23 2000
-+++ gdb-5.0/Makefile.in	Tue Sep  5 18:32:37 2000
-@@ -558,7 +558,6 @@
+diff -ur gdb-5.1.orig/Makefile.in gdb-5.1/Makefile.in
+--- gdb-5.1.orig/Makefile.in	Sun Nov 18 20:37:49 2001
++++ gdb-5.1/Makefile.in	Tue Jan 22 23:52:34 2002
+@@ -530,7 +530,6 @@
  	all-perl \
  	all-prms \
  	all-rcs \
@@ -9,7 +9,7 @@ diff -urN gdb-5.0.org/Makefile.in gdb-5.0/Makefile.in
  	all-release \
  	all-recode \
  	all-sed \
-@@ -631,7 +630,6 @@
+@@ -607,7 +606,6 @@
  	check-perl \
  	check-prms \
  	check-rcs \
@@ -17,7 +17,7 @@ diff -urN gdb-5.0.org/Makefile.in gdb-5.0/Makefile.in
  	check-recode \
  	check-sed \
  	check-send-pr \
-@@ -705,7 +703,6 @@
+@@ -684,7 +682,6 @@
  	install-perl \
  	install-prms \
  	install-rcs \
@@ -25,7 +25,7 @@ diff -urN gdb-5.0.org/Makefile.in gdb-5.0/Makefile.in
  	install-recode \
  	install-sed \
  	install-send-pr \
-@@ -869,7 +866,6 @@
+@@ -886,7 +883,6 @@
  	clean-perl \
  	clean-prms \
  	clean-rcs \
@@ -33,30 +33,31 @@ diff -urN gdb-5.0.org/Makefile.in gdb-5.0/Makefile.in
  	clean-release \
  	clean-recode \
  	clean-sed \
-@@ -1561,7 +1557,7 @@
- all-gcc: all-bison all-byacc all-binutils all-gas all-ld
- all-bootstrap: all-libiberty all-bison all-byacc all-binutils all-gas all-ld
+@@ -1602,7 +1598,7 @@
+ all-gcc: all-bison all-byacc all-binutils all-gas all-ld all-zlib
+ all-bootstrap: all-libiberty all-texinfo all-bison all-byacc all-binutils all-gas all-ld all-zlib
  GDB_TK = all-tk all-tcl all-itcl all-tix all-libgui
 -all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
 +all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
  all-gettext:
  all-gnuserv:
- configure-target-gperf: $(ALL_GCC)
-@@ -1606,12 +1602,11 @@
- all-perl:
- all-prms: all-libiberty
+ configure-target-gperf: $(ALL_GCC_C)
+@@ -1662,13 +1658,12 @@
+ configure-target-qthreads: $(ALL_GCC_C)
+ all-target-qthreads: configure-target-qthreads
  all-rcs:
 -all-readline:
  all-recode: all-libiberty
  all-sed: all-libiberty
  all-send-pr: all-prms
  all-shellutils:
--all-sim: all-libiberty all-bfd all-opcodes all-readline
-+all-sim: all-libiberty all-bfd all-opcodes
+ all-sid: all-tcl all-tk
+-all-sim: all-libiberty all-bfd all-opcodes all-readline all-cgen
++all-sim: all-libiberty all-bfd all-opcodes all-cgen
+ all-snavigator: all-tcl all-tk all-itcl all-db all-grep all-libgui
  all-tar: all-libiberty
  all-tcl:
- all-tcl8.1:
-@@ -1853,7 +1848,7 @@
+@@ -1925,7 +1920,7 @@
  		SUPPORT_FILES="$(GNATS_SUPPORT_DIRS)"
  
  .PHONY: gdb.tar.bz2
@@ -65,10 +66,10 @@ diff -urN gdb-5.0.org/Makefile.in gdb-5.0/Makefile.in
  gdb.tar.bz2: $(DIST_SUPPORT) $(GDB_SUPPORT_DIRS) gdb
  	$(MAKE) -f Makefile.in gdb-taz TOOL=gdb \
  		MD5PROG="$(MD5PROG)" \
-diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
---- gdb-5.0.org/gdb/Makefile.in	Tue Sep  5 18:30:00 2000
-+++ gdb-5.0/gdb/Makefile.in	Tue Sep  5 19:15:00 2000
-@@ -126,10 +126,10 @@
+diff -ur gdb-5.1.orig/gdb/Makefile.in gdb-5.1/gdb/Makefile.in
+--- gdb-5.1.orig/gdb/Makefile.in	Sun Nov 18 06:08:36 2001
++++ gdb-5.1/gdb/Makefile.in	Tue Jan 22 23:54:56 2002
+@@ -120,10 +120,10 @@
  BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
  
  # Where is the READLINE library?  Typically in ../readline.
@@ -83,81 +84,10 @@ diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
  
  WARN_CFLAGS = @WARN_CFLAGS@
  WERROR_CFLAGS = @WERROR_CFLAGS@
-diff -urN gdb-5.0.org/gdb/event-top.c gdb-5.0/gdb/event-top.c
---- gdb-5.0.org/gdb/event-top.c	Tue Sep  5 19:34:20 2000
-+++ gdb-5.0/gdb/event-top.c	Tue Sep  5 19:34:42 2000
-@@ -32,6 +32,7 @@
- #include "gdbcmd.h"
- 
- /* readline include files */
-+#define savestring
- #include <readline/readline.h>
- #include <readline/history.h>
- 
-diff -urN gdb-5.0.org/gdb/gdbserver/Makefile.in gdb-5.0/gdb/gdbserver/Makefile.in
---- gdb-5.0.org/gdb/gdbserver/Makefile.in	Tue Sep  5 18:30:00 2000
-+++ gdb-5.0/gdb/gdbserver/Makefile.in	Tue Sep  5 18:30:35 2000
-@@ -87,7 +87,7 @@
- 
- # Where is the source dir for the READLINE library?  Traditionally in .. or .
- # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
--READLINE_DIR = ${srcdir}/../readline
-+READLINE_DIR = /usr/lib
- READLINE_DEP = $$(READLINE_DIR)
- 
- # All the includes used for CFLAGS and for lint.
-diff -urN gdb-5.0.org/gdb/top.c gdb-5.0/gdb/top.c
---- gdb-5.0.org/gdb/top.c	Wed Apr 12 18:46:03 2000
-+++ gdb-5.0/gdb/top.c	Tue Sep  5 19:45:56 2000
-@@ -36,6 +36,7 @@
- #include "version.h"
- 
- /* readline include files */
-+#define savestring
- #include <readline/readline.h>
- #include <readline/history.h>
- 
-diff -urN gdb-5.0.org/gdb/tracepoint.c gdb-5.0/gdb/tracepoint.c
---- gdb-5.0.org/gdb/tracepoint.c	Tue Dec 14 02:05:38 1999
-+++ gdb-5.0/gdb/tracepoint.c	Tue Sep  5 19:38:26 2000
-@@ -36,6 +36,7 @@
- #include "ax-gdb.h"
- 
- /* readline include files */
-+#define savestring
- #include <readline/readline.h>
- #include <readline/history.h>
- 
-diff -urN gdb-5.0.org/gdb/tui/Makefile.in gdb-5.0/gdb/tui/Makefile.in
---- gdb-5.0.org/gdb/tui/Makefile.in	Tue Sep  5 18:30:00 2000
-+++ gdb-5.0/gdb/tui/Makefile.in	Tue Sep  5 18:28:16 2000
-@@ -49,9 +49,9 @@
- BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
- 
- # Where is the READLINE library?  Typically in ../readline.
--READLINE_DIR = ../../readline
--READLINE_SRC = $(srcdir)/$(READLINE_DIR)
--READLINE_CFLAGS = -I$(READLINE_SRC)
-+READLINE_DIR = /usr/lib
-+READLINE_SRC = /usr/lib
-+READLINE_CFLAGS = -I/usr/include/readline
- 
- # Where is the INTL library?  Typically in ../intl.
- INTL_DIR = ../../intl
-diff -urN gdb-5.0.org/gdb/utils.c gdb-5.0/gdb/utils.c
---- gdb-5.0.org/gdb/utils.c	Tue Sep  5 18:54:25 2000
-+++ gdb-5.0/gdb/utils.c	Tue Sep  5 19:49:03 2000
-@@ -50,6 +50,7 @@
- #include "language.h"
- #include "annotate.h"
- 
-+#define savestring
- #include <readline/readline.h>
- 
- #undef XMALLOC
---- gdb-5.0/gdb/defs.h.wiget	Fri Apr 13 14:59:59 2001
-+++ gdb-5.0/gdb/defs.h	Fri Apr 13 15:00:09 2001
-@@ -603,7 +603,7 @@
+diff -ur gdb-5.1.orig/gdb/defs.h gdb-5.1/gdb/defs.h
+--- gdb-5.1.orig/gdb/defs.h	Thu Aug  2 23:36:51 2001
++++ gdb-5.1/gdb/defs.h	Tue Jan 22 23:59:50 2002
+@@ -800,7 +800,7 @@
  
  /* From readline (but not in any readline .h files).  */
  
@@ -166,3 +96,59 @@ diff -urN gdb-5.0.org/gdb/utils.c gdb-5.0/gdb/utils.c
  
  /* Control types for commands */
  
+diff -ur gdb-5.1.orig/gdb/event-top.c gdb-5.1/gdb/event-top.c
+--- gdb-5.1.orig/gdb/event-top.c	Sat Jul 14 20:59:07 2001
++++ gdb-5.1/gdb/event-top.c	Tue Jan 22 23:59:50 2002
+@@ -32,6 +32,7 @@
+ #include "gdbcmd.h"
+ 
+ /* readline include files */
++#define savestring
+ #include <readline/readline.h>
+ #include <readline/history.h>
+ 
+diff -ur gdb-5.1.orig/gdb/gdbserver/Makefile.in gdb-5.1/gdb/gdbserver/Makefile.in
+--- gdb-5.1.orig/gdb/gdbserver/Makefile.in	Tue Mar  6 09:21:43 2001
++++ gdb-5.1/gdb/gdbserver/Makefile.in	Tue Jan 22 23:59:50 2002
+@@ -88,7 +88,7 @@
+ 
+ # Where is the source dir for the READLINE library?  Traditionally in .. or .
+ # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
+-READLINE_DIR = ${srcdir}/../readline
++READLINE_DIR = /usr/lib
+ READLINE_DEP = $$(READLINE_DIR)
+ 
+ # All the includes used for CFLAGS and for lint.
+diff -ur gdb-5.1.orig/gdb/top.c gdb-5.1/gdb/top.c
+--- gdb-5.1.orig/gdb/top.c	Sun Oct 21 21:41:19 2001
++++ gdb-5.1/gdb/top.c	Tue Jan 22 23:59:50 2002
+@@ -42,6 +42,7 @@
+ #include "serial.h"
+ 
+ /* readline include files */
++#define savestring
+ #include <readline/readline.h>
+ #include <readline/history.h>
+ 
+diff -ur gdb-5.1.orig/gdb/tracepoint.c gdb-5.1/gdb/tracepoint.c
+--- gdb-5.1.orig/gdb/tracepoint.c	Thu Aug  2 14:05:57 2001
++++ gdb-5.1/gdb/tracepoint.c	Tue Jan 22 23:59:50 2002
+@@ -40,6 +40,7 @@
+ #include "ax-gdb.h"
+ 
+ /* readline include files */
++#define savestring
+ #include <readline/readline.h>
+ #include <readline/history.h>
+ 
+diff -ur gdb-5.1.orig/gdb/utils.c gdb-5.1/gdb/utils.c
+--- gdb-5.1.orig/gdb/utils.c	Fri Nov  2 23:06:29 2001
++++ gdb-5.1/gdb/utils.c	Tue Jan 22 23:59:50 2002
+@@ -54,6 +54,7 @@
+ 
+ #include "inferior.h" /* for signed_pointer_to_address */
+ 
++#define savestring
+ #include <readline/readline.h>
+ 
+ #ifndef MALLOC_INCOMPATIBLE

@@ -1,0 +1,24 @@
+diff -ur gdb-5.1.1/sim/Makefile.in gdb-5.1.1-/sim/Makefile.in
+--- gdb-5.1.1/sim/Makefile.in	Fri Apr 16 01:34:55 1999
++++ gdb-5.1.1-/sim/Makefile.in	Tue Apr  9 11:03:47 2002
+@@ -81,6 +81,20 @@
+ FLAGS_TO_PASS = \
+ 	"prefix=$(prefix)" \
+ 	"exec_prefix=$(exec_prefix)" \
++	"bindir=$(bindir)" \
++	"datadir=$(datadir)" \
++	"includedir=$(includedir)" \
++	"infodir=$(infodir)" \
++	"libdir=$(libdir)" \
++	"libexecdir=$(libexecdir)" \
++	"lispdir=$(lispdir)" \
++	"localstatedir=$(localstatedir)" \
++	"mandir=$(mandir)" \
++	"oldincludedir=$(oldincludedir)" \
++	"sbindir=$(sbindir)" \
++	"sharedstatedir=$(sharedstatedir)" \
++	"sysconfdir=$(sysconfdir)" \
++	"tooldir=$(tooldir)" \
+ 	"against=$(against)" \
+ 	"AR=$(AR)" \
+ 	"AR_FLAGS=$(AR_FLAGS)" \

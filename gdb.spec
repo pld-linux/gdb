@@ -6,7 +6,7 @@ Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(pt_BR):	Depurador de programas C e outras linguagens
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
-Version:	5.1
+Version:	5.1.1
 Release:	1
 License:	GPL
 Group:		Development/Debuggers
@@ -76,7 +76,8 @@ verir.
 %patch4 -p1
 
 %build
-(cd gdb; libtoolize --copy --force; aclocal; autoconf)
+(cd gdb; autoconf)
+#libtoolize --copy --force; aclocal; autoconf)
 (cd gdb/doc; autoconf)
 (cd gdb/testsuite; autoconf)
 (cd gdb/testsuite/gdb.asm; autoconf)
@@ -108,6 +109,11 @@ verir.
 	--with-mmalloc \
 %endif
 	--with-mmap
+
+# something is wrong after above - e.g. $exeext=="no" - fix it:
+(cd gdb
+%configure
+)
 
 %{__make}
 %{__make} info

@@ -1,7 +1,7 @@
 Summary:	Symbolic debugger for C and other languages
 Summary(de):	Symbolischer Debugger für C und andere Sprachen 
 Summary(fr):	Débugger symbolique pour C et d'autres langages
-Summary(pl):	Symboliczny debugger dla C i innych jêzyków
+Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	4.18
@@ -31,10 +31,10 @@ des programmes et d'examiner à tout moment leur état interne. Fonctionne
 avec les binaires C et C++ compilés avec le compilateur C de GNU, gcc.
 
 %description -l pl
-Gdb jest rozbudowanym debugerem, pozwalaj±cym ¶ledziæ wykonanie
-programu i badaæ jego stan wewnêtrzny. gdb umo¿liwia debugowanie
-programów napisanych w C i C++ i skompilowanych przy pomocy kompilatora
-C GNU (egcs).
+Gdb jest rozbudowanym odpluskwiaczem (debuggerem), pozwalaj±cym ¶ledziæ
+wykonywanie programu i badaæ jego stan wewnêtrzny. Gdb umo¿liwia
+odpluskwianie programów napisanych w C/C++ i skompilowanych przy pomocy
+kompilatora GNU (gcc).
 
 %description -l tr
 Bir komut arayüzü üzerinden programcýya programýný adým adým izleme (trace)

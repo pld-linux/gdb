@@ -155,3 +155,14 @@ diff -urN gdb-5.0.org/gdb/utils.c gdb-5.0/gdb/utils.c
  #include <readline/readline.h>
  
  #undef XMALLOC
+--- gdb-5.0/gdb/defs.h.wiget	Fri Apr 13 14:59:59 2001
++++ gdb-5.0/gdb/defs.h	Fri Apr 13 15:00:09 2001
+@@ -603,7 +603,7 @@
+ 
+ /* From readline (but not in any readline .h files).  */
+ 
+-extern char *tilde_expand (char *);
++extern char *tilde_expand (const char *);
+ 
+ /* Control types for commands */
+ 

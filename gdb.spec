@@ -10,8 +10,6 @@ Version:	5.1.1
 Release:	2
 License:	GPL
 Group:		Development/Debuggers
-Group(de):	Entwicklung/Debugger
-Group(pl):	Programowanie/Odpluskwiacze
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 Patch0:		%{name}-gettext.patch

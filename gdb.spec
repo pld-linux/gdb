@@ -4,19 +4,17 @@ Summary(fr):	Débugger symbolique pour C et d'autres langages
 Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
-Version:	5.0
-Release:	8
+Version:	5.1
+Release:	1
 License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
 Group(de):	Entwicklung/Debugger
-Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.bz2
+Source0:	ftp://ftp.gnu.org/pub/gdb/%{name}-%{version}.tar.gz
 Source1:	%{name}-non-english-man-pages.tar.bz2
 Patch0:		%{name}-gettext.patch
-Patch1:		%{name}-ncurses.patch
-Patch2:		%{name}-readline.patch
-Patch3:		%{name}-info.patch
-Patch4:		%{name}-procfs.patch
+Patch1:		%{name}-gcc3.1-jelinek.patch
+URL:		http://sources.redhat.com/gdb/
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	readline-devel >= 4.2
 BuildRequires:	XFree86-devel
@@ -57,44 +55,26 @@ verir.
 %setup -q
 %patch0 -p1
 %patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
 
 %build
-(cd gdb; libtoolize --copy --force; aclocal; autoconf)
-(cd gdb/doc; autoconf)
-(cd gdb/testsuite; autoconf)
-(cd gdb/testsuite/gdb.asm; autoconf)
-(cd gdb/testsuite/gdb.base; autoconf)
-(cd gdb/testsuite/gdb.c++; autoconf)
-(cd gdb/testsuite/gdb.disasm; autoconf)
-(cd gdb/testsuite/gdb.chill; autoconf)
-(cd gdb/testsuite/gdb.mi; autoconf)
-(cd gdb/testsuite/gdb.threads; autoconf)
-(cd gdb/testsuite/gdb.trace; autoconf)
-(cd gdb/testsuite/gdb.stabs; autoconf)
-(cd gdb/gdbserver; autoconf)
 # !! Don't enable shared here !! 
 # This will cause serious problems --misiek
+CFLAGS="%{rpmcflags} -I%{_includedir}/ncurses"; export CFLAGS
 %configure2_13 \
+	--enable-multi-ice \
+	--enable-gdbcli \
+	--enable-gdbmi \
+	--enable-tui \
+	--enable-netrom \
+	--with-mmalloc \
+	--with-cpu=%{_target_cpu} \
+	--enable-sim \
+	--disable-gdbtk \
 	--disable-shared \
 	--enable-nls \
-	--without-included-gettext \
-	--enable-multi-ice \
-	--enable-gdbmi \
-	--enable-netrom \
-	--with-cpu=%{_target_cpu} \
-	--with-x \
-%ifnarch alpha
-	--with-mmalloc \
-%endif
-	--with-mmap
-#	--enable-tui
+	--without-included-gettext
 
-# rebuild main Makefile again (due to some bug, Makefile is deleted)
-%configure2_13 \
-	--norecursion
+echo '#define HAVE_NCURSES_H 1' >> gdb/config.h
 			
 %{__make}
 %{__make} info

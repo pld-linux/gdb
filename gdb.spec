@@ -7,6 +7,8 @@ Summary(pt_BR):	Depurador de programas C e outras linguagens
 Summary(ru):	Символический отладчик для C и других языков
 Summary(tr):	C ve diПer diller iГin sembolik hata ayЩklayЩcЩ
 Summary(uk):	Символьний в╕дладчик для С та ╕нших мов
+Summary(zh_CN):	[©╙╥╒]C╨мфДкШсОят╣д╣ВйтфВ
+Summary(zh_TW):	[.-A╤}╣o]C╘M.$)B╗Д.-A╔L╩y.$)B╗╔╙╨╫у╦у╬╧
 Name:		gdb
 Version:	5.2.1
 Release:	1

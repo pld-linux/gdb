@@ -20,11 +20,11 @@ Patch2:		%{name}-readline.patch
 Patch3:		%{name}-info.patch
 Patch4:		%{name}-procfs.patch
 Patch5:		%{name}-passflags.patch
-BuildRequires:	ncurses-devel >= 5.2
-BuildRequires:	readline-devel >= 4.2
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	libtool
+BuildRequires:	ncurses-devel >= 5.2
+BuildRequires:	readline-devel >= 4.2
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -89,21 +89,37 @@ verir.
 %patch5 -p1
 
 %build
-(cd gdb; autoconf)
-(cd gdb/doc; autoconf)
-(cd gdb/testsuite; autoconf)
-(cd gdb/testsuite/gdb.asm; autoconf)
-(cd gdb/testsuite/gdb.base; autoconf)
-(cd gdb/testsuite/gdb.c++; autoconf)
-(cd gdb/testsuite/gdb.chill; autoconf)
-(cd gdb/testsuite/gdb.disasm; autoconf)
-(cd gdb/testsuite/gdb.fortran; autoconf)
-(cd gdb/testsuite/gdb.java; autoconf)
-(cd gdb/testsuite/gdb.mi; autoconf)
-(cd gdb/testsuite/gdb.stabs; autoconf)
-(cd gdb/testsuite/gdb.threads; autoconf)
-(cd gdb/testsuite/gdb.trace; autoconf)
-(cd gdb/gdbserver; autoconf)
+cd gdb
+%{__autoconf}
+cd doc
+%{__autoconf}
+cd ../testsuite
+%{__autoconf}
+cd gdb.asm
+%{__autoconf}
+cd ../gdb.base
+%{__autoconf}
+cd ../gdb.c++
+%{__autoconf}
+cd ../gdb.chill
+%{__autoconf}
+cd ../gdb.disasm
+%{__autoconf}
+#cd ../gdb.fortran
+#%{__autoconf}
+cd ../gdb.java
+%{__autoconf}
+cd ../gdb.mi
+%{__autoconf}
+cd ../gdb.stabs
+%{__autoconf}
+cd ../gdb.threads
+%{__autoconf}
+cd ../gdb.trace
+%{__autoconf}
+cd ../../gdbserver
+%{__autoconf}
+cd ../..
 # !! Don't enable shared here !!
 # This will cause serious problems --misiek
 %configure2_13 \
@@ -118,13 +134,13 @@ verir.
 	--with-cpu=%{_target_cpu} \
 	--enable-tui \
 %ifnarch alpha
-	--with-mmalloc \
+	--with-mmalloc
 %endif
 
 # something is wrong after above - e.g. $exeext=="no" - fix it:
-(cd gdb
+cd gdb
 %configure
-)
+cd ..
 
 %{__make}
 %{__make} info

@@ -96,32 +96,3 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/*
 %{_infodir}/gd*.info*
 %{_infodir}/stabs*.info*
-
-%changelog
-* Sun May 16 1999 Artur Frysiak <wiget@pld.org.pl>
-  [4.18-3]
-- configure with --host=%{_host_alias} instead --host=%{_host} to prevent build
-  crosscompiler prefix (eg i586-pc-linux-gdb)
-- using more rpm macros
-
-* Fri May 14 1999 Tomasz K³oczko <kloczek@rudy.mif.pg.gda.pl>
-  [4.18-2]
-- now package is FHS 2.0 compliant.
-
-* Tue Apr 13 1999 Tomasz K³oczko <kloczek@rudy.mif.pg.gda.pl>
-  [4.18-1]
-- standarized {un}registering info pages (added gdb-info.patch).
-- removed man group from man pages.
-
-* Mon Apr 12 1999 Marcin Dalecki <dalecki@cs.net.pl>
-  [4.18]
-- updated to this fresh new release.
-
-* Sat Oct 17 1998 Tomasz K³oczko <kloczek@rudy.mif.pg.gda.pl>
-  [4.17.0.4-3]
-- added gdb-readline_ncurses.patch for compiling gdb agains shared
-  libredline and libncurses.
-
-* Sun Sep 27 1998 Marcin Korzonek <mkorz@shadow.eu.org>
-- added pl translation,
-- major changes for PLD Linux

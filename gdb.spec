@@ -8,6 +8,7 @@ Version:	4.18
 Release:	1
 Copyright:	GPL
 Group:		Development/Debuggers
+Group(pl):	Programowanie/Odpluskwiacze
 Source:		ftp://sourceware.cygnus.com/pub/gdb/%{name}-4.18.tar.bz2
 Patch0:		gdb-info.patch
 Prereq:		/sbin/install-info
@@ -45,7 +46,7 @@ ve herhangi bir anda programýn durumunu inceleme olanaðý verir.
 
 %build
 CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \
-./configure \
+./configure %{_target} \
 	--prefix=/usr 
 make
 make info

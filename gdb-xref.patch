@@ -1,0 +1,22 @@
+--- gdb-4.17/bfd/linker.c~	Thu Dec 11 20:49:03 1997
++++ gdb-4.17/bfd/linker.c	Sun Mar 21 12:47:58 1999
+@@ -74,7 +74,7 @@
+ @cindex target vector (_bfd_link_hash_table_create)
+ 	The linker routines must create a hash table, which must be
+ 	derived from <<struct bfd_link_hash_table>> described in
+-	<<bfdlink.c>>.  @xref{Hash Tables} for information on how to
++	<<bfdlink.c>>.  @xref{Hash Tables}. for information on how to
+ 	create a derived hash table.  This entry point is called using
+ 	the target vector of the linker output file.
+ 
+--- gdb-4.17/bfd/hash.c~	Mon Mar 17 19:46:59 1997
++++ gdb-4.17/bfd/hash.c	Sun Mar 21 12:48:43 1999
+@@ -73,7 +73,7 @@
+ 	The function <<bfd_hash_table_init>> take as an argument a
+ 	function to use to create new entries.  For a basic hash
+ 	table, use the function <<bfd_hash_newfunc>>.  @xref{Deriving
+-	a New Hash Table Type} for why you would want to use a
++	a New Hash Table Type}. for why you would want to use a
+ 	different value for this argument.
+ 
+ @findex bfd_hash_allocate

@@ -1,0 +1,87 @@
+diff -urN gdb-4.18-orig/Makefile.in gdb-4.18/Makefile.in
+--- gdb-4.18-orig/Makefile.in	Wed Apr  7 21:40:04 1999
++++ gdb-4.18/Makefile.in	Mon May 24 15:21:43 1999
+@@ -552,7 +552,6 @@
+ 	all-perl \
+ 	all-prms \
+ 	all-rcs \
+-	all-readline \
+ 	all-release \
+ 	all-recode \
+ 	all-sed \
+@@ -625,7 +624,6 @@
+ 	check-perl \
+ 	check-prms \
+ 	check-rcs \
+-	check-readline \
+ 	check-recode \
+ 	check-sed \
+ 	check-send-pr \
+@@ -699,7 +697,6 @@
+ 	install-perl \
+ 	install-prms \
+ 	install-rcs \
+-	install-readline \
+ 	install-recode \
+ 	install-sed \
+ 	install-send-pr \
+@@ -863,7 +860,6 @@
+ 	clean-perl \
+ 	clean-prms \
+ 	clean-rcs \
+-	clean-readline \
+ 	clean-release \
+ 	clean-recode \
+ 	clean-sed \
+@@ -1555,7 +1551,7 @@
+ all-gcc: all-bison all-byacc all-binutils all-gas all-ld
+ all-bootstrap: all-libiberty all-bison all-byacc all-binutils all-gas all-ld
+ GDB_TK = all-tk all-tcl all-itcl all-tix all-libgui
+-all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-readline all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
++all-gdb: all-libiberty all-opcodes all-bfd all-mmalloc all-bison all-byacc all-sim $(gdbnlmrequirements) $(GDB_TK)
+ all-gettext:
+ all-gnuserv:
+ configure-target-gperf: $(ALL_GCC)
+@@ -1600,12 +1596,11 @@
+ all-perl:
+ all-prms: all-libiberty
+ all-rcs:
+-all-readline:
+ all-recode: all-libiberty
+ all-sed: all-libiberty
+ all-send-pr: all-prms
+ all-shellutils:
+-all-sim: all-libiberty all-bfd all-opcodes all-readline
++all-sim: all-libiberty all-bfd all-opcodes
+ all-tar: all-libiberty
+ all-tcl:
+ all-tcl8.1:
+@@ -1786,7 +1781,7 @@
+ 		SUPPORT_FILES="$(GNATS_SUPPORT_DIRS)"
+ 
+ .PHONY: gdb.tar.gz
+-GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline sim utils intl
++GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes sim utils intl
+ gdb.tar.gz: $(DIST_SUPPORT) $(GDB_SUPPORT_DIRS) gdb
+ 	$(MAKE) -f Makefile.in taz TOOL=gdb \
+ 		SUPPORT_FILES="$(GDB_SUPPORT_DIRS)"
+diff -urN gdb-4.18-orig/gdb/Makefile.in gdb-4.18/gdb/Makefile.in
+--- gdb-4.18-orig/gdb/Makefile.in	Wed Apr  7 21:00:43 1999
++++ gdb-4.18/gdb/Makefile.in	Mon May 24 15:22:57 1999
+@@ -112,10 +112,12 @@
+ BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
+ 
+ # Where is the READLINE library?  Typically in ../readline.
+-READLINE_DIR = ../readline
+-READLINE = $(READLINE_DIR)/libreadline.a
+-READLINE_SRC = $(srcdir)/$(READLINE_DIR)
+-READLINE_CFLAGS = -I$(READLINE_SRC)/..
++# Why not use the shared libreadline like everyone else does...
++# readline 4.0 is better than 2.2 anyway.
++READLINE_DIR = /usr/include/readline
++READLINE = -lreadline
++READLINE_SRC = /usr/include/readline
++READLINE_CFLAGS = -I/usr/include/readline
+ 
+ WARN_CFLAGS = @WARN_CFLAGS@
+ 

@@ -10,26 +10,25 @@ Summary(uk):	óÉÍ×ÏÌØÎÉÊ ×¦ÄÌÁÄÞÉË ÄÌÑ ó ÔÁ ¦ÎÛÉÈ ÍÏ×
 Summary(zh_CN):	[¿ª·¢]CºÍÆäËûÓïÑÔµÄµ÷ÊÔÆ÷
 Summary(zh_TW):	[.-A¶}µo]C©M.$)B¨ä.-A¥L»y.$)B¨¥ªº½Õ¸Õ¾¹
 Name:		gdb
-Version:	6.0
+Version:	6.1
 Release:	1
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
-# Source0-md5:	e2314b7c9c7670b5384deb90701446f4
+# Source0-md5:	f707d21f5a3e963ce059caed75e899a2
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Patch0:		%{name}-ncurses.patch
 Patch1:		%{name}-readline.patch
 Patch2:		%{name}-info.patch
-Patch3:		%{name}-procfs.patch
-Patch4:		%{name}-passflags.patch
-Patch5:		%{name}-sparc-workaround.patch
+Patch3:		%{name}-passflags.patch
+Patch4:		%{name}-sparc-workaround.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
-BuildRequires:	readline-devel >= 4.2
+BuildRequires:	readline-devel >= 4.3
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -91,7 +90,6 @@ verir.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
-%patch5 -p1
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

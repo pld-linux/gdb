@@ -5,7 +5,7 @@ Summary(pl):	Symboliczny debugger dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	4.18
-Release:	2
+Release:	3
 Copyright:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
@@ -47,36 +47,36 @@ ve herhangi bir anda programýn durumunu inceleme olanaðý verir.
 %build
 CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \
 ./configure \
-	--prefix=/usr \
+	--prefix=%{_prefix} \
 	--target=%{_target_platform} \
-	--host=%{_host}
+	--host=%{_host_alias}
 make
 make info
 
 %install
 rm -rf $RPM_BUILD_ROOT
-install -d $RPM_BUILD_ROOT/usr
+install -d $RPM_BUILD_ROOT%{_prefix}
 
 make install install-info \
-	prefix=$RPM_BUILD_ROOT/usr \
-	infodir=$RPM_BUILD_ROOT/usr/share/info \
-	mandir=$RPM_BUILD_ROOT/usr/share/man
+	prefix=$RPM_BUILD_ROOT%{_prefix} \
+	infodir=$RPM_BUILD_ROOT%{_infodir} \
+	mandir=$RPM_BUILD_ROOT%{_mandir}
 
-strip $RPM_BUILD_ROOT/usr/bin/*
+strip $RPM_BUILD_ROOT%{_bindir}/*
 
-rm -f $RPM_BUILD_ROOT/usr/share/info/{bfd*,history*,readline*,standard*,texinfo*}
-gzip -fn9 $RPM_BUILD_ROOT/usr/share/{info/*info*,man/man?/*}
+rm -f $RPM_BUILD_ROOT%{_infodir}{bfd*,history*,readline*,standard*,texinfo*}
+gzip -fn9 $RPM_BUILD_ROOT{%{_infodir}/*info*,%{_mandir}/man?/*}
 
 %post
-/sbin/install-info /usr/share/info/gdb.info.gz /etc/info-dir
-/sbin/install-info /usr/share/info/stabs.info.gz /etc/info-dir
-/sbin/install-info /usr/share/info/gdbint.info.gz /etc/info-dir
+/sbin/install-info %{_infodir}/gdb.info.gz /etc/info-dir
+/sbin/install-info %{_infodir}/stabs.info.gz /etc/info-dir
+/sbin/install-info %{_infodir}/gdbint.info.gz /etc/info-dir
 
 %preun
 if [ "$1" = 0 ]; then
-	/sbin/install-info --delete /usr/share/info/gdb.info.gz /usr/share/info-dir
-	/sbin/install-info --delete /usr/share/info/stabs.info.gz /etc/info-dir
-	/sbin/install-info --delete /usr/share/info/gdbint.info.gz /etc/info-dir
+	/sbin/install-info --delete %{_infodir}/gdb.info.gz    /etc/info-dir
+	/sbin/install-info --delete %{_infodir}/stabs.info.gz  /etc/info-dir
+	/sbin/install-info --delete %{_infodir}/gdbint.info.gz /etc/info-dir
 fi
 
 %clean
@@ -84,11 +84,17 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%attr(755,root,root) /usr/bin/*
-/usr/share/man/man1/*
-/usr/share/info/*info*
+%attr(755,root,root) %{_bindir}/*
+%{_mandir}/man1/*
+%{_infodir}/*info*
 
 %changelog
+* Sun May 16 1999 Artur Frysiak <wiget@pld.org.pl>
+  [4.18-3]
+- configure with --host=%{_host_alias} instead --host=%{_host} to prevent build
+  crosscompiler prefix (eg i586-pc-linux-gdb)
+- using more rpm macros
+
 * Fri May 14 1999 Tomasz K³oczko <kloczek@rudy.mif.pg.gda.pl>
   [4.18-2]
 - now package is FHS 2.0 compliant.

@@ -46,8 +46,10 @@ ve herhangi bir anda programýn durumunu inceleme olanaðý verir.
 
 %build
 CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \
-./configure %{_target} \
-	--prefix=/usr 
+./configure \
+	--prefix=/usr \
+	--target=%{_target_platform} \
+	--host=%{_host}
 make
 make info
 

@@ -54,7 +54,7 @@ diff -ur gdb-5.1.orig/Makefile.in gdb-5.1/Makefile.in
  all-sid: all-tcl all-tk
 -all-sim: all-libiberty all-bfd all-opcodes all-readline all-cgen
 +all-sim: all-libiberty all-bfd all-opcodes all-cgen
- all-snavigator: all-tcl all-tk all-itcl all-db all-grep all-libgui
+ all-snavigator: all-tcl all-tk all-itcl all-tix all-db all-grep all-libgui
  all-tar: all-libiberty
  all-tcl:
 @@ -1925,7 +1920,7 @@

@@ -6,10 +6,10 @@ Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	4.18
 Release:	7
-Copyright:	GPL
+License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
-Source:		ftp://sourceware.cygnus.com/pub/gdb/%{name}-%{version}.tar.bz2
+Source0:	ftp://sourceware.cygnus.com/pub/gdb/%{name}-%{version}.tar.bz2
 Patch0:		gdb-info.patch
 Patch1:		gdb-sigtramp.patch
 Patch2:		gdb-sparc.patch
@@ -22,29 +22,32 @@ BuildRequires:	readline-devel >= 4.1
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
-Gdb is a full featured, command driven debugger. Gdb allows you to trace the
-execution of programs and examine their internal state at any time. Gdb
-works for C and C++ compiled with the GNU C compiler gcc.
+Gdb is a full featured, command driven debugger. Gdb allows you to
+trace the execution of programs and examine their internal state at
+any time. Gdb works for C and C++ compiled with the GNU C compiler
+gcc.
 
 %description -l de
-dem Sie die Ausführung von Programmen verfolgen und jederzeit den 
-inneren Zustand überprüfen können. Er funktioniert für C und mit 
-GNU C kompiliertes C++. 
+dem Sie die Ausführung von Programmen verfolgen und jederzeit den
+inneren Zustand überprüfen können. Er funktioniert für C und mit GNU C
+kompiliertes C++.
 
 %description -l fr
 Débugger complet, piloté par commandes. Permet de tracer l'exécution
-des programmes et d'examiner à tout moment leur état interne. Fonctionne
-avec les binaires C et C++ compilés avec le compilateur C de GNU, gcc.
+des programmes et d'examiner à tout moment leur état interne.
+Fonctionne avec les binaires C et C++ compilés avec le compilateur C
+de GNU, gcc.
 
 %description -l pl
-Gdb jest rozbudowanym odpluskwiaczem (debuggerem), pozwalaj±cym ¶ledziæ
-wykonywanie programu i badaæ jego stan wewnêtrzny. Gdb umo¿liwia
-odpluskwianie programów napisanych w C/C++ i skompilowanych przy pomocy
-kompilatora GNU (gcc).
+Gdb jest rozbudowanym odpluskwiaczem (debuggerem), pozwalaj±cym
+¶ledziæ wykonywanie programu i badaæ jego stan wewnêtrzny. Gdb
+umo¿liwia odpluskwianie programów napisanych w C/C++ i skompilowanych
+przy pomocy kompilatora GNU (gcc).
 
 %description -l tr
-Bir komut arayüzü üzerinden programcýya programýný adým adým izleme (trace)
-ve herhangi bir anda programýn durumunu inceleme olanaðý verir.
+Bir komut arayüzü üzerinden programcýya programýný adým adým izleme
+(trace) ve herhangi bir anda programýn durumunu inceleme olanaðý
+verir.
 
 %prep
 %setup -q
@@ -81,7 +84,7 @@ install gdb/doc/*.info* $RPM_BUILD_ROOT%{_infodir}
 
 strip $RPM_BUILD_ROOT%{_bindir}/*
 
-gzip -fn9 $RPM_BUILD_ROOT{%{_infodir}/*info*,%{_mandir}/man?/*}
+gzip -9nf $RPM_BUILD_ROOT{%{_infodir}/*info*,%{_mandir}/man?/*}
 
 %post
 [ -x /usr/sbin/fix-info-dir ] && /usr/sbin/fix-info-dir -c %{_infodir} >/dev/null 2>&1

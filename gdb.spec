@@ -103,6 +103,7 @@ for dir in `find gdb/ -name 'configure.in'`; do
 	%{__autoconf}
 	cd $olddir
 done
+cp -f /usr/share/automake/config.* .
 # !! Don't enable shared here !!
 # This will cause serious problems --misiek
 %configure2_13 \

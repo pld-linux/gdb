@@ -23,9 +23,21 @@ Patch1:		%{name}-readline.patch
 Patch2:		%{name}-info.patch
 Patch3:		%{name}-passflags.patch
 Patch4:		%{name}-headers.patch
+Patch5:		%{name}-ada-flex.patch
+Patch6:		%{name}-ada-support.patch
+Patch7:		%{name}-ada-update0.patch
+Patch8:		%{name}-ada-update1.patch
+Patch9:		%{name}-ada-update2.patch
+Patch10:	%{name}-ada-update2b.patch
+Patch11:	%{name}-ada-update3.patch
+Patch12:	%{name}-ada-update4.patch
+Patch13:	%{name}-ada-update5.patch
+Patch14:	%{name}-ada-backport.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
+BuildRequires:	bison
+BuildRequires:	flex
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	readline-devel >= 4.3
@@ -90,6 +102,16 @@ verir.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
+%patch6 -p0
+%patch7 -p0
+%patch8 -p0
+%patch9 -p0
+%patch10 -p0
+%patch11 -p0
+%patch12 -p0
+%patch13 -p0
+%patch14 -p1
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

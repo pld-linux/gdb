@@ -12,6 +12,7 @@ Source:      ftp://ftp.cygnus.com/pub/gdb/%{name}-4.17.tar.gz
 Patch0:      gdb-19980528-jbj.patch
 Patch1:      ftp://ftp.yggdrasil.com/private/hjl/gdb-4.17-4.17.0.4.diff.gz
 Patch2:      gdb-4.17-debug-threads.patch.gz
+Patch3:      gdb-readline_ncurses.patch
 Prereq:      /sbin/install-info
 Buildroot:   /tmp/%{name}-%{version}-root
 
@@ -54,6 +55,8 @@ ve herhangi bir anda programýn durumunu inceleme olanaðý verir.
 %patch2 -p1 -b .debug_threads
 %endif
 
+%patch3 -p1 -b .readline_ncurses
+
 %build
 CC=gcc CFLAGS=$RPM_OPT_FLAGS ./configure --prefix=/usr 
 make
@@ -90,6 +93,11 @@ rm -rf $RPM_BUILD_ROOT
 /usr/info/*info*
 
 %changelog
+* Sat Oct 17 1998 Tomasz K³oczko <kloczek@rudy.mif.pg.gda.pl>
+  [4.17.0.4-3]
+- added gdb-readline_ncurses.patch for compiling gdb agains shared
+  libredline and libncurses.
+
 * Sun Sep 27 1998 Marcin Korzonek <mkorz@shadow.eu.org>
 - added pl translation.
 

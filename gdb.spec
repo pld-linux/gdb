@@ -20,7 +20,7 @@ Patch6:		gdb-shared-readline.patch
 Prereq:		/usr/sbin/fix-info-dir
 BuildRequires:	ncurses-devel >= 5.0
 BuildRequires:	readline-devel >= 4.1
-Buildroot:	/tmp/%{name}-%{version}-root
+BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
 Gdb is a full featured, command driven debugger. Gdb allows you to trace the

@@ -26,6 +26,7 @@ Patch4:		%{name}-passflags.patch
 Patch5:		%{name}-sparc-workaround.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
+BuildRequires:	automake
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	readline-devel >= 4.2

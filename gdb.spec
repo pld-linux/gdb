@@ -15,7 +15,9 @@ Release:	1
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
+# Source0-md5: 1e8566325f222edfbdd93e40c6ae921b
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
+# Source1-md5: 2e8a48939ae282c12bbacdd54e398247
 Patch0:		%{name}-gettext.patch
 Patch1:		%{name}-ncurses.patch
 Patch2:		%{name}-readline.patch

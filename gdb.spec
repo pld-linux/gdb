@@ -9,6 +9,7 @@ Release:	3
 License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
+Group(de):	Entwicklung/Debugger
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.bz2
 Patch0:		%{name}-gettext.patch
 Patch1:		%{name}-ncurses.patch

@@ -1,7 +1,7 @@
-diff -ur gdb-5.1.orig/gdb/config.in gdb-5.1/gdb/config.in
---- gdb-5.1.orig/gdb/config.in	Mon Jul 23 21:21:51 2001
-+++ gdb-5.1/gdb/config.in	Wed Jan 23 00:13:15 2002
-@@ -292,6 +292,9 @@
+diff -urN gdb-6.0.org/gdb/config.in gdb-6.0/gdb/config.in
+--- gdb-6.0.org/gdb/config.in	2003-10-09 19:42:39.000000000 +0200
++++ gdb-6.0/gdb/config.in	2003-10-09 19:44:01.000000000 +0200
+@@ -290,6 +290,9 @@
  /* Define if you have the <ncurses.h> header file.  */
  #undef HAVE_NCURSES_H
  
@@ -11,21 +11,21 @@ diff -ur gdb-5.1.orig/gdb/config.in gdb-5.1/gdb/config.in
  /* Define if you have the <ndir.h> header file.  */
  #undef HAVE_NDIR_H
  
-diff -ur gdb-5.1.orig/gdb/configure.in gdb-5.1/gdb/configure.in
---- gdb-5.1.orig/gdb/configure.in	Thu Aug  2 23:30:22 2001
-+++ gdb-5.1/gdb/configure.in	Wed Jan 23 00:12:08 2002
-@@ -125,7 +125,7 @@
- 	wchar.h wctype.h asm/debugreg.h sys/debugreg.h sys/select.h \
- 	time.h sys/file.h sys/ioctl.h sys/user.h sys/fault.h sys/syscall.h \
- 	dirent.h sys/ndir.h sys/dir.h ndir.h sys/filio.h \
--	curses.h ncurses.h \
-+	curses.h ncurses.h ncurses/ncurses.h \
- 	poll.h sys/poll.h)
- AC_HEADER_STAT
+diff -urN gdb-6.0.org/gdb/configure.in gdb-6.0/gdb/configure.in
+--- gdb-6.0.org/gdb/configure.in	2003-10-09 19:42:39.000000000 +0200
++++ gdb-6.0/gdb/configure.in	2003-10-09 19:44:27.000000000 +0200
+@@ -351,7 +351,7 @@
+    Solaris 2.[78] when using GCC. ]])
+     fi ;;
+ esac
+-AC_CHECK_HEADERS(curses.h ncurses.h term.h)
++AC_CHECK_HEADERS(curses.h ncurses.h ncurses/ncurses.h term.h)
  
-diff -ur gdb-5.1.orig/gdb/tui/tuiData.h gdb-5.1/gdb/tui/tuiData.h
---- gdb-5.1.orig/gdb/tui/tuiData.h	Mon Jul 23 23:16:20 2001
-+++ gdb-5.1/gdb/tui/tuiData.h	Wed Jan 23 00:11:53 2002
+ # FIXME: kettenis/20030102: In most cases we include these
+ # unconditionally, so what's the point in checking these?
+diff -urN gdb-6.0.org/gdb/tui/tuiData.h gdb-6.0/gdb/tui/tuiData.h
+--- gdb-6.0.org/gdb/tui/tuiData.h	2003-10-09 19:42:43.000000000 +0200
++++ gdb-6.0/gdb/tui/tuiData.h	2003-10-09 19:44:01.000000000 +0200
 @@ -24,6 +24,8 @@
  
  #if defined (HAVE_NCURSES_H)
@@ -35,12 +35,12 @@ diff -ur gdb-5.1.orig/gdb/tui/tuiData.h gdb-5.1/gdb/tui/tuiData.h
  #elif defined (HAVE_CURSES_H)
  #include <curses.h>
  #endif
-diff -ur gdb-5.1.orig/gdb/utils.c gdb-5.1/gdb/utils.c
---- gdb-5.1.orig/gdb/utils.c	Wed Jan 23 00:01:31 2002
-+++ gdb-5.1/gdb/utils.c	Wed Jan 23 00:15:07 2002
-@@ -26,9 +26,14 @@
- #include "gdb_string.h"
- #include "event-top.h"
+diff -urN gdb-6.0.org/gdb/utils.c gdb-6.0/gdb/utils.c
+--- gdb-6.0.org/gdb/utils.c	2003-10-09 19:42:40.000000000 +0200
++++ gdb-6.0/gdb/utils.c	2003-10-09 19:44:01.000000000 +0200
+@@ -52,9 +52,14 @@
+ 
+ #include <sys/param.h>		/* For MAXPATHLEN */
  
 -#ifdef HAVE_CURSES_H
 +#if defined (HAVE_NCURSES_H)

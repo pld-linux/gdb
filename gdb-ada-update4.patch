@@ -1,0 +1,61 @@
+===================================================================
+RCS file: /cvs/src/src/gdb/ada-lang.h,v
+retrieving revision 1.7
+retrieving revision 1.8
+diff -u -r1.7 -r1.8
+--- gdb/ada-lang.h	2004/06/02 09:55:36	1.7
++++ gdb/ada-lang.h	2004/06/08 08:42:04	1.8
+@@ -393,4 +393,15 @@
+ 
+ extern void ada_reset_thread_registers (void);
+ 
++/* Look up a symbol by name using the search conventions of 
++   a specific language (optional block, optional symtab). 
++   FIXME: Should be symtab.h. */
++
++extern struct symbol *lookup_symbol_in_language (const char *, 
++						 const struct block *,
++						 domain_enum, 
++						 enum language,
++						 int *,
++						 struct symtab **);
++
+ #endif
+===================================================================
+RCS file: /cvs/src/src/gdb/ada-lang.c,v
+retrieving revision 1.36
+retrieving revision 1.37
+diff -u -r1.36 -r1.37
+--- gdb/ada-lang.c	2004/06/02 09:55:36	1.36
++++ gdb/ada-lang.c	2004/06/08 08:42:03	1.37
+@@ -4444,6 +4444,30 @@
+ #endif
+ }
+ 
++/* FIXME: The next two routines belong in symtab.c */
++
++static void restore_language (void* lang)
++{
++  set_language ((enum language) lang);
++}
++
++/* As for lookup_symbol, but performed as if the current language 
++   were LANG. */
++
++struct symbol *
++lookup_symbol_in_language (const char *name, const struct block *block,
++			   domain_enum domain, enum language lang,
++			   int *is_a_field_of_this, struct symtab **symtab)
++{
++  struct cleanup *old_chain 
++    = make_cleanup (restore_language, (void*) current_language->la_language);
++  struct symbol *result;
++  set_language (lang);
++  result = lookup_symbol (name, block, domain, is_a_field_of_this, symtab);
++  do_cleanups (old_chain);
++  return result;
++}
++
+ /* True if TYPE is definitely an artificial type supplied to a symbol
+    for which no debugging information was given in the symbol file.  */
+ 

@@ -15,6 +15,7 @@ Patch0:		%{name}-gettext.patch
 Patch1:		%{name}-ncurses.patch
 Patch2:		%{name}-readline.patch
 Patch3:		%{name}-info.patch
+Patch4:		%{name}-procfs.patch
 BuildRequires:	ncurses-devel >= 5.0
 BuildRequires:	readline-devel >= 4.1
 BuildRequires:	XFree86-devel
@@ -54,6 +55,7 @@ verir.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 (cd gdb; aclocal; autoconf; cd ..)

@@ -10,21 +10,18 @@ Summary(uk):	óÉÍ×ÏÌØÎÉÊ ×¦ÄÌÁÄÞÉË ÄÌÑ ó ÔÁ ¦ÎÛÉÈ ÍÏ×
 Summary(zh_CN):	[¿ª·¢]CºÍÆäËûÓïÑÔµÄµ÷ÊÔÆ÷
 Summary(zh_TW):	[.-A¶}µo]C©M.$)B¨ä.-A¥L»y.$)B¨¥ªº½Õ¸Õ¾¹
 Name:		gdb
-Version:	6.2.1
+Version:	6.3
 Release:	1
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	3b3898cfd426e1acd5efc89560aa93ba
+# Source0-md5:	05b928f41fa5b482e49ca2c24762a0ae
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Patch0:		%{name}-ncurses.patch
 Patch1:		%{name}-readline.patch
 Patch2:		%{name}-info.patch
 Patch3:		%{name}-passflags.patch
-Patch4:		%{name}-headers.patch
-Patch5:		%{name}-ada-flex.patch
-Patch6:		%{name}-ada-support.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -93,9 +90,6 @@ verir.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-%patch4 -p1
-%patch5 -p1
-%patch6 -p0
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

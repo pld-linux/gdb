@@ -86,46 +86,22 @@ verir.
 %prep
 %setup -q
 #%patch0 -p1
-#%patch1 -p1
-#%patch2 -p1
+%patch1 -p1
+%patch2 -p1
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
 
 %build
-cd gdb
-%{__autoconf}
-cd doc
-%{__autoconf}
-cd ../testsuite
-%{__autoconf}
-cd gdb.arch
-%{__autoconf}
-cd ../gdb.asm
-%{__autoconf}
-cd ../gdb.base
-%{__autoconf}
-cd ../gdb.c++
-%{__autoconf}
-cd ../gdb.chill
-%{__autoconf}
-cd ../gdb.disasm
-%{__autoconf}
-#cd ../gdb.fortran
-#%%{__autoconf}
-cd ../gdb.java
-%{__autoconf}
-cd ../gdb.mi
-%{__autoconf}
-cd ../gdb.stabs
-%{__autoconf}
-cd ../gdb.threads
-%{__autoconf}
-cd ../gdb.trace
-%{__autoconf}
-cd ../../gdbserver
-%{__autoconf}
-cd ../..
+for dir in `find gdb/ -name 'configure.in'`; do
+	dir=$(dirname "$dir")
+	olddir=$(pwd)
+	cd $dir
+	rm -f aclocal.m4
+	%{__aclocal}
+	%{__autoconf}
+	cd $olddir
+done
 # !! Don't enable shared here !!
 # This will cause serious problems --misiek
 %configure2_13 \

@@ -1,5 +1,5 @@
 Summary:	A GNU source-level debugger for C, C++ and Fortran
-Summary(de):	Symbolischer Debugger für C und andere Sprachen 
+Summary(de):	Symbolischer Debugger für C und andere Sprachen
 Summary(es):	Depurador de programas C y otras lenguajes
 Summary(fr):	Débugger symbolique pour C et d'autres langages
 Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
@@ -89,7 +89,7 @@ verir.
 (cd gdb/testsuite/gdb.threads; autoconf)
 (cd gdb/testsuite/gdb.trace; autoconf)
 (cd gdb/gdbserver; autoconf)
-# !! Don't enable shared here !! 
+# !! Don't enable shared here !!
 # This will cause serious problems --misiek
 %configure2_13 \
 	--disable-shared \

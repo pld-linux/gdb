@@ -1,0 +1,852 @@
+From gdb-patches-return-33877-listarch-gdb-patches=sources dot redhat dot com at sources dot redhat dot com Wed Jun 16 08:42:53 2004
+Return-Path: <gdb-patches-return-33877-listarch-gdb-patches=sources dot redhat dot com at sources dot redhat dot com>
+Delivered-To: listarch-gdb-patches at sources dot redhat dot com
+Received: (qmail 7986 invoked by alias); 16 Jun 2004 08:42:52 -0000
+Mailing-List: contact gdb-patches-help at sources dot redhat dot com; run by ezmlm
+Precedence: bulk
+List-Subscribe: <mailto:gdb-patches-subscribe at sources dot redhat dot com>
+List-Archive: <http://sources.redhat.com/ml/gdb-patches/>
+List-Post: <mailto:gdb-patches at sources dot redhat dot com>
+List-Help: <mailto:gdb-patches-help at sources dot redhat dot com>, <http://sources dot redhat dot com/ml/#faqs>
+Sender: gdb-patches-owner at sources dot redhat dot com
+Delivered-To: mailing list gdb-patches at sources dot redhat dot com
+Received: (qmail 7802 invoked from network); 16 Jun 2004 08:42:38 -0000
+Received: from unknown (HELO nile.gnat.com) (205.232.38.5)
+  by sourceware dot org with SMTP; 16 Jun 2004 08:42:38 -0000
+Received: from localhost (localhost [127.0.0.1])
+	by nile dot gnat dot com (Postfix) with ESMTP
+	id 73F11F28E9; Wed, 16 Jun 2004 04:42:38 -0400 (EDT)
+Received: from nile.gnat.com ([127.0.0.1])
+ by localhost (nile dot gnat dot com [127 dot 0 dot 0 dot 1]) (amavisd-new, port 10024) with LMTP
+ id 10906-01-2; Wed, 16 Jun 2004 04:42:38 -0400 (EDT)
+Received: by nile.gnat.com (Postfix, from userid 1345)
+	id F02D1F292A; Wed, 16 Jun 2004 04:42:37 -0400 (EDT)
+From: Paul Hilfinger <hilfingr at gnat dot com>
+To: gdb-patches at sources dot redhat dot com
+Cc: drow at false dot org, jimb at redhat dot com, eliz at gnu dot org
+In-reply-to: <20040609131240 dot GA7587 at nevyn dot them dot org> (message from Daniel
+	Jacobowitz on Wed, 9 Jun 2004 09:12:40 -0400)
+Subject: Re: [RFA]: Turn on Ada support, take 2
+References: <20040608090758.C59CAF2940@nile.gnat.com> <vt2aczd8aah.fsf@zenia.home> <20040609131240.GA7587@nevyn.them.org>
+Message-Id: <20040616084237.F02D1F292A@nile.gnat.com>
+Date: Wed, 16 Jun 2004 04:42:37 -0400 (EDT)
+X-Virus-Scanned: by amavisd-new at nile.gnat.com
+
+
+
+Here is an update to the patch I sent previously.  In this version, I have
+
+1. Removed the compilation of ada-tasks.o, since we have not yet turned
+   on any of it in the public version.
+
+2. Responded to most of Eli's comments.  I will have to consider the
+   issue of formating things like 'Address, since the standard rendering
+   in info files provided by the technically appropriate marker, 
+   @code, looks rather bad (in my opinion), due to the adjacent quotes 
+   at the beginning.  
+
+A previous patch to the Ada sources added some conditionalization to mark code
+that is not yet used in the public version (for the benefit of reviewers).
+
+
+ChangeLogs:
+
+ 2004-06-16  Paul N. Hilfinger  <Hilfinger@gnat.com>
+
+        Turn on initial Ada support (mainly expression evaluation).
+	
+        * Makefile.in (ada_lex_c): Define
+	(HFILES_NO_SRCDIR): Add ada-lang.h.
+	(COMMON_OBS): Add ada-lang.o, ada-typeprint.o, ada-valprint.o.
+	(YYOBJ): Add ada-exp.o.
+	(rule .l.c): Generalize to not mention ada.
+	(ada-lex.o): Remove (ada-lex.c is included by ada-exp.y).
+	(ada-lang.o): Add dependencies on completer.h, gdb_obstack.h, 
+	hashtab.h.
+	(ada-tasks.o): Add dependency on gdb_string.h.
+	(ada-valprint.o): Add dependency on gdb_string.h.
+	
+	* symtab.c: Add dependency on ada-lang.h.
+	(symbol_natural_name): Add Ada case.
+	(symbol_demangled_name): Add Ada case.
+	(symbol_search_name): Add Ada case.
+	
+	* symfile.c (init_filename_language_table): Add extensions for
+	Ada.
+	
+	* defs.h (enum language): Add language_ada.
+
+	* gdbtypes.h (TYPE_FLAG_FIXED_INSTANCE): Define.
+	
+2004-06-09  Paul N. Hilfinger  <hilfinger@gnat.com>
+
+	* doc/gdb.texinfo (Filenames): Add Ada suffixes.
+	(Ada) New section.
+
+
+
+Index: gdb/Makefile.in
+===================================================================
+RCS file: /cvs/src/src/gdb/Makefile.in,v
+retrieving revision 1.587
+diff -u -p -r1.587 Makefile.in
+--- gdb/Makefile.in	14 Jun 2004 20:40:39 -0000	1.587
++++ gdb/Makefile.in	16 Jun 2004 08:23:45 -0000
+@@ -616,6 +616,7 @@ nm_h =		@nm_h@
+ # gdb/ headers
+ #
+ 
++ada_lex_c = ada-lex.c
+ ada_lang_h = ada-lang.h $(value_h) $(gdbtypes_h)
+ alphabsd_tdep_h = alphabsd-tdep.h
+ alpha_tdep_h = alpha-tdep.h
+@@ -833,7 +834,7 @@ HFILES_NO_SRCDIR = bcache.h buildsym.h c
+ 	symfile.h symfile-mem.h stabsread.h target.h terminal.h typeprint.h \
+ 	xcoffsolib.h \
+ 	macrotab.h macroexp.h macroscope.h \
+-	c-lang.h f-lang.h \
++	ada-lang.h c-lang.h f-lang.h \
+ 	jv-lang.h \
+ 	m2-lang.h  p-lang.h \
+ 	complaints.h valprint.h \
+@@ -894,7 +895,7 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
+ 	dbxread.o coffread.o coff-pe-read.o elfread.o \
+ 	dwarfread.o dwarf2read.o mipsread.o stabsread.o corefile.o \
+ 	dwarf2expr.o dwarf2loc.o dwarf2-frame.o \
+-	c-lang.o f-lang.o objc-lang.o \
++	ada-lang.o c-lang.o f-lang.o objc-lang.o \
+ 	ui-out.o cli-out.o \
+ 	varobj.o wrapper.o \
+ 	jv-lang.o jv-valprint.o jv-typeprint.o \
+@@ -902,8 +903,8 @@ COMMON_OBS = $(DEPFILES) $(YYOBJ) \
+ 	scm-exp.o scm-lang.o scm-valprint.o \
+ 	sentinel-frame.o \
+ 	complaints.o typeprint.o \
+-	c-typeprint.o f-typeprint.o m2-typeprint.o \
+-	c-valprint.o cp-valprint.o f-valprint.o m2-valprint.o \
++	ada-typeprint.o c-typeprint.o f-typeprint.o m2-typeprint.o \
++	ada-valprint.o c-valprint.o cp-valprint.o f-valprint.o m2-valprint.o \
+ 	nlmread.o serial.o mdebugread.o top.o utils.o \
+ 	ui-file.o \
+ 	user-regs.o \
+@@ -927,6 +928,7 @@ YYFILES = c-exp.c \
+ 	f-exp.c m2-exp.c p-exp.c
+ YYOBJ = c-exp.o \
+ 	objc-exp.o \
++	ada-exp.o \
+ 	jv-exp.o \
+ 	f-exp.o m2-exp.o p-exp.o
+ 
+@@ -1495,7 +1497,7 @@ valprint.o: $(srcdir)/valprint.c
+ 	    echo $(FLEX) -Isit $< ">" $@; \
+ 	    $(FLEX) -Isit $< > $@; \
+ 	elif [ ! -f $@ -a ! -f $< ]; then \
+-	    echo "ada-lex.c missing and flex not available."; \
++	    echo "$< missing and flex not available."; \
+ 	    false; \
+ 	elif [ ! -f $@ ]; then \
+ 	    echo "Warning: $*.c older than $*.l and flex not available."; \
+@@ -1522,18 +1524,18 @@ ada-lang.o: ada-lang.c $(gdb_string_h) $
+ 	$(gdbtypes_h) $(gdbcmd_h) $(expression_h) $(parser_defs_h) \
+ 	$(language_h) $(c_lang_h) $(inferior_h) $(symfile_h) $(objfiles_h) \
+ 	$(breakpoint_h) $(gdbcore_h) $(ada_lang_h) $(ui_out_h) $(block_h) \
+-	$(infcall_h) $(dictionary_h)
+-ada-lex.o: ada-lex.c
++	$(completer_h) $(infcall_h) $(gdb_obstack_h) $(dictionary_h) \
++	$(hashtab_h)
+ ada-tasks.o: ada-tasks.c $(defs_h) $(command_h) $(value_h) $(language_h) \
+ 	$(inferior_h) $(symtab_h) $(target_h) $(regcache_h) $(gdbcore_h) \
+-	$(gregset_h) $(ada_lang_h)
++	$(gregset_h) $(gdb_string_h) $(ada_lang_h)
+ ada-typeprint.o: ada-typeprint.c $(defs_h) $(gdb_obstack_h) $(bfd_h) \
+ 	$(symtab_h) $(gdbtypes_h) $(expression_h) $(value_h) $(gdbcore_h) \
+ 	$(target_h) $(command_h) $(gdbcmd_h) $(language_h) $(demangle_h) \
+ 	$(c_lang_h) $(typeprint_h) $(ada_lang_h) $(gdb_string_h)
+ ada-valprint.o: ada-valprint.c $(defs_h) $(symtab_h) $(gdbtypes_h) \
+ 	$(expression_h) $(value_h) $(demangle_h) $(valprint_h) $(language_h) \
+-	$(annotate_h) $(ada_lang_h) $(c_lang_h) $(infcall_h)
++	$(annotate_h) $(ada_lang_h) $(c_lang_h) $(gdb_string_h) $(infcall_h)
+ aix-thread.o: aix-thread.c $(defs_h) $(gdb_assert_h) $(gdbthread_h) \
+ 	$(target_h) $(inferior_h) $(regcache_h) $(gdbcmd_h) $(language_h) \
+ 	$(ppc_tdep_h) $(gdb_string_h)
+Index: gdb/defs.h
+===================================================================
+RCS file: /cvs/src/src/gdb/defs.h,v
+retrieving revision 1.147
+diff -u -p -r1.147 defs.h
+--- gdb/defs.h	10 Jun 2004 20:05:43 -0000	1.147
++++ gdb/defs.h	16 Jun 2004 08:23:45 -0000
+@@ -220,6 +220,7 @@ enum language
+     language_asm,		/* Assembly language */
+     language_scm,    		/* Scheme / Guile */
+     language_pascal,		/* Pascal */
++    language_ada,		/* Ada */
+     language_minimal		/* All other languages, minimal support only */
+   };
+ 
+Index: gdb/gdbtypes.h
+===================================================================
+RCS file: /cvs/src/src/gdb/gdbtypes.h,v
+retrieving revision 1.53
+diff -u -p -r1.53 gdbtypes.h
+--- gdb/gdbtypes.h	2 Jun 2004 21:01:55 -0000	1.53
++++ gdb/gdbtypes.h	16 Jun 2004 08:23:45 -0000
+@@ -273,6 +273,17 @@ enum type_code
+ #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
+ 				   & TYPE_FLAG_ADDRESS_CLASS_ALL)
+ 
++/* The debugging formats (especially STABS) do not contain enough information
++   to represent all Ada types---especially those whose size depends on
++   dynamic quantities.  Therefore, the GNAT Ada compiler includes
++   extra information in the form of additional type definitions
++   connected by naming conventions.  This flag indicates that the 
++   type is an ordinary (unencoded) GDB type that has been created from 
++   the necessary run-time information, and does not need further 
++   interpretation. Optionally marks ordinary, fixed-size GDB type. */
++
++#define TYPE_FLAG_FIXED_INSTANCE (1 << 15)
++
+ /*  Array bound type.  */
+ enum array_bound_type
+ {
+Index: gdb/symfile.c
+===================================================================
+RCS file: /cvs/src/src/gdb/symfile.c,v
+retrieving revision 1.132
+diff -u -p -r1.132 symfile.c
+--- gdb/symfile.c	15 Jun 2004 01:04:20 -0000	1.132
++++ gdb/symfile.c	16 Jun 2004 08:23:46 -0000
+@@ -2158,6 +2158,10 @@ init_filename_language_table (void)
+       add_filename_language (".pas", language_pascal);
+       add_filename_language (".p", language_pascal);
+       add_filename_language (".pp", language_pascal);
++      add_filename_language (".adb", language_ada);
++      add_filename_language (".ads", language_ada);
++      add_filename_language (".a", language_ada);
++      add_filename_language (".ada", language_ada);
+     }
+ }
+ 
+Index: gdb/symtab.c
+===================================================================
+RCS file: /cvs/src/src/gdb/symtab.c,v
+retrieving revision 1.132
+diff -u -p -r1.132 symtab.c
+--- gdb/symtab.c	10 Jun 2004 20:05:44 -0000	1.132
++++ gdb/symtab.c	16 Jun 2004 08:23:47 -0000
+@@ -41,6 +41,7 @@
+ #include "source.h"
+ #include "filenames.h"		/* for FILENAME_CMP */
+ #include "objc-lang.h"
++#include "ada-lang.h"
+ 
+ #include "hashtab.h"
+ 
+@@ -632,17 +633,24 @@ symbol_init_demangled_name (struct gener
+ char *
+ symbol_natural_name (const struct general_symbol_info *gsymbol)
+ {
+-  if ((gsymbol->language == language_cplus
+-       || gsymbol->language == language_java
+-       || gsymbol->language == language_objc)
+-      && (gsymbol->language_specific.cplus_specific.demangled_name != NULL))
++  switch (gsymbol->language) 
+     {
+-      return gsymbol->language_specific.cplus_specific.demangled_name;
+-    }
+-  else
+-    {
+-      return gsymbol->name;
++    case language_cplus:
++    case language_java:
++    case language_objc:
++      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
++	return gsymbol->language_specific.cplus_specific.demangled_name;
++      break;
++    case language_ada:
++      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
++	return gsymbol->language_specific.cplus_specific.demangled_name;
++      else
++	return ada_decode_symbol (gsymbol);
++      break;
++    default:
++      break;
+     }
++  return gsymbol->name;
+ }
+ 
+ /* Return the demangled name for a symbol based on the language for
+@@ -650,13 +658,24 @@ symbol_natural_name (const struct genera
+ char *
+ symbol_demangled_name (struct general_symbol_info *gsymbol)
+ {
+-  if (gsymbol->language == language_cplus
+-      || gsymbol->language == language_java
+-      || gsymbol->language == language_objc)
+-    return gsymbol->language_specific.cplus_specific.demangled_name;
+-
+-  else 
+-    return NULL;
++  switch (gsymbol->language) 
++    {
++    case language_cplus:
++    case language_java:
++    case language_objc:
++      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
++	return gsymbol->language_specific.cplus_specific.demangled_name;
++      break;
++    case language_ada:
++      if (gsymbol->language_specific.cplus_specific.demangled_name != NULL)
++	return gsymbol->language_specific.cplus_specific.demangled_name;
++      else
++	return ada_decode_symbol (gsymbol);
++      break;
++    default:
++      break;
++    }
++  return NULL;
+ }
+ 
+ /* Return the search name of a symbol---generally the demangled or
+#### gdb post-6.1 branch
+##@@ -664,7 +683,10 @@ symbol_demangled_name (struct general_sy
+##    If there is no distinct demangled name, then returns the same value 
+##    (same pointer) as SYMBOL_LINKAGE_NAME. */
+## char *symbol_search_name (const struct general_symbol_info *gsymbol) {
+##-  return symbol_natural_name (gsymbol);
+##+  if (gsymbol->language == language_ada)
+##+    return gsymbol->name;
+##+  else
+##+    return symbol_natural_name (gsymbol);
+## }
+## 
+## /* Initialize the structure fields to zero values.  */
+##
+Index: gdb/doc/gdb.texinfo
+===================================================================
+RCS file: /cvs/src/src/gdb/doc/gdb.texinfo,v
+retrieving revision 1.206
+diff -u -p -r1.206 gdb.texinfo
+--- gdb/doc/gdb.texinfo	14 Jun 2004 22:26:33 -0000	1.206
++++ gdb/doc/gdb.texinfo	16 Jun 2004 08:23:53 -0000
+@@ -7741,6 +7741,11 @@ If a source file name ends in one of the
+ @value{GDBN} infers that its language is the one indicated.
+ 
+ @table @file
++@item .ada
++@itemx .ads
++@itemx .adb
++@itemx .a
++Ada source file.
+ 
+ @item .c
+ C source file
+@@ -8031,7 +8036,7 @@ being set automatically by @value{GDBN}.
+ @node Support
+ @section Supported languages
+ 
+-@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, assembly, and Modula-2.
++@value{GDBN} supports C, C@t{++}, Objective-C, Fortran, Java, assembly, Modula-2, and Ada.
+ @c This is false ...
+ Some @value{GDBN} features may be used in expressions regardless of the
+ language you use: the @value{GDBN} @code{@@} and @code{::} operators,
+@@ -8051,6 +8056,7 @@ language reference or tutorial.
+ * C::                           C and C@t{++}
+ * Objective-C::                 Objective-C
+ * Modula-2::                    Modula-2
++* Ada::                         Ada
+ @end menu
+ 
+ @node C
+@@ -8666,7 +8672,7 @@ the description of an object.  However, 
+ with certain Objective-C libraries that have a particular hook
+ function, @code{_NSPrintForDebugger}, defined.
+ 
+-@node Modula-2,  , Objective-C, Support
++@node Modula-2, Ada, Objective-C, Support
+ @subsection Modula-2
+ 
+ @cindex Modula-2, @value{GDBN} support
+@@ -9109,6 +9115,481 @@ address can be specified by an integral 
+ In @value{GDBN} scripts, the Modula-2 inequality operator @code{#} is
+ interpreted as the beginning of a comment.  Use @code{<>} instead.
+ 
++@node Ada
++@subsection Ada
++@cindex Ada
++
++The extensions made to @value{GDBN} for Ada only support
++output from the @sc{gnu} Ada (GNAT) compiler.
++Other Ada compilers are not currently supported, and
++attempting to debug executables produced by them is most likely
++to be difficult.
++
++
++@cindex expressions in Ada
++@menu
++* Ada Mode Intro::              General remarks on the Ada syntax 
++                                   and semantics supported by Ada mode 
++                                   in @value{GDBN}
++* Omissions from Ada::          Restrictions on the Ada expression syntax.
++* Additions to Ada::            Extensions of the Ada expression syntax.
++* Stopping Before Main Program:: Debugging the program during elaboration.
++* Ada Exceptions::              Setting breakpoints on exception handlers.
++* Ada Generic Units::           Dealing with generic instantiations.
++* Ada Glitches::                Known peculiarities of Ada mode.
++@end menu
++
++@node Ada Mode Intro
++@subsubsection Introduction
++@cindex Ada mode, general
++
++The Ada mode of @value{GDBN} supports a fairly large subset of Ada expression 
++syntax, with some extensions.
++The philosophy behind the design of this subset is 
++
++@itemize @bullet
++@item
++That @value{GDBN} should provide basic literals and access to operations for 
++arithmetic, dereferencing, field selection, indexing, and subprogram calls, 
++leaving more sophisticated computations to subprograms written into the
++program (which therefore may be called from @value{GDBN}).
++
++@item 
++That type safety and strict adherence to Ada language restrictions
++are not particularly important to the @value{GDBN} user.
++
++@item 
++That brevity is important to the @value{GDBN} user.
++@end itemize
++
++Thus, for brevity, the debugger acts as if there were 
++implicit @code{with} and @code{use} clauses in effect for all user-written 
++packages, making it unnecessary to fully qualify most names with 
++their packages, regardless of context.  Where this causes ambiguity, 
++@value{GDBN} asks the user's intent.
++
++The debugger will start in Ada mode if it detects an Ada main program. 
++As for other languages, it will enter Ada mode when stopped in a program that
++was translated from an Ada source file.
++
++While in Ada mode, you may use `@t{--}' for comments.  This is useful 
++mostly for documenting command files.  The standard @value{GDBN} comment 
++(@samp{#}) still works at the beginning of a line in Ada mode, but not in the 
++middle (to allow based literals).
++
++The debugger supports limited overloading.  Given a subprogram call in which
++the function symbol has multiple definitions, it will use the number of 
++actual parameters and some information about their types to attempt to narrow
++the set of definitions.  It also makes very limited use of context, preferring
++procedures to functions in the context of the @code{call} command, and
++functions to procedures elsewhere. 
++
++@node Omissions from Ada
++@subsubsection Omissions from Ada
++@cindex Ada, omissions from
++
++Here are the notable omissions from the subset:
++
++@itemize @bullet
++@item
++Only a subset of the attributes are supported:
++
++@itemize @minus
++@item
++@t{'First}, @t{'Last}, and @t{'Length}
++ on array objects (not on types and subtypes).
++
++@item
++@t{'Min} and @t{'Max}.  
++
++@item 
++@t{'Pos} and @t{'Val}. 
++
++@item
++@t{'Tag}.
++
++@item
++@t{'Range} on array objects (not subtypes), but only as the right
++operand of the membership (@code{in}) operator.
++
++@item 
++@t{'Access}, @t{'Unchecked_Access}, and 
++@t{'Unrestricted_Access} (a GNAT extension).
++
++@item
++@t{'Address}.
++@end itemize
++
++@item
++The names in
++@code{Characters.Latin_1} are not available and
++concatenation is not implemented.  Thus, escape characters in strings are 
++not currently available.
++
++@item
++Equality tests (@samp{=} and @samp{/=}) on arrays test for bitwise
++equality of representations.  They will generally work correctly
++for strings and arrays whose elements have integer or enumeration types.
++They may not work correctly for arrays whose element
++types have user-defined equality, for arrays of real values 
++(in particular, IEEE-conformant floating point, because of negative
++zeroes and NaNs), and for arrays whose elements contain unused bits with
++indeterminate values.  
++
++@item
++The other component-by-component array operations (@code{and}, @code{or}, 
++@code{xor}, @code{not}, and relational tests other than equality)
++are not implemented. 
++
++@item 
++There are no record or array aggregates.
++
++@item
++Dispatching subprogram calls are not implemented.
++
++@item
++The overloading algorithm is much more limited (i.e., less selective)
++than that of real Ada.  It makes only limited use of the context in which a subexpression
++appears to resolve its meaning, and it is much looser in its rules for allowing
++type matches.  As a result, some function calls will be ambiguous, and the user
++will be asked to choose the proper resolution.
++
++@item
++The @code{new} operator is not implemented.
++
++@item
++Entry calls are not implemented.
++
++@item 
++Aside from printing, arithmetic operations on the native VAX floating-point 
++formats are not supported.
++
++@item
++It is not possible to slice a packed array.
++@end itemize
++
++@node Additions to Ada
++@subsubsection Additions to Ada
++@cindex Ada, deviations from 
++
++As it does for other languages, @value{GDBN} makes certain generic
++extensions to Ada (@pxref{Expressions}):
++
++@itemize @bullet
++@item
++If the expression @var{E} is a variable residing in memory 
++(typically a local variable or array element) and @var{N} is 
++a positive integer, then @code{@var{E}@@@var{N}} displays the values of
++@var{E} and the @var{N}-1 adjacent variables following it in memory as an array.  
++In Ada, this operator is generally not necessary, since its prime use
++is in displaying parts of an array, and slicing will usually do this in Ada.
++However, there are occasional uses when debugging programs
++in which certain debugging information has been optimized away.
++
++@item
++@code{@var{B}::@var{var}} means ``the variable named @var{var} that appears
++in function or file @var{B}.''  When @var{B} is a file name, you must typically
++surround it in single quotes.
++
++@item 
++The expression @code{@{@var{type}@} @var{addr}} means ``the variable of type
++@var{type} that appears at address @var{addr}.''
++
++@item
++A name starting with @samp{$} is a convenience variable 
++(@pxref{Convenience Vars}) or a machine register (@pxref{Registers}).
++@end itemize
++
++In addition, @value{GDBN} provides a few other shortcuts and outright additions specific 
++to Ada:
++
++@itemize @bullet
++@item 
++The assignment statement is allowed as an expression, returning
++its right-hand operand as its value.  Thus, you may enter
++
++@smallexample
++set x := y + 3
++print A(tmp := y + 1)
++@end smallexample
++
++@item 
++The semicolon is allowed as an ``operator,''  returning as its value 
++the value of its right-hand operand.
++This allows, for example,
++complex conditional breaks:
++
++@smallexample
++break f
++condition 1 (report(i); k += 1; A(k) > 100)
++@end smallexample
++
++@item 
++Rather than use catenation and symbolic character names to introduce special 
++characters into strings, one may instead use a special bracket notation, 
++which is also used to print strings.  A sequence of characters of the form 
++@samp{["@var{XX}"]} within a string or character literal denotes the 
++(single) character whose numeric encoding is @var{XX} in hexadecimal.  The
++sequence of characters @samp{["""]} also denotes a single quotation mark 
++in strings.   For example,
++@smallexample
++   "One line.["0a"]Next line.["0a"]"
++@end smallexample
++@noindent
++Contains an ASCII newline character (@code{Ada.Characters.Latin_1.LF}) after each
++period.
++
++@item
++The subtype used as a prefix for the attributes @t{'Pos}, @t{'Min}, and
++@t{'Max} is optional (and is ignored in any case).  For example, it is valid
++to write
++
++@smallexample
++print 'max(x, y)
++@end smallexample
++
++@item
++When printing arrays, @value{GDBN} uses positional notation when the 
++array has a lower bound of 1, and uses a modified named notation otherwise.
++For example, a one-dimensional array of three integers with a lower bound of 3 might print as
++
++@smallexample
++(3 => 10, 17, 1)
++@end smallexample
++
++@noindent
++That is, in contrast to valid Ada, only the first component has a @code{=>} 
++clause.
++
++@item
++You may abbreviate attributes in expressions with any unique,
++multi-character subsequence of 
++their names (an exact match gets preference).
++For example, you may use @t{a'len}, @t{a'gth}, or @t{a'lh}
++in place of  @t{a'length}.
++
++@item
++@cindex quoting Ada internal identifiers
++Since Ada is case-insensitive, the debugger normally maps identifiers you type 
++to lower case.  The GNAT compiler uses upper-case characters for 
++some of its internal identifiers, which are normally of no interest to users.
++For the rare occasions when you actually have to look at them,
++enclose them in angle brackets to avoid the lower-case mapping. 
++For example,
++@smallexample
++(gdb) print <JMPBUF_SAVE>[0]
++@end smallexample
++
++@item
++Printing an object of class-wide type or dereferencing an 
++access-to-class-wide value will display all the components of the object's
++specific type (as indicated by its run-time tag).  Likewise, component
++selection on such a value will operate on the specific type of the
++object.
++
++@end itemize
++
++@node Stopping Before Main Program
++@subsubsection Stopping at the Very Beginning
++
++@cindex breakpointing Ada elaboration code
++It is sometimes necessary to debug the program during elaboration, and
++before reaching the main procedure.
++As defined in the Ada Reference
++Manual, the elaboration code is invoked from a procedure called
++@code{adainit}.  To run your program up to the beginning of
++elaboration, simply use the following two commands:
++@code{tbreak adainit} and @code{run}.
++
++@node Ada Exceptions
++@subsubsection Breaking on Ada Exceptions
++@cindex Ada, exceptions
++
++In Ada mode, you can set breakpoints that trip when your program raises 
++selected exceptions.
++
++@table @code
++@kindex break exception
++@item break exception
++Set a breakpoint that trips whenever (any task in the) program raises
++any exception.
++
++@item break exception @var{name}
++Set a breakpoint that trips whenever (any task in the) program raises
++the exception @var{name}.
++
++When inserting a breakpoint on a specific exception for which an
++homonym entity exists in the application, it is necessary to prefix
++the exception name with its package name.  In particular, if an entity
++sharing the same name as one of the standard exceptions has been defined,
++the exception name must be prefixed with package @code{Standard} when
++setting a breakpoint on this exception.
++
++@smallexample
++@iftex
++@leftskip=0.5cm
++@end iftex
++(gdb) break exception Standard.Constraint_Error
++@end smallexample
++
++@item break exception unhandled
++Set a breakpoint that trips whenever (any task in the) program raises an
++exception for which there is no handler.
++At the moment, 
++depending on the implementation of exceptions used on your platform, 
++this may not have quite the desired effect.  Other forms of
++exception breaking stop the program at the point the exception is raised.
++In Ada implementations that use setjmp and longjmp to implement exception
++handling, however, unhandled exceptions are not detected until the 
++affected task's stack is completely unwound.  Thus, you find out that a
++task has terminated with an exception, but you aren't told where it was
++raised.
++
++@kindex info exceptions
++@item info exceptions 
++@itemx info exceptions @var{regexp}
++The @code{info exceptions} command permits the user to examine all defined
++exceptions within Ada programs.  With a regular expression, @var{regexp}, as 
++argument, prints out only those exceptions whose name matches @var{regexp}.
++@end table
++
++@node Ada Generic Units
++@subsubsection Debugging Generic Units
++@cindex Ada, generic units
++
++GNAT always uses code expansion for generic instantiation.  This means that
++each time an instantiation occurs, a complete copy of the original code is
++made with appropriate substitutions.
++
++It is not possible to refer to the original generic entities themselves
++in @value{GDBN} (there is no code to refer to), but it
++is certainly possible to debug a particular instance of a generic, simply by
++using the appropriate expanded names.  For example, suppose that 
++@code{Gen} is a generic package:
++
++@smallexample
++-- In file gen.ads:
++generic package Gen is
++   function F (v1 : Integer) return Integer;
++end Gen;
++
++-- In file gen.adb:
++package body Gen is
++   function F (v1 : Integer) return Integer is
++   begin
++      return v1+1;         -- Line 5
++   end F;
++end Gen;
++@end smallexample
++
++@noindent
++and we have the following expansions
++
++@smallexample
++with Gen;
++procedure G is
++   package Gen1 is new Gen;
++   package Gen2 is new Gen;
++
++   I : Integer := 0;
++begin
++   I := Gen1.F (I);
++   I := Gen2.F (I);
++   I := Gen1.F (I);
++   I := Gen2.F (I);
++end;
++@end smallexample
++
++@noindent
++Then to break on a call to procedure @code{F} in the @code{Gen2} instance, simply
++use the command:
++
++@smallexample
++break G.Gen2.F
++@end smallexample
++
++When a breakpoint occurs, you can step through the code of the generic
++instance in the normal manner.  You can also examine values of data in the
++normal manner, providing the appropriate generic package qualification to
++refer to non-local entities.
++
++@node Ada Glitches
++@subsubsection Known Peculiarities of Ada Mode
++@cindex Ada, problems
++
++Besides the omissions listed previously (@pxref{Omissions from Ada}),
++we know of several problems with and limitations of Ada mode in
++@value{GDBN},
++some of which will be fixed with planned future releases of the debugger 
++and the GNU Ada compiler.
++
++@itemize @bullet
++@item
++Currently, the debugger 
++has insufficient information to determine whether certain pointers represent
++pointers to objects or the objects themselves.
++Thus, the user may have to tack an extra @code{.all} after an expression
++to get it printed properly.
++
++@item 
++Static constants that the compiler chooses not to materialize as objects in 
++storage are invisible to the debugger.
++
++@item
++Named parameter associations in function argument lists are ignored (the
++argument lists are treated as positional).
++
++@item
++Many useful library packages are currently invisible to the debugger.
++
++@item
++Fixed-point arithmetic, conversions, input, and output is carried out using 
++floating-point arithmetic, and may give results that only approximate those on 
++the host machine.
++
++@item
++The type of the @t{'Address} attribute may not be @code{System.Address}.
++
++@item
++When stopped in a particular subprogram, you can access variables defined
++in other, lexically
++enclosing subprograms by their simple names.  At the moment, however, this
++may not always work; it depends on whether the compiler happens to have
++made the necessary information (the ``static link'') available 
++at execution time, which it can sometimes avoid.  Of course,
++even in those cases where
++the compiler does not provide the information, you can still look at such
++variables by issuing the appropriate number of @code{up} commands to get to
++frame containing the variable you wish to see.   
++Access to non-local variables does not, at the moment, work in
++the test expressions for conditional breakpoints 
++(@pxref{Conditions, ,Break conditions}) unless you happen to specify these 
++while stopped in the subprogram in which they are to be applied.
++
++@item
++Depending on the platform, it is not always possible to set breakpoints
++on nested functions by name (e.g., @code{break foo}).  In effect, the
++nested functions act like local variables of the enclosing function.
++On these platforms, you must wait until @value{GDBN} is stopped in 
++the enclosing function before using this form of @code{break} command.  
++This is not much of a limitation, since you can still set a breakpoint on 
++the first line of the desired function using the usual 
++@code{break @var{file}:@var{line}} syntax.
++
++@item
++The GNAT compiler never generates the prefix @code{Standard} for any of 
++the standard symbols defined by the Ada language.  @value{GDBN} knows about 
++this: it will strip the prefix from names when you use it, and will never
++look for a name you have so qualified among local symbols, nor match against
++symbols in other packages or subprograms.  If you have 
++defined entities anywhere in your program other than parameters and 
++local variables whose simple names match names in @code{Standard}, 
++GNAT's lack of qualification here can cause confusion.  When this happens,
++you can usually resolve the confusion 
++by qualifying the problematic names with package
++@code{Standard} explicitly.  
++@end itemize
++
+ @node Unsupported languages
+ @section Unsupported languages
+ 
+

@@ -10,7 +10,7 @@ diff -Nru gdb-4.18/gdb/doc/gdb.texinfo gdb-4.18.new/gdb/doc/gdb.texinfo
 -END-INFO-DIR-ENTRY
 +@dircategory
 +@direntry Programming tools:
-+* Gdb: (gdb)				The @sc{gnu} debugger
++* Gdb: (gdb).				The @sc{gnu} debugger
 +@end direntry
  @end format
  @end ifinfo

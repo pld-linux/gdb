@@ -10,7 +10,7 @@ Summary(uk):	Символьний в╕дладчик для С та ╕нших мов
 Summary(zh_CN):	[©╙╥╒]C╨мфДкШсОят╣д╣ВйтфВ
 Summary(zh_TW):	[.-A╤}╣o]C╘M.$)B╗Д.-A╔L╩y.$)B╗╔╙╨╫у╦у╬╧
 Name:		gdb
-Version:	5.2.1
+Version:	5.3
 Release:	1
 License:	GPL
 Group:		Development/Debuggers
@@ -97,7 +97,9 @@ cd doc
 %{__autoconf}
 cd ../testsuite
 %{__autoconf}
-cd gdb.asm
+cd gdb.arch
+%{__autoconf}
+cd ../gdb.asm
 %{__autoconf}
 cd ../gdb.base
 %{__autoconf}

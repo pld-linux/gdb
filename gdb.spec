@@ -5,7 +5,7 @@ Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	5.0
-Release:	3
+Release:	4
 License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
@@ -68,10 +68,12 @@ verir.
 	--enable-multi-ice \
 	--enable-gdbmi \
 	--enable-netrom \
-	--with-cpu=%{__host_cpu} \
+	--with-cpu=%{_host_cpu} \
 	--with-x \
-	--with-mmap \
-	--with-mmalloc
+%ifnarch alpha
+	--with-mmalloc \
+%endif
+	--with-mmap
 #	--enable-tui
 
 # rebuild main Makefile again (due to some bug, Makefile is deleted)

@@ -1,0 +1,87 @@
+diff -Nru gdb-4.18/gdb/doc/gdb.texinfo gdb-4.18.new/gdb/doc/gdb.texinfo
+--- gdb-4.18/gdb/doc/gdb.texinfo	Fri Feb 12 03:02:45 1999
++++ gdb-4.18.new/gdb/doc/gdb.texinfo	Tue Apr 13 21:05:16 1999
+@@ -41,9 +41,10 @@
+ @c This is a dir.info fragment to support semi-automated addition of
+ @c manuals to an info tree.  zoo@cygnus.com is developing this facility.
+ @format
+-START-INFO-DIR-ENTRY
+-* Gdb: (gdb).                     The @sc{gnu} debugger.
+-END-INFO-DIR-ENTRY
++@dircategory
++@direntry Programming tools:
++* Gdb: (gdb)				The @sc{gnu} debugger
++@end direntry
+ @end format
+ @end ifinfo
+ @c
+diff -Nru gdb-4.18/gdb/doc/gdbint.texinfo gdb-4.18.new/gdb/doc/gdbint.texinfo
+--- gdb-4.18/gdb/doc/gdbint.texinfo	Wed Jan 13 02:35:53 1999
++++ gdb-4.18.new/gdb/doc/gdbint.texinfo	Tue Apr 13 21:34:50 1999
+@@ -3,9 +3,10 @@
+ 
+ @ifinfo
+ @format
+-START-INFO-DIR-ENTRY
+-* Gdb-Internals: (gdbint).	The GNU debugger's internals.
+-END-INFO-DIR-ENTRY
++@dircategory Programming tools:
++@direntry
++* Gdb-Internals: (gdbint)		The GNU debugger's internals
++@end direntry
+ @end format
+ @end ifinfo
+ 
+diff -Nru gdb-4.18/gdb/doc/stabs.texinfo gdb-4.18.new/gdb/doc/stabs.texinfo
+--- gdb-4.18/gdb/doc/stabs.texinfo	Fri Jul 24 23:52:03 1998
++++ gdb-4.18.new/gdb/doc/stabs.texinfo	Wed Apr 14 00:44:56 1999
+@@ -5,9 +5,11 @@
+ 
+ @ifinfo
+ @format
+-START-INFO-DIR-ENTRY
+-* Stabs: (stabs).                 The "stabs" debugging information format.
+-END-INFO-DIR-ENTRY
++@dircategory Programming tools:
++@direntry
++* Stabs: (stabs)			The "stabs" debugging information
++					format
++@end direntry
+ @end format
+ @end ifinfo
+ 
+@@ -872,7 +874,7 @@
+ .stabn 224,0,0,LBE2             # @r{224 is N_RBRAC}
+ @end example
+ 
+-@xref{Procedures} for more information on the @code{N_FUN} stab, and
++@xref{Procedures}, for more information on the @code{N_FUN} stab, and
+ @ref{Block Structure} for more information on the @code{N_LBRAC} and
+ @code{N_RBRAC} stabs.
+ 
+@@ -3370,7 +3372,7 @@
+ Variable on the stack; see @ref{Stack Variables}.
+ 
+ @item :
+-C++ nested symbol; see @xref{Nested Symbols}
++C++ nested symbol; see @xref{Nested Symbols}.
+ 
+ @item a
+ Parameter passed by reference in register; see @ref{Reference Parameters}.
+diff -Nru gdb-4.18/mmalloc/mmalloc.texi gdb-4.18.new/mmalloc/mmalloc.texi
+--- gdb-4.18/mmalloc/mmalloc.texi	Mon Nov  1 21:28:47 1993
++++ gdb-4.18.new/mmalloc/mmalloc.texi	Tue Apr 13 21:36:25 1999
+@@ -3,9 +3,10 @@
+ 
+ @ifinfo
+ @format
+-START-INFO-DIR-ENTRY
+-* Mmalloc: (mmalloc).		The GNU mapped-malloc package.
+-END-INFO-DIR-ENTRY
++@dircategory Programming tools:
++@direntry
++* Mmalloc: (mmalloc)			The GNU mapped-malloc package
++@end direntry
+ @end format
+ 
+ This file documents the GNU mmalloc (mapped-malloc) package, written by

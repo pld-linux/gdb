@@ -11,7 +11,7 @@ Summary(zh_CN):	[开发]C和其他语言的调试器
 Summary(zh_TW):	[.-A秨祇]C㎝.$)Bㄤ.-A粂.$)Bē秸刚竟
 Name:		gdb
 Version:	6.0
-Release:	0.1
+Release:	0.2
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
@@ -23,6 +23,7 @@ Patch1:		%{name}-readline.patch
 Patch2:		%{name}-info.patch
 Patch3:		%{name}-procfs.patch
 Patch4:		%{name}-passflags.patch
+Patch5:		%{name}-sparc-workaround.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	libtool
@@ -89,6 +90,7 @@ verir.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p1
+%patch5 -p1
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

@@ -19,7 +19,7 @@ Patch5:		gdb-threads.patch
 Patch6:		gdb-shared-readline.patch
 Prereq:		/usr/sbin/fix-info-dir
 BuildRequires:	ncurses-devel >= 5.0
-BuildRequires:	readline-devel
+BuildRequires:	readline-devel >= 4.1
 Buildroot:	/tmp/%{name}-%{version}-root
 
 %description

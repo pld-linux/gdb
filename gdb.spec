@@ -10,9 +10,13 @@ License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.bz2
-#Patch0:	gdb-shared-readline.patch
+Patch0:		%{name}-gettext.patch
+Patch1:		%{name}-ncurses.patch
+Patch2:		%{name}-readline.patch
+Patch3:		%{name}-info.patch
 BuildRequires:	ncurses-devel >= 5.0
 BuildRequires:	readline-devel >= 4.1
+BuildRequires:	XFree86-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -45,16 +49,32 @@ verir.
 
 %prep
 %setup -q
-#%patch0 -p1
+%patch0 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
 
 %build
-CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \
-./configure %{_target_platform} \
-	--prefix=%{_prefix} \
-	--infodir=%{_infodir} \
-	--mandir=%{_mandir} \
-	--enable-shared
+(cd gdb; aclocal; autoconf; cd ..)
+# !! Don't enable shared here !! 
+# This will cause serious problems --misiek
+%configure \
+	--disable-shared \
+	--enable-nls \
+	--without-included-gettext \
+	--enable-multi-ice \
+	--enable-gdbmi \
+	--enable-netrom \
+	--with-cpu=%{__host_cpu} \
+	--with-x \
+	--with-mmap \
+	--with-mmalloc
+#	--enable-tui
 
+# rebuild main Makefile again (due to some bug, Makefile is deleted)
+%configure \
+	--norecursion
+			
 %{__make}
 %{__make} info
 
@@ -62,15 +82,14 @@ CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_infodir}
 
-%{__make} install \
+%{__make} install install-info \
 	prefix=$RPM_BUILD_ROOT%{_prefix} \
+	bindir=$RPM_BUILD_ROOT%{_bindir} \
+	sbindir=$RPM_BUILD_ROOT%{_sbindir} \
 	infodir=$RPM_BUILD_ROOT%{_infodir} \
+	includedir=$RPM_BUILD_ROOT%{_includedir} \
+	libdir=$RPM_BUILD_ROOT%{_libdir} \
 	mandir=$RPM_BUILD_ROOT%{_mandir}
-
-# install by hand
-install gdb/doc/*.info* $RPM_BUILD_ROOT%{_infodir}
-
-strip $RPM_BUILD_ROOT%{_bindir}/*
 
 gzip -9nf $RPM_BUILD_ROOT{%{_infodir}/*info*,%{_mandir}/man?/*}
 

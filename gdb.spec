@@ -1,21 +1,17 @@
+%define		snap	20010313
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de):	Symbolischer Debugger für C und andere Sprachen 
 Summary(fr):	Débugger symbolique pour C et d'autres langages
 Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
-Version:	5.0
-Release:	5
+Version:	5.1
+Release:	0.%{snap}
 License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
 Group(de):	Entwicklung/Debugger
-Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.bz2
-Patch0:		%{name}-gettext.patch
-Patch1:		%{name}-ncurses.patch
-Patch2:		%{name}-readline.patch
-Patch3:		%{name}-info.patch
-Patch4:		%{name}-procfs.patch
+Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{snap}.tar.gz
 BuildRequires:	ncurses-devel >= 5.0
 BuildRequires:	readline-devel >= 4.1
 BuildRequires:	XFree86-devel
@@ -50,41 +46,45 @@ Bir komut arayüzü üzerinden programcýya programýný adým adým izleme
 verir.
 
 %prep
-%setup -q
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
-%patch4 -p1
+%setup -q -n %{name}-%{snap}
 
 %build
-(cd gdb; aclocal; autoconf; cd ..)
 # !! Don't enable shared here !! 
 # This will cause serious problems --misiek
-%configure \
+rm -rf obj-%{_target_platform} && install -d obj-%{_target_platform} && cd obj-%{_target_platform}  
+
+../configure \
+	--prefix=%{_prefix} \
+	--libdir=%{_libdir} \
+	--datadir=%{_datadir} \
+	--infodir=%{_infodir} \
+	--mandir=%{_mandir} \
 	--disable-shared \
+	--disable-tui \
 	--enable-nls \
 	--without-included-gettext \
-	--enable-multi-ice \
+	--enable-gdbcli \
 	--enable-gdbmi \
+	--enable-multi-ice \
 	--enable-netrom \
+	--enable-tui \
 	--with-cpu=%{_target_cpu} \
 	--with-x \
 %ifnarch alpha
 	--with-mmalloc \
 %endif
+%ifarch alpha sparc64
+	--enable-64-bit-bfd \
+%endif
 	--with-mmap
-#	--enable-tui
 
-# rebuild main Makefile again (due to some bug, Makefile is deleted)
-%configure \
-	--norecursion
 			
 %{__make}
 %{__make} info
 
 %install
 rm -rf $RPM_BUILD_ROOT
+cd obj-%{_target_platform}  
 install -d $RPM_BUILD_ROOT%{_infodir}
 
 %{__make} install install-info \

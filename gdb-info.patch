@@ -1,6 +1,6 @@
 diff -Nru gdb-4.18/gdb/doc/gdb.texinfo gdb-4.18.new/gdb/doc/gdb.texinfo
---- gdb-4.18/gdb/doc/gdb.texinfo	Fri Feb 12 03:02:45 1999
-+++ gdb-4.18.new/gdb/doc/gdb.texinfo	Tue Apr 13 21:05:16 1999
+--- gdb-4.18/gdb/doc/gdb.texinfo	Mon Nov 22 15:04:50 1999
++++ gdb-4.18.new/gdb/doc/gdb.texinfo	Mon Nov 22 15:05:13 1999
 @@ -41,9 +41,10 @@
  @c This is a dir.info fragment to support semi-automated addition of
  @c manuals to an info tree.  zoo@cygnus.com is developing this facility.
@@ -8,16 +8,74 @@ diff -Nru gdb-4.18/gdb/doc/gdb.texinfo gdb-4.18.new/gdb/doc/gdb.texinfo
 -START-INFO-DIR-ENTRY
 -* Gdb: (gdb).                     The @sc{gnu} debugger.
 -END-INFO-DIR-ENTRY
-+@dircategory
-+@direntry Programming tools:
++@dircategory Programming tools:
++@direntry
 +* Gdb: (gdb).				The @sc{gnu} debugger
 +@end direntry
  @end format
  @end ifinfo
  @c
+@@ -189,8 +190,10 @@
+ 
+ @end ifclear
+ 
+-* Command Line Editing::        Command Line Editing
+-* Using History Interactively:: Using History Interactively
++* Command Line Editing: (readline)Command Line Editing.
++				Command Line Editing
++* Using History Interactively: (readline)Readline Movement Commands.
++				Using History Interactively
+ * Installing GDB::              Installing GDB
+ * Index::                       Index
+ 
+@@ -4644,7 +4647,7 @@
+ by preprocessor @code{#define} commands.
+ 
+ @value{GDBN} now supports array constants in expressions input by
+-the user.  The syntax is @var{@{element, element@dots{}@}}.  For example,
++the user.  The syntax is @var{@{element element@dots{}@}}.  For example,
+ you can now use the command @code{print @{1, 2, 3@}} to build up an array in 
+ memory that is malloc'd in the target program.
+ 
+@@ -5281,7 +5284,7 @@
+ @kindex set print null-stop
+ @item set print null-stop
+ Cause @value{GDBN} to stop printing the characters of an array when the first
+-@sc{NULL} is encountered.  This is useful when large arrays actually
++@sc{null} is encountered.  This is useful when large arrays actually
+ contain only short strings.
+ 
+ @kindex set print pretty
+@@ -6528,7 +6531,7 @@
+ @item
+ Character constants are a single character surrounded by single quotes
+ (@code{'}), or a number---the ordinal value of the corresponding character
+-(usually its @sc{ASCII} value).  Within quotes, the single character may
++(usually its @sc{ascii} value).  Within quotes, the single character may
+ be represented by a letter or by @dfn{escape sequences}, which are of
+ the form @samp{\@var{nnn}}, where @var{nnn} is the octal representation
+ of the character's ordinal value; or of the form @samp{\@var{x}}, where
+@@ -9872,8 +9875,6 @@
+ @c     inc-hist.texi
+ @c Use -I with makeinfo to point to the appropriate directory,
+ @c environment var TEXINPUTS with TeX.
+-@include rluser.texinfo
+-@include inc-hist.texi
+ 
+ 
+ @ifclear PRECONFIGURED
+@@ -9967,7 +9968,7 @@
+ Then give @file{gdb.dvi} to your @sc{dvi} printing program.
+ @end ifclear
+ 
+-@node Installing GDB, Index, Using History Interactively, Top
++@node Installing GDB, Index, (readline)Using History Interactively, Top
+ @appendix Installing @value{GDBN}
+ @cindex configuring @value{GDBN}
+ @cindex installation
 diff -Nru gdb-4.18/gdb/doc/gdbint.texinfo gdb-4.18.new/gdb/doc/gdbint.texinfo
---- gdb-4.18/gdb/doc/gdbint.texinfo	Wed Jan 13 02:35:53 1999
-+++ gdb-4.18.new/gdb/doc/gdbint.texinfo	Tue Apr 13 21:34:50 1999
+--- gdb-4.18/gdb/doc/gdbint.texinfo	Mon Nov 22 15:04:50 1999
++++ gdb-4.18.new/gdb/doc/gdbint.texinfo	Mon Nov 22 11:40:12 1999
 @@ -3,9 +3,10 @@
  
  @ifinfo
@@ -33,8 +91,8 @@ diff -Nru gdb-4.18/gdb/doc/gdbint.texinfo gdb-4.18.new/gdb/doc/gdbint.texinfo
  @end ifinfo
  
 diff -Nru gdb-4.18/gdb/doc/stabs.texinfo gdb-4.18.new/gdb/doc/stabs.texinfo
---- gdb-4.18/gdb/doc/stabs.texinfo	Fri Jul 24 23:52:03 1998
-+++ gdb-4.18.new/gdb/doc/stabs.texinfo	Wed Apr 14 00:44:56 1999
+--- gdb-4.18/gdb/doc/stabs.texinfo	Mon Nov 22 15:04:50 1999
++++ gdb-4.18.new/gdb/doc/stabs.texinfo	Mon Nov 22 11:40:12 1999
 @@ -5,9 +5,11 @@
  
  @ifinfo
@@ -69,8 +127,8 @@ diff -Nru gdb-4.18/gdb/doc/stabs.texinfo gdb-4.18.new/gdb/doc/stabs.texinfo
  @item a
  Parameter passed by reference in register; see @ref{Reference Parameters}.
 diff -Nru gdb-4.18/mmalloc/mmalloc.texi gdb-4.18.new/mmalloc/mmalloc.texi
---- gdb-4.18/mmalloc/mmalloc.texi	Mon Nov  1 21:28:47 1993
-+++ gdb-4.18.new/mmalloc/mmalloc.texi	Tue Apr 13 21:36:25 1999
+--- gdb-4.18/mmalloc/mmalloc.texi	Mon Nov 22 15:04:50 1999
++++ gdb-4.18.new/mmalloc/mmalloc.texi	Mon Nov 22 11:40:12 1999
 @@ -3,9 +3,10 @@
  
  @ifinfo

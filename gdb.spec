@@ -8,7 +8,7 @@ Summary(ru):	Символический отладчик для C и других языков
 Summary(tr):	C ve diПer diller iГin sembolik hata ayЩklayЩcЩ
 Summary(uk):	Символьний в╕дладчик для С та ╕нших мов
 Name:		gdb
-Version:	5.2
+Version:	5.2.1
 Release:	1
 License:	GPL
 Group:		Development/Debuggers

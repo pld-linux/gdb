@@ -9,7 +9,7 @@ Release:	1
 License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
-Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
+Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.bz2
 #Patch0:	gdb-shared-readline.patch
 BuildRequires:	ncurses-devel >= 5.0
 BuildRequires:	readline-devel >= 4.1

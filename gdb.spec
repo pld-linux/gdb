@@ -10,14 +10,14 @@ Summary(uk):	óÉÍ×ÏÌØÎÉÊ ×¦ÄÌÁÄŞÉË ÄÌÑ ó ÔÁ ¦ÎÛÉÈ ÍÏ×
 Summary(zh_CN):	[¿ª·¢]CºÍÆäËûÓïÑÔµÄµ÷ÊÔÆ÷
 Summary(zh_TW):	[.-A¶}µo]C©M.$)B¨ä.-A¥L»y.$)B¨¥ªº½Õ¸Õ¾¹
 Name:		gdb
-Version:	5.3
-Release:	1
+Version:	6.0
+Release:	0.1
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
-# Source0-md5: 1e8566325f222edfbdd93e40c6ae921b
+# Source0-md5:	e2314b7c9c7670b5384deb90701446f4
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
-# Source1-md5: 2e8a48939ae282c12bbacdd54e398247
+# Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Patch0:		%{name}-gettext.patch
 Patch1:		%{name}-ncurses.patch
 Patch2:		%{name}-readline.patch
@@ -85,9 +85,9 @@ verir.
 
 %prep
 %setup -q
-%patch0 -p1
-%patch1 -p1
-%patch2 -p1
+#%patch0 -p1
+#%patch1 -p1
+#%patch2 -p1
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1

@@ -5,12 +5,13 @@ Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	5.0
-Release:	7
+Release:	8
 License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
 Group(de):	Entwicklung/Debugger
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.bz2
+Source1:	%{name}-non-english-man-pages.tar.bz2
 Patch0:		%{name}-gettext.patch
 Patch1:		%{name}-ncurses.patch
 Patch2:		%{name}-readline.patch
@@ -111,6 +112,8 @@ install -d $RPM_BUILD_ROOT%{_infodir}
 	libdir=$RPM_BUILD_ROOT%{_libdir} \
 	mandir=$RPM_BUILD_ROOT%{_mandir}
 
+bzip2 -dc %{SOURCE1} | tar xf - -C $RPM_BUILD_ROOT%{_mandir}
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -125,5 +128,10 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/*
 
 %{_mandir}/man1/*
+%lang(es) %{_mandir}/es/man1/*
+%lang(fr) %{_mandir}/fr/man1/*
+%lang(hu) %{_mandir}/hu/man1/*
+%lang(ja) %{_mandir}/ja/man1/*
+%lang(pl) %{_mandir}/pl/man1/*
 %{_infodir}/gdb*.info*
 %{_infodir}/stabs*.info*

@@ -5,7 +5,7 @@ Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	5.0
-Release:	6
+Release:	7
 License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
@@ -19,6 +19,8 @@ Patch4:		%{name}-procfs.patch
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	readline-devel >= 4.2
 BuildRequires:	XFree86-devel
+BuildRequires:	autoconf
+BuildRequires:	automake
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -58,10 +60,22 @@ verir.
 %patch4 -p1
 
 %build
-(cd gdb; aclocal; autoconf; cd ..)
+(cd gdb; libtoolize --copy --force; aclocal; autoconf)
+(cd gdb/doc; autoconf)
+(cd gdb/testsuite; autoconf)
+(cd gdb/testsuite/gdb.asm; autoconf)
+(cd gdb/testsuite/gdb.base; autoconf)
+(cd gdb/testsuite/gdb.c++; autoconf)
+(cd gdb/testsuite/gdb.disasm; autoconf)
+(cd gdb/testsuite/gdb.chill; autoconf)
+(cd gdb/testsuite/gdb.mi; autoconf)
+(cd gdb/testsuite/gdb.threads; autoconf)
+(cd gdb/testsuite/gdb.trace; autoconf)
+(cd gdb/testsuite/gdb.stabs; autoconf)
+(cd gdb/gdbserver; autoconf)
 # !! Don't enable shared here !! 
 # This will cause serious problems --misiek
-%configure \
+%configure2_13 \
 	--disable-shared \
 	--enable-nls \
 	--without-included-gettext \
@@ -77,7 +91,7 @@ verir.
 #	--enable-tui
 
 # rebuild main Makefile again (due to some bug, Makefile is deleted)
-%configure \
+%configure2_13 \
 	--norecursion
 			
 %{__make}

@@ -9,3 +9,69 @@ diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
  	"exec_prefix=$(exec_prefix)" \
  	"against=$(against)" \
  	"AR=$(AR)" \
+diff -Nur gdb-5.0.orig/gdb/doc/gdb.texinfo gdb-5.0/gdb/doc/gdb.texinfo
+--- gdb-5.0.orig/gdb/doc/gdb.texinfo	Fri May 12 12:30:39 2000
++++ gdb-5.0/gdb/doc/gdb.texinfo	Sat Aug  4 16:37:53 2001
+@@ -39,9 +39,9 @@
+ 
+ @c This is a dir.info fragment to support semi-automated addition of
+ @c manuals to an info tree.
+-@dircategory Programming & development tools.
++@dircategory Programming tools:
+ @direntry
+-* Gdb: (gdb).                     The @sc{gnu} debugger.
++* Gdb: (gdb).				The @sc{gnu} debugger.
+ @end direntry
+ 
+ @ifinfo
+diff -Nur gdb-5.0.orig/gdb/doc/gdbgui.texinfo gdb-5.0/gdb/doc/gdbgui.texinfo
+--- gdb-5.0.orig/gdb/doc/gdbgui.texinfo	Mon Feb  7 01:19:39 2000
++++ gdb-5.0/gdb/doc/gdbgui.texinfo	Sat Aug  4 16:38:31 2001
+@@ -43,9 +43,10 @@
+ @c This is a dir.info fragment to support semi-automated addition of
+ @c manuals to an info tree.  zoo@cygnus.com is developing this facility.
+ @format
+-START-INFO-DIR-ENTRY
+-* Gdb: (gdb).                     The GNU debugger.
+-END-INFO-DIR-ENTRY
++@dircategory Programming tools:
++@direntry
++* Gdb: (gdb).				The GNU debugger.
++@end direntry
+ @end format
+ @end ifinfo
+ @c
+diff -Nur gdb-5.0.orig/gdb/doc/gdbint.texinfo gdb-5.0/gdb/doc/gdbint.texinfo
+--- gdb-5.0.orig/gdb/doc/gdbint.texinfo	Wed Apr 12 07:16:56 2000
++++ gdb-5.0/gdb/doc/gdbint.texinfo	Sat Aug  4 16:39:49 2001
+@@ -3,9 +3,10 @@
+ 
+ @ifinfo
+ @format
+-START-INFO-DIR-ENTRY
+-* Gdb-Internals: (gdbint).	The GNU debugger's internals.
+-END-INFO-DIR-ENTRY
++@dircategory Programming tools:
++@direntry
++* Gdb-Internals: (gdbint).		The GNU debugger's internals.
++@end direntry
+ @end format
+ @end ifinfo
+ 
+diff -Nur gdb-5.0.orig/gdb/doc/stabs.texinfo gdb-5.0/gdb/doc/stabs.texinfo
+--- gdb-5.0.orig/gdb/doc/stabs.texinfo	Mon Jun 28 18:02:18 1999
++++ gdb-5.0/gdb/doc/stabs.texinfo	Sat Aug  4 16:40:42 2001
+@@ -5,9 +5,10 @@
+ 
+ @ifinfo
+ @format
+-START-INFO-DIR-ENTRY
+-* Stabs: (stabs).                 The "stabs" debugging information format.
+-END-INFO-DIR-ENTRY
++@dircategory Programming tools:
++@direntry
++* Stabs: (stabs).			The "stabs" debugging information format.
++@end direntry
+ @end format
+ @end ifinfo
+ 

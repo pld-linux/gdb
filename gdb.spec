@@ -110,7 +110,7 @@ cd ../gdb.chill
 cd ../gdb.disasm
 %{__autoconf}
 #cd ../gdb.fortran
-#%{__autoconf}
+#%%{__autoconf}
 cd ../gdb.java
 %{__autoconf}
 cd ../gdb.mi

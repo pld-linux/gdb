@@ -4,7 +4,9 @@ Summary(es):	Depurador de programas C y otras lenguajes
 Summary(fr):	DИbugger symbolique pour C et d'autres langages
 Summary(pl):	Symboliczny odpluskwiacz dla C i innych jЙzykСw
 Summary(pt_BR):	Depurador de programas C e outras linguagens
+Summary(ru):	Символический отладчик для C и других языков
 Summary(tr):	C ve diПer diller iГin sembolik hata ayЩklayЩcЩ
+Summary(uk):	Символьний в╕дладчик для С та ╕нших мов
 Name:		gdb
 Version:	5.2
 Release:	1
@@ -61,10 +63,22 @@ Ele permite Ю vocЙ rastrear a execuГЦo de programas e examinar o seu
 estado interno a qualquer momento. Ele funciona para para C e C++
 compilado com o compilador GNU C.
 
+%description -l ru
+Это полноценный отладчик, управляемый командами. Он позволяет
+трассировать исполнение программ и изучать их внутреннее состояние в
+любой момент времени. Работает с программами на C и C++,
+скомпилированными GNU компилятором C (gcc, egcs, pgcc).
+
 %description -l tr
 Bir komut arayЭzЭ Эzerinden programcЩya programЩnЩ adЩm adЩm izleme
 (trace) ve herhangi bir anda programЩn durumunu inceleme olanaПЩ
 verir.
+
+%description -l uk
+Це повноц╕нний в╕дладчик, що керу╓ться командами. В╕н дозволя╓
+трасувати виконання програм та вивчати ╖х внутр╕шн╕й стан в дов╕льний
+момент часу. Працю╓ з програмами на C та C++, зкомп╕льованими
+комп╕ляторами GNU C (gcc, egcs, pgcc).
 
 %prep
 %setup -q

@@ -28,6 +28,15 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  
  WARN_CFLAGS = @WARN_CFLAGS@
  WERROR_CFLAGS = @WERROR_CFLAGS@
+@@ -369,7 +369,7 @@
+ 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
+ 	$(LIBICONV) \
+ 	$(LIBIBERTY) $(WIN32LIBS)
+-CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
++CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) \
+ 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
+ 
+ ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 --- gdb-6.1/Makefile.in.orig	2004-04-03 18:52:09.000000000 +0200
 +++ gdb-6.1/Makefile.in	2004-04-17 22:43:50.603804248 +0200
 @@ -571,7 +571,6 @@

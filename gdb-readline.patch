@@ -37,9 +37,9 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
  
  ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
---- gdb-6.2/Makefile.in.orig	2004-07-30 00:49:41.000000000 +0200
-+++ gdb-6.2/Makefile.in	2004-07-31 21:35:43.554574184 +0200
-@@ -686,7 +686,6 @@
+--- gdb-6.3/Makefile.in.orig	2004-11-08 17:21:22.000000000 +0100
++++ gdb-6.3/Makefile.in	2004-11-19 23:30:12.276705120 +0100
+@@ -692,7 +692,6 @@
      maybe-configure-perl \
      maybe-configure-prms \
      maybe-configure-rcs \
@@ -47,7 +47,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-configure-release \
      maybe-configure-recode \
      maybe-configure-sed \
-@@ -788,7 +787,6 @@
+@@ -793,7 +792,6 @@
      maybe-all-perl \
      maybe-all-prms \
      maybe-all-rcs \
@@ -55,7 +55,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-all-release \
      maybe-all-recode \
      maybe-all-sed \
-@@ -885,7 +883,6 @@
+@@ -889,7 +887,6 @@
      maybe-info-perl \
      maybe-info-prms \
      maybe-info-rcs \
@@ -63,7 +63,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-info-release \
      maybe-info-recode \
      maybe-info-sed \
-@@ -978,7 +975,6 @@
+@@ -981,7 +978,6 @@
      maybe-dvi-perl \
      maybe-dvi-prms \
      maybe-dvi-rcs \
@@ -71,7 +71,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-dvi-release \
      maybe-dvi-recode \
      maybe-dvi-sed \
-@@ -1071,7 +1067,6 @@
+@@ -1073,7 +1069,6 @@
      maybe-TAGS-perl \
      maybe-TAGS-prms \
      maybe-TAGS-rcs \
@@ -79,7 +79,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-TAGS-release \
      maybe-TAGS-recode \
      maybe-TAGS-sed \
-@@ -1164,7 +1159,6 @@
+@@ -1165,7 +1160,6 @@
      maybe-install-info-perl \
      maybe-install-info-prms \
      maybe-install-info-rcs \
@@ -95,7 +95,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-installcheck-release \
      maybe-installcheck-recode \
      maybe-installcheck-sed \
-@@ -1350,7 +1343,6 @@
+@@ -1349,7 +1342,6 @@
      maybe-mostlyclean-perl \
      maybe-mostlyclean-prms \
      maybe-mostlyclean-rcs \
@@ -103,7 +103,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-mostlyclean-release \
      maybe-mostlyclean-recode \
      maybe-mostlyclean-sed \
-@@ -1443,7 +1435,6 @@
+@@ -1441,7 +1433,6 @@
      maybe-clean-perl \
      maybe-clean-prms \
      maybe-clean-rcs \
@@ -111,7 +111,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-clean-release \
      maybe-clean-recode \
      maybe-clean-sed \
-@@ -1536,7 +1527,6 @@
+@@ -1533,7 +1524,6 @@
      maybe-distclean-perl \
      maybe-distclean-prms \
      maybe-distclean-rcs \
@@ -119,7 +119,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-distclean-release \
      maybe-distclean-recode \
      maybe-distclean-sed \
-@@ -1629,7 +1619,6 @@
+@@ -1625,7 +1615,6 @@
      maybe-maintainer-clean-perl \
      maybe-maintainer-clean-prms \
      maybe-maintainer-clean-rcs \
@@ -127,7 +127,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-maintainer-clean-release \
      maybe-maintainer-clean-recode \
      maybe-maintainer-clean-sed \
-@@ -1779,7 +1768,6 @@
+@@ -1774,7 +1763,6 @@
      maybe-check-perl \
      maybe-check-prms \
      maybe-check-rcs \
@@ -135,7 +135,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-check-release \
      maybe-check-recode \
      maybe-check-sed \
-@@ -1892,7 +1880,6 @@
+@@ -1885,7 +1873,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -143,7 +143,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -1961,7 +1948,6 @@
+@@ -1953,7 +1940,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -151,21 +151,19 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -29207,7 +29193,7 @@
- # GDB needs to know that the simulator is being built.
- configure-gdb: maybe-configure-itcl maybe-configure-tcl maybe-configure-tk maybe-configure-sim
- GDB_TK = @GDB_TK@
--all-gdb: maybe-all-libiberty maybe-all-opcodes maybe-all-bfd maybe-all-mmalloc maybe-all-readline maybe-all-bison maybe-all-byacc maybe-all-sim $(gdbnlmrequirements) $(GDB_TK)
-+all-gdb: maybe-all-libiberty maybe-all-opcodes maybe-all-bfd maybe-all-mmalloc maybe-all-bison maybe-all-byacc maybe-all-sim $(gdbnlmrequirements) $(GDB_TK)
- install-gdb: maybe-install-tcl maybe-install-tk maybe-install-itcl maybe-install-tix maybe-install-libgui
- configure-libgui: maybe-configure-tcl maybe-configure-tk
- all-libgui: maybe-all-tcl maybe-all-tk maybe-all-itcl
-@@ -29238,7 +29224,7 @@
- install-itcl: maybe-install-tcl
- all-sid: maybe-all-libiberty maybe-all-bfd maybe-all-opcodes maybe-all-tcl maybe-all-tk
- install-sid: maybe-install-tcl maybe-install-tk
--all-sim: maybe-all-libiberty maybe-all-bfd maybe-all-opcodes maybe-all-readline maybe-configure-gdb
-+all-sim: maybe-all-libiberty maybe-all-bfd maybe-all-opcodes maybe-configure-gdb
- configure-tk: maybe-configure-tcl
- all-tk: maybe-all-tcl
- configure-tix: maybe-configure-tcl maybe-configure-tk
+@@ -32695,7 +32681,6 @@
+ all-gdb: maybe-all-libiberty
+ all-gdb: maybe-all-opcodes
+ all-gdb: maybe-all-bfd
+-all-gdb: maybe-all-readline
+ all-gdb: maybe-all-build-bison
+ all-gdb: maybe-all-build-byacc
+ all-gdb: maybe-all-sim
+@@ -32928,7 +32913,6 @@
+ all-sim: maybe-all-libiberty
+ all-sim: maybe-all-bfd
+ all-sim: maybe-all-opcodes
+-all-sim: maybe-all-readline
+ all-sim: maybe-configure-gdb
+ all-fastjar: maybe-all-zlib
+ all-fastjar: maybe-all-build-texinfo

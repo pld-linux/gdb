@@ -68,7 +68,7 @@ verir.
 	--enable-multi-ice \
 	--enable-gdbmi \
 	--enable-netrom \
-	--with-cpu=%{_host_cpu} \
+	--with-cpu=%{_target_cpu} \
 	--with-x \
 %ifnarch alpha
 	--with-mmalloc \

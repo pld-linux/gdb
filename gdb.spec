@@ -1,20 +1,20 @@
+Name:        gdb
+Version:     4.18
+Release:     1
+Copyright:   GPL
+Group:       Development/Debuggers
+Source:      ftp://sourceware.cygnus.com/pub/gdb/%{name}-4.18.tar.gz
+# Patch0:      gdb-19980528-jbj.patch
+# Patch1:      ftp://ftp.yggdrasil.com/private/hjl/gdb-4.17-4.17.0.4.diff.gz
+# Patch2:      gdb-4.17-debug-threads.patch.gz
+# Patch3:      gdb-readline_ncurses.patch
+Prereq:      /sbin/install-info
+Buildroot:   /tmp/%{name}-%{version}-root
 Summary:     Symbolic debugger for C and other languages
 Summary(de): Symbolischer Debugger für C und andere Sprachen 
 Summary(fr): Débugger symbolique pour C et d'autres langages
 Summary(pl): Symboliczny debugger dla C i innych jêzyków
 Summary(tr): C ve diðer diller için sembolik hata ayýklayýcý
-Name:        gdb
-Version:     4.17.0.4
-Release:     3
-Copyright:   GPL
-Group:       Development/Debuggers
-Source:      ftp://ftp.cygnus.com/pub/gdb/%{name}-4.17.tar.gz
-Patch0:      gdb-19980528-jbj.patch
-Patch1:      ftp://ftp.yggdrasil.com/private/hjl/gdb-4.17-4.17.0.4.diff.gz
-Patch2:      gdb-4.17-debug-threads.patch.gz
-Patch3:      gdb-readline_ncurses.patch
-Prereq:      /sbin/install-info
-Buildroot:   /tmp/%{name}-%{version}-root
 
 %description
 This is a full featured, command driven debugger. It allows you to
@@ -43,19 +43,19 @@ Bir komut arayüzü üzerinden programcýya programýný adým adým izleme (trace)
 ve herhangi bir anda programýn durumunu inceleme olanaðý verir.
 
 %prep
-%setup -q -n gdb-4.17
+%setup -q -n gdb-4.18
 %ifarch sparc
-%patch0 -p1 -b .jbj
+# %patch0 -p1 -b .jbj
 %endif
 
-%patch1 -p2 -b .hjl
+# %patch1 -p2 -b .hjl
 
 # XXX can't debug threads on sparc yet
 %ifarch i386 alpha
-%patch2 -p1 -b .debug_threads
+# %patch2 -p1 -b .debug_threads
 %endif
 
-%patch3 -p1 -b .readline_ncurses
+# %patch3 -p1 -b .readline_ncurses
 
 %build
 CC=gcc CFLAGS=$RPM_OPT_FLAGS ./configure --prefix=/usr 
@@ -93,6 +93,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/info/*info*
 
 %changelog
+* Mon Apr 12 1999 Marcin Dalecki <dalecki@cs.net.pl>
+  [4.18]
+- updated to this fresh new release.
+
 * Sat Oct 17 1998 Tomasz K³oczko <kloczek@rudy.mif.pg.gda.pl>
   [4.17.0.4-3]
 - added gdb-readline_ncurses.patch for compiling gdb agains shared

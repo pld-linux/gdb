@@ -37,9 +37,9 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
  
  ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
---- gdb-6.1/Makefile.in.orig	2004-04-03 18:52:09.000000000 +0200
-+++ gdb-6.1/Makefile.in	2004-04-17 22:43:50.603804248 +0200
-@@ -571,7 +571,6 @@
+--- gdb-6.2/Makefile.in.orig	2004-07-30 00:49:41.000000000 +0200
++++ gdb-6.2/Makefile.in	2004-07-31 21:35:43.554574184 +0200
+@@ -686,7 +686,6 @@
      maybe-configure-perl \
      maybe-configure-prms \
      maybe-configure-rcs \
@@ -47,7 +47,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-configure-release \
      maybe-configure-recode \
      maybe-configure-sed \
-@@ -661,7 +660,6 @@
+@@ -788,7 +787,6 @@
      maybe-all-perl \
      maybe-all-prms \
      maybe-all-rcs \
@@ -55,7 +55,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-all-release \
      maybe-all-recode \
      maybe-all-sed \
-@@ -755,7 +753,6 @@
+@@ -885,7 +883,6 @@
      maybe-info-perl \
      maybe-info-prms \
      maybe-info-rcs \
@@ -63,36 +63,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-info-release \
      maybe-info-recode \
      maybe-info-sed \
-@@ -1724,28 +1721,6 @@
- 	  || exit 1
- 
- 
--.PHONY: maybe-info-readline info-readline
--maybe-info-readline:
--
--info-readline: \
--    configure-readline 
--	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	for flag in $(EXTRA_HOST_FLAGS); do \
--	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
--	done; \
--	echo "Doing info in readline" ; \
--	(cd readline && \
--	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
--	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
--	          "RANLIB=$${RANLIB}" \
--	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
--	          info) \
--	  || exit 1
--
--
- .PHONY: maybe-info-release info-release
- maybe-info-release:
- 
-@@ -2654,7 +2629,6 @@
+@@ -978,7 +975,6 @@
      maybe-dvi-perl \
      maybe-dvi-prms \
      maybe-dvi-rcs \
@@ -100,36 +71,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-dvi-release \
      maybe-dvi-recode \
      maybe-dvi-sed \
-@@ -3623,28 +3597,6 @@
- 	  || exit 1
- 
- 
--.PHONY: maybe-dvi-readline dvi-readline
--maybe-dvi-readline:
--
--dvi-readline: \
--    configure-readline 
--	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	for flag in $(EXTRA_HOST_FLAGS); do \
--	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
--	done; \
--	echo "Doing dvi in readline" ; \
--	(cd readline && \
--	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
--	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
--	          "RANLIB=$${RANLIB}" \
--	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
--	          dvi) \
--	  || exit 1
--
--
- .PHONY: maybe-dvi-release dvi-release
- maybe-dvi-release:
- 
-@@ -4553,7 +4505,6 @@
+@@ -1071,7 +1067,6 @@
      maybe-TAGS-perl \
      maybe-TAGS-prms \
      maybe-TAGS-rcs \
@@ -137,36 +79,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-TAGS-release \
      maybe-TAGS-recode \
      maybe-TAGS-sed \
-@@ -5522,28 +5473,6 @@
- 	  || exit 1
- 
- 
--.PHONY: maybe-TAGS-readline TAGS-readline
--maybe-TAGS-readline:
--
--TAGS-readline: \
--    configure-readline 
--	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	for flag in $(EXTRA_HOST_FLAGS); do \
--	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
--	done; \
--	echo "Doing TAGS in readline" ; \
--	(cd readline && \
--	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
--	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
--	          "RANLIB=$${RANLIB}" \
--	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
--	          TAGS) \
--	  || exit 1
--
--
- .PHONY: maybe-TAGS-release TAGS-release
- maybe-TAGS-release:
- 
-@@ -6452,7 +6381,6 @@
+@@ -1164,7 +1159,6 @@
      maybe-install-info-perl \
      maybe-install-info-prms \
      maybe-install-info-rcs \
@@ -174,37 +87,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-install-info-release \
      maybe-install-info-recode \
      maybe-install-info-sed \
-@@ -7463,29 +7391,6 @@
- 	  || exit 1
- 
- 
--.PHONY: maybe-install-info-readline install-info-readline
--maybe-install-info-readline:
--
--install-info-readline: \
--    configure-readline \
--    info-readline 
--	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	for flag in $(EXTRA_HOST_FLAGS); do \
--	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
--	done; \
--	echo "Doing install-info in readline" ; \
--	(cd readline && \
--	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
--	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
--	          "RANLIB=$${RANLIB}" \
--	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
--	          install-info) \
--	  || exit 1
--
--
- .PHONY: maybe-install-info-release install-info-release
- maybe-install-info-release:
- 
-@@ -8433,7 +8338,6 @@
+@@ -1257,7 +1251,6 @@
      maybe-installcheck-perl \
      maybe-installcheck-prms \
      maybe-installcheck-rcs \
@@ -212,36 +95,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-installcheck-release \
      maybe-installcheck-recode \
      maybe-installcheck-sed \
-@@ -9402,28 +9306,6 @@
- 	  || exit 1
- 
- 
--.PHONY: maybe-installcheck-readline installcheck-readline
--maybe-installcheck-readline:
--
--installcheck-readline: \
--    configure-readline 
--	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	for flag in $(EXTRA_HOST_FLAGS); do \
--	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
--	done; \
--	echo "Doing installcheck in readline" ; \
--	(cd readline && \
--	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
--	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
--	          "RANLIB=$${RANLIB}" \
--	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
--	          installcheck) \
--	  || exit 1
--
--
- .PHONY: maybe-installcheck-release installcheck-release
- maybe-installcheck-release:
- 
-@@ -10332,7 +10214,6 @@
+@@ -1350,7 +1343,6 @@
      maybe-mostlyclean-perl \
      maybe-mostlyclean-prms \
      maybe-mostlyclean-rcs \
@@ -249,35 +103,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-mostlyclean-release \
      maybe-mostlyclean-recode \
      maybe-mostlyclean-sed \
-@@ -11245,27 +11126,6 @@
- 	  || exit 1
- 
- 
--.PHONY: maybe-mostlyclean-readline mostlyclean-readline
--maybe-mostlyclean-readline:
--
--mostlyclean-readline: 
--	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	for flag in $(EXTRA_HOST_FLAGS); do \
--	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
--	done; \
--	echo "Doing mostlyclean in readline" ; \
--	(cd readline && \
--	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
--	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
--	          "RANLIB=$${RANLIB}" \
--	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
--	          mostlyclean) \
--	  || exit 1
--
--
- .PHONY: maybe-mostlyclean-release mostlyclean-release
- maybe-mostlyclean-release:
- 
-@@ -12107,7 +11967,6 @@
+@@ -1443,7 +1435,6 @@
      maybe-clean-perl \
      maybe-clean-prms \
      maybe-clean-rcs \
@@ -285,35 +111,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-clean-release \
      maybe-clean-recode \
      maybe-clean-sed \
-@@ -13034,27 +12893,6 @@
- 	  || exit 1
- 
- 
--.PHONY: maybe-clean-readline clean-readline
--maybe-clean-readline:
--
--clean-readline: 
--	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	for flag in $(EXTRA_HOST_FLAGS); do \
--	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
--	done; \
--	echo "Doing clean in readline" ; \
--	(cd readline && \
--	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
--	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
--	          "RANLIB=$${RANLIB}" \
--	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
--	          clean) \
--	  || exit 1
--
--
- .PHONY: maybe-clean-release clean-release
- maybe-clean-release:
- 
-@@ -13896,7 +13734,6 @@
+@@ -1536,7 +1527,6 @@
      maybe-distclean-perl \
      maybe-distclean-prms \
      maybe-distclean-rcs \
@@ -321,35 +119,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-distclean-release \
      maybe-distclean-recode \
      maybe-distclean-sed \
-@@ -14823,27 +14660,6 @@
- 	  || exit 1
- 
- 
--.PHONY: maybe-distclean-readline distclean-readline
--maybe-distclean-readline:
--
--distclean-readline: 
--	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	for flag in $(EXTRA_HOST_FLAGS); do \
--	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
--	done; \
--	echo "Doing distclean in readline" ; \
--	(cd readline && \
--	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
--	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
--	          "RANLIB=$${RANLIB}" \
--	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
--	          distclean) \
--	  || exit 1
--
--
- .PHONY: maybe-distclean-release distclean-release
- maybe-distclean-release:
- 
-@@ -15685,7 +15501,6 @@
+@@ -1629,7 +1619,6 @@
      maybe-maintainer-clean-perl \
      maybe-maintainer-clean-prms \
      maybe-maintainer-clean-rcs \
@@ -357,35 +127,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-maintainer-clean-release \
      maybe-maintainer-clean-recode \
      maybe-maintainer-clean-sed \
-@@ -16612,27 +16427,6 @@
- 	  || exit 1
- 
- 
--.PHONY: maybe-maintainer-clean-readline maintainer-clean-readline
--maybe-maintainer-clean-readline:
--
--maintainer-clean-readline: 
--	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	for flag in $(EXTRA_HOST_FLAGS); do \
--	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
--	done; \
--	echo "Doing maintainer-clean in readline" ; \
--	(cd readline && \
--	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
--	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
--	          "RANLIB=$${RANLIB}" \
--	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" \
--	          maintainer-clean) \
--	  || exit 1
--
--
- .PHONY: maybe-maintainer-clean-release maintainer-clean-release
- maybe-maintainer-clean-release:
- 
-@@ -17531,7 +17325,6 @@
+@@ -1779,7 +1768,6 @@
      maybe-check-perl \
      maybe-check-prms \
      maybe-check-rcs \
@@ -393,7 +135,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-check-release \
      maybe-check-recode \
      maybe-check-sed \
-@@ -17641,7 +17434,6 @@
+@@ -1892,7 +1880,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -401,7 +143,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -17708,7 +17500,6 @@
+@@ -1961,7 +1948,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -409,81 +151,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -20631,73 +20422,6 @@
- 	(cd rcs && $(MAKE) $(FLAGS_TO_PASS) install)
- 
- 
--.PHONY: configure-readline maybe-configure-readline
--maybe-configure-readline:
--configure-readline:
--	@test ! -f readline/Makefile || exit 0; \
--	[ -d readline ] || mkdir readline; \
--	r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	CC="$(CC)"; export CC; \
--	CFLAGS="$(CFLAGS)"; export CFLAGS; \
--	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \
--	CXX="$(CXX)"; export CXX; \
--	CXXFLAGS="$(CXXFLAGS)"; export CXXFLAGS; \
--	AR="$(AR)"; export AR; \
--	AS="$(AS)"; export AS; \
--	CC_FOR_BUILD="$(CC_FOR_BUILD)"; export CC_FOR_BUILD; \
--	DLLTOOL="$(DLLTOOL)"; export DLLTOOL; \
--	LD="$(LD)"; export LD; \
--	NM="$(NM)"; export NM; \
--	RANLIB="$(RANLIB)"; export RANLIB; \
--	WINDRES="$(WINDRES)"; export WINDRES; \
--	OBJCOPY="$(OBJCOPY)"; export OBJCOPY; \
--	OBJDUMP="$(OBJDUMP)"; export OBJDUMP; \
--	echo Configuring in readline; \
--	cd readline || exit 1; \
--	case $(srcdir) in \
--	  \.) \
--	    srcdiroption="--srcdir=."; \
--	    libsrcdir=".";; \
--	  /* | [A-Za-z]:[\\/]*) \
--	    srcdiroption="--srcdir=$(srcdir)/readline"; \
--	    libsrcdir="$$s/readline";; \
--	  *) \
--	    srcdiroption="--srcdir=../$(srcdir)/readline"; \
--	    libsrcdir="$$s/readline";; \
--	esac; \
--	$(SHELL) $${libsrcdir}/configure \
--	  $(HOST_CONFIGARGS) $${srcdiroption} \
--	  || exit 1
--
--.PHONY: all-readline maybe-all-readline
--maybe-all-readline:
--all-readline: configure-readline
--	@r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	(cd readline && $(MAKE) $(FLAGS_TO_PASS) all)
--
--.PHONY: check-readline maybe-check-readline
--maybe-check-readline:
--
--check-readline:
--	@r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	(cd readline && $(MAKE) $(FLAGS_TO_PASS) check)
--
--
--.PHONY: install-readline maybe-install-readline
--maybe-install-readline:
--
--install-readline: installdirs
--	@r=`${PWD_COMMAND}`; export r; \
--	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
--	$(SET_LIB_PATH) \
--	(cd readline && $(MAKE) $(FLAGS_TO_PASS) install)
--
--
- .PHONY: configure-release maybe-configure-release
- maybe-configure-release:
- configure-release:
-@@ -23771,7 +23495,7 @@
+@@ -29207,7 +29193,7 @@
  # GDB needs to know that the simulator is being built.
  configure-gdb: maybe-configure-itcl maybe-configure-tcl maybe-configure-tk maybe-configure-sim
  GDB_TK = @GDB_TK@
@@ -492,7 +160,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  install-gdb: maybe-install-tcl maybe-install-tk maybe-install-itcl maybe-install-tix maybe-install-libgui
  configure-libgui: maybe-configure-tcl maybe-configure-tk
  all-libgui: maybe-all-tcl maybe-all-tk maybe-all-itcl
-@@ -23802,7 +23526,7 @@
+@@ -29238,7 +29224,7 @@
  install-itcl: maybe-install-tcl
  all-sid: maybe-all-libiberty maybe-all-bfd maybe-all-opcodes maybe-all-tcl maybe-all-tk
  install-sid: maybe-install-tcl maybe-install-tk

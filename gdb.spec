@@ -6,8 +6,8 @@ Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(pt_BR):	Depurador de programas C e outras linguagens
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
-Version:	5.1.1
-Release:	2
+Version:	5.2
+Release:	1
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
@@ -17,8 +17,7 @@ Patch1:		%{name}-ncurses.patch
 Patch2:		%{name}-readline.patch
 Patch3:		%{name}-info.patch
 Patch4:		%{name}-procfs.patch
-Patch5:		%{name}-ppc-include.patch
-Patch6:		%{name}-passflags.patch
+Patch5:		%{name}-passflags.patch
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	readline-devel >= 4.2
 BuildRequires:	XFree86-devel
@@ -75,7 +74,6 @@ verir.
 %patch3 -p1
 %patch4 -p1
 %patch5 -p1
-%patch6 -p1
 
 %build
 (cd gdb; autoconf)
@@ -99,17 +97,16 @@ verir.
 	--disable-shared \
 	--enable-nls \
 	--without-included-gettext \
-	--enable-multi-ice \
-	--enable-gdbmi \
+	--without-included-regex \
 	--enable-gdcli \
+	--enable-gdbmi \
+	--enable-multi-ice \
 	--enable-netrom \
 	--with-cpu=%{_target_cpu} \
-	--with-x \
 	--enable-tui \
 %ifnarch alpha
 	--with-mmalloc \
 %endif
-	--with-mmap
 
 # something is wrong after above - e.g. $exeext=="no" - fix it:
 (cd gdb

@@ -1,7 +1,7 @@
-diff -urN gdb-4.18-orig/Makefile.in gdb-4.18/Makefile.in
---- gdb-4.18-orig/Makefile.in	Wed Apr  7 21:40:04 1999
-+++ gdb-4.18/Makefile.in	Mon May 24 15:21:43 1999
-@@ -552,7 +552,6 @@
+diff -urN gdb-5.0.org/Makefile.in gdb-5.0/Makefile.in
+--- gdb-5.0.org/Makefile.in	Wed May 24 18:38:08 2000
++++ gdb-5.0/Makefile.in	Wed May 24 18:40:05 2000
+@@ -558,7 +558,6 @@
  	all-perl \
  	all-prms \
  	all-rcs \
@@ -9,7 +9,7 @@ diff -urN gdb-4.18-orig/Makefile.in gdb-4.18/Makefile.in
  	all-release \
  	all-recode \
  	all-sed \
-@@ -625,7 +624,6 @@
+@@ -631,7 +630,6 @@
  	check-perl \
  	check-prms \
  	check-rcs \
@@ -17,7 +17,7 @@ diff -urN gdb-4.18-orig/Makefile.in gdb-4.18/Makefile.in
  	check-recode \
  	check-sed \
  	check-send-pr \
-@@ -699,7 +697,6 @@
+@@ -705,7 +703,6 @@
  	install-perl \
  	install-prms \
  	install-rcs \
@@ -25,7 +25,7 @@ diff -urN gdb-4.18-orig/Makefile.in gdb-4.18/Makefile.in
  	install-recode \
  	install-sed \
  	install-send-pr \
-@@ -863,7 +860,6 @@
+@@ -869,7 +866,6 @@
  	clean-perl \
  	clean-prms \
  	clean-rcs \
@@ -33,7 +33,7 @@ diff -urN gdb-4.18-orig/Makefile.in gdb-4.18/Makefile.in
  	clean-release \
  	clean-recode \
  	clean-sed \
-@@ -1555,7 +1551,7 @@
+@@ -1561,7 +1557,7 @@
  all-gcc: all-bison all-byacc all-binutils all-gas all-ld
  all-bootstrap: all-libiberty all-bison all-byacc all-binutils all-gas all-ld
  GDB_TK = all-tk all-tcl all-itcl all-tix all-libgui
@@ -42,7 +42,7 @@ diff -urN gdb-4.18-orig/Makefile.in gdb-4.18/Makefile.in
  all-gettext:
  all-gnuserv:
  configure-target-gperf: $(ALL_GCC)
-@@ -1600,12 +1596,11 @@
+@@ -1606,12 +1602,11 @@
  all-perl:
  all-prms: all-libiberty
  all-rcs:
@@ -56,19 +56,19 @@ diff -urN gdb-4.18-orig/Makefile.in gdb-4.18/Makefile.in
  all-tar: all-libiberty
  all-tcl:
  all-tcl8.1:
-@@ -1786,7 +1781,7 @@
+@@ -1853,7 +1848,7 @@
  		SUPPORT_FILES="$(GNATS_SUPPORT_DIRS)"
  
- .PHONY: gdb.tar.gz
+ .PHONY: gdb.tar.bz2
 -GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes readline sim utils intl
 +GDB_SUPPORT_DIRS= bfd include libiberty mmalloc opcodes sim utils intl
- gdb.tar.gz: $(DIST_SUPPORT) $(GDB_SUPPORT_DIRS) gdb
- 	$(MAKE) -f Makefile.in taz TOOL=gdb \
- 		SUPPORT_FILES="$(GDB_SUPPORT_DIRS)"
-diff -urN gdb-4.18-orig/gdb/Makefile.in gdb-4.18/gdb/Makefile.in
---- gdb-4.18-orig/gdb/Makefile.in	Wed Apr  7 21:00:43 1999
-+++ gdb-4.18/gdb/Makefile.in	Mon May 24 15:22:57 1999
-@@ -112,10 +112,12 @@
+ gdb.tar.bz2: $(DIST_SUPPORT) $(GDB_SUPPORT_DIRS) gdb
+ 	$(MAKE) -f Makefile.in gdb-taz TOOL=gdb \
+ 		MD5PROG="$(MD5PROG)" \
+diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
+--- gdb-5.0.org/gdb/Makefile.in	Wed May 24 18:37:32 2000
++++ gdb-5.0/gdb/Makefile.in	Wed May 24 18:40:47 2000
+@@ -126,10 +126,10 @@
  BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
  
  # Where is the READLINE library?  Typically in ../readline.
@@ -76,12 +76,10 @@ diff -urN gdb-4.18-orig/gdb/Makefile.in gdb-4.18/gdb/Makefile.in
 -READLINE = $(READLINE_DIR)/libreadline.a
 -READLINE_SRC = $(srcdir)/$(READLINE_DIR)
 -READLINE_CFLAGS = -I$(READLINE_SRC)/..
-+# Why not use the shared libreadline like everyone else does...
-+# readline 4.0 is better than 2.2 anyway.
 +READLINE_DIR = /usr/include/readline
 +READLINE = -lreadline
 +READLINE_SRC = /usr/include/readline
 +READLINE_CFLAGS = -I/usr/include/readline
  
  WARN_CFLAGS = @WARN_CFLAGS@
- 
+ WERROR_CFLAGS = @WERROR_CFLAGS@

@@ -55,7 +55,7 @@ CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \
 	--mandir=%{_mandir} \
 	--enable-shared
 
-make
+%{__make}
 %{__make} info
 
 %install

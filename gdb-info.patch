@@ -9,44 +9,41 @@ diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
  	"exec_prefix=$(exec_prefix)" \
  	"against=$(against)" \
  	"AR=$(AR)" \
-diff -Nur gdb-5.0.orig/gdb/doc/gdb.texinfo gdb-5.0/gdb/doc/gdb.texinfo
---- gdb-5.0.orig/gdb/doc/gdb.texinfo	Fri May 12 12:30:39 2000
-+++ gdb-5.0/gdb/doc/gdb.texinfo	Sat Aug  4 16:37:53 2001
-@@ -39,9 +39,9 @@
+--- gdb-6.1.1/gdb/doc/gdb.texinfo.orig	2004-06-15 00:25:29.000000000 +0200
++++ gdb-6.1.1/gdb/doc/gdb.texinfo	2004-06-22 23:37:55.963941600 +0200
+@@ -38,9 +38,9 @@
  
  @c This is a dir.info fragment to support semi-automated addition of
  @c manuals to an info tree.
--@dircategory Programming & development tools.
+-@dircategory Software development
 +@dircategory Programming tools:
  @direntry
--* Gdb: (gdb).                     The @sc{gnu} debugger.
-+* Gdb: (gdb).				The @sc{gnu} debugger.
+-* Gdb: (gdb).                     The GNU debugger.
++* Gdb: (gdb).				The GNU debugger
  @end direntry
  
  @ifinfo
-diff -Nur gdb-5.0.orig/gdb/doc/gdbint.texinfo gdb-5.0/gdb/doc/gdbint.texinfo
---- gdb-5.0.orig/gdb/doc/gdbint.texinfo	Wed Apr 12 07:16:56 2000
-+++ gdb-5.0/gdb/doc/gdbint.texinfo	Sat Aug  4 16:39:49 2001
-@@ -3,9 +3,9 @@
+--- gdb-6.1.1/gdb/doc/gdbint.texinfo.orig	2004-06-15 00:25:31.000000000 +0200
++++ gdb-6.1.1/gdb/doc/gdbint.texinfo	2004-06-22 23:38:21.741022888 +0200
+@@ -1,9 +1,9 @@
  \input texinfo   @c -*- texinfo -*-
  @setfilename gdbint.info
  @include gdb-cfg.texi
--@dircategory Programming & development tools.
--@direntry
--* Gdb-Internals: (gdbint).	The GNU debugger's internals.
+-@dircategory Software development
 +@dircategory Programming tools:
-+@direntry
-+* Gdb-Internals: (gdbint).		The GNU debugger's internals.
+ @direntry
+-* Gdb-Internals: (gdbint).	The GNU debugger's internals.
++* Gdb-Internals: (gdbint).		The GNU debugger's internals
  @end direntry
  
  @ifinfo
---- gdb-6.1/gdb/doc/stabs.texinfo.orig	2004-02-24 16:41:29.000000000 +0100
-+++ gdb-6.1/gdb/doc/stabs.texinfo	2004-04-17 22:45:39.781206760 +0200
+--- gdb-6.1.1/gdb/doc/stabs.texinfo.orig	2004-06-15 00:25:31.000000000 +0200
++++ gdb-6.1.1/gdb/doc/stabs.texinfo	2004-06-22 23:38:51.279532352 +0200
 @@ -5,9 +5,9 @@
  
  @c This is a dir.info fragment to support semi-automated addition of
  @c manuals to an info tree.
--@dircategory Programming & development tools.
+-@dircategory Software development
 +@dircategory Programming tools:
  @direntry
 -* Stabs: (stabs).                 The "stabs" debugging information format.   

@@ -14,6 +14,7 @@ Source0:	ftp://ftp.gnu.org/pub/gdb/%{name}-%{version}.tar.gz
 Source1:	%{name}-non-english-man-pages.tar.bz2
 Patch0:		%{name}-gettext.patch
 Patch1:		%{name}-gcc3.1-jelinek.patch
+Patch2:		%{name}-ncurses.patch
 URL:		http://sources.redhat.com/gdb/
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	readline-devel >= 4.2
@@ -55,6 +56,7 @@ verir.
 %setup -q
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 
 %build
 # !! Don't enable shared here !! 

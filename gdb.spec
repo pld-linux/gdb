@@ -11,7 +11,7 @@ Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
 Source:		ftp://sourceware.cygnus.com/pub/gdb/%{name}-%{version}.tar.bz2
 Patch0:		gdb-info.patch
-Prereq:		/sbin/install-info
+Prereq:		/usr/sbin/fix-info-dir
 Buildroot:	/tmp/%{name}-%{version}-root
 
 %description
@@ -75,16 +75,10 @@ rm -f $RPM_BUILD_ROOT%{_infodir}{bfd*,history*,readline*,standard*,texinfo*}
 gzip -fn9 $RPM_BUILD_ROOT{%{_infodir}/*info*,%{_mandir}/man?/*}
 
 %post
-/sbin/install-info %{_infodir}/gdb.info.gz	/etc/info-dir
-/sbin/install-info %{_infodir}/stabs.info.gz	/etc/info-dir
-/sbin/install-info %{_infodir}/gdbint.info.gz	/etc/info-dir
+/usr/sbin/fix-info-dir -c %{_infodir} >/dev/null 2>&1
 
 %preun
-if [ "$1" = 0 ]; then
-	/sbin/install-info --delete %{_infodir}/gdb.info.gz	/etc/info-dir
-	/sbin/install-info --delete %{_infodir}/stabs.info.gz	/etc/info-dir
-	/sbin/install-info --delete %{_infodir}/gdbint.info.gz	/etc/info-dir
-fi
+/usr/sbin/fix-info-dir -c %{_infodir} >/dev/null 2>&1
 
 %clean
 rm -rf $RPM_BUILD_ROOT

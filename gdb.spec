@@ -56,13 +56,13 @@ CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \
 	--enable-shared
 
 make
-make info
+%{__make} info
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_infodir}
 
-make install \
+%{__make} install \
 	prefix=$RPM_BUILD_ROOT%{_prefix} \
 	infodir=$RPM_BUILD_ROOT%{_infodir} \
 	mandir=$RPM_BUILD_ROOT%{_mandir}

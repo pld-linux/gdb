@@ -5,7 +5,7 @@ Summary(pl):	Symboliczny debugger dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	4.18
-Release:	3
+Release:	4
 Copyright:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
@@ -42,14 +42,16 @@ ve herhangi bir anda programýn durumunu inceleme olanaðý verir.
 
 %prep
 %setup -q
-#%patch0 -p1
+%patch -p1
 
 %build
 CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \
 ./configure \
 	--prefix=%{_prefix} \
-	--target=%{_target_platform} \
-	--host=%{_host_alias}
+	--infodir=%{_infodir} \
+	--mandir=%{_mandir} \
+	%{_target_platform} 
+
 make
 make info
 
@@ -57,26 +59,31 @@ make info
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_prefix}
 
-make install install-info \
+make \
 	prefix=$RPM_BUILD_ROOT%{_prefix} \
 	infodir=$RPM_BUILD_ROOT%{_infodir} \
-	mandir=$RPM_BUILD_ROOT%{_mandir}
+	mandir=$RPM_BUILD_ROOT%{_mandir} \
+	install
+
+# install by hand
+install gdb/doc/*.info* $RPM_BUILD_ROOT%{_infodir}
 
 strip $RPM_BUILD_ROOT%{_bindir}/*
 
 rm -f $RPM_BUILD_ROOT%{_infodir}{bfd*,history*,readline*,standard*,texinfo*}
+
 gzip -fn9 $RPM_BUILD_ROOT{%{_infodir}/*info*,%{_mandir}/man?/*}
 
 %post
-/sbin/install-info %{_infodir}/gdb.info.gz /etc/info-dir
-/sbin/install-info %{_infodir}/stabs.info.gz /etc/info-dir
-/sbin/install-info %{_infodir}/gdbint.info.gz /etc/info-dir
+/sbin/install-info %{_infodir}/gdb.info.gz	/etc/info-dir
+/sbin/install-info %{_infodir}/stabs.info.gz	/etc/info-dir
+/sbin/install-info %{_infodir}/gdbint.info.gz	/etc/info-dir
 
 %preun
 if [ "$1" = 0 ]; then
-	/sbin/install-info --delete %{_infodir}/gdb.info.gz    /etc/info-dir
-	/sbin/install-info --delete %{_infodir}/stabs.info.gz  /etc/info-dir
-	/sbin/install-info --delete %{_infodir}/gdbint.info.gz /etc/info-dir
+	/sbin/install-info --delete %{_infodir}/gdb.info.gz	/etc/info-dir
+	/sbin/install-info --delete %{_infodir}/stabs.info.gz	/etc/info-dir
+	/sbin/install-info --delete %{_infodir}/gdbint.info.gz	/etc/info-dir
 fi
 
 %clean
@@ -85,8 +92,10 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/*
+
 %{_mandir}/man1/*
-%{_infodir}/*info*
+%{_infodir}/gd*.info*
+%{_infodir}/stabs*.info*
 
 %changelog
 * Sun May 16 1999 Artur Frysiak <wiget@pld.org.pl>
@@ -114,21 +123,5 @@ rm -rf $RPM_BUILD_ROOT
   libredline and libncurses.
 
 * Sun Sep 27 1998 Marcin Korzonek <mkorz@shadow.eu.org>
-- added pl translation.
-
-* Thu May 07 1998 Prospector System <bugs@redhat.com>
-- translations modified for de, fr, tr
-
-* Thu Apr 30 1998 Cristian Gafton <gafton@redhat.com>
-- upgraded to 4.17
-
-* Wed Oct 08 1997 Erik Troan <ewt@redhat.com>
-- updated to use a buildroot
-- uses install-info
-
-* Tue Aug 19 1997 Erik Troan <ewt@redhat.com>
-- turned off mmalloc() support, which seems to annoy glibc (resulting in
-  a quick core dump inside of getcwd())
-
-* Thu Jul 17 1997 Erik Troan <ewt@redhat.com>
-- built against glibc
+- added pl translation,
+- major changes for PLD Linux

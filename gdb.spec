@@ -22,7 +22,7 @@ Patch0:		%{name}-ncurses.patch
 Patch1:		%{name}-readline.patch
 Patch2:		%{name}-info.patch
 Patch3:		%{name}-passflags.patch
-Patch4:		%{name}-sparc-workaround.patch
+Patch4:		%{name}-headers.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake

@@ -77,7 +77,6 @@ verir.
 
 %build
 (cd gdb; autoconf)
-#libtoolize --copy --force; aclocal; autoconf)
 (cd gdb/doc; autoconf)
 (cd gdb/testsuite; autoconf)
 (cd gdb/testsuite/gdb.asm; autoconf)

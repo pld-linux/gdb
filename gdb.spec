@@ -5,7 +5,7 @@ Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	5.0
-Release:	2
+Release:	3
 License:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze

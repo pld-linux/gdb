@@ -7,7 +7,7 @@ Summary(pt_BR):	Depurador de programas C e outras linguagens
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	5.1.1
-Release:	1
+Release:	2
 License:	GPL
 Group:		Development/Debuggers
 Group(de):	Entwicklung/Debugger

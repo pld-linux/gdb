@@ -66,7 +66,9 @@ CFLAGS="%{rpmcflags} -I%{_includedir}/ncurses"; export CFLAGS
 	--enable-gdbmi \
 	--enable-tui \
 	--enable-netrom \
+%ifnarch alpha
 	--with-mmalloc \
+%endif
 	--with-cpu=%{_target_cpu} \
 	--enable-sim \
 	--disable-gdbtk \

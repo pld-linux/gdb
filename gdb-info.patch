@@ -40,20 +40,17 @@ diff -Nur gdb-5.0.orig/gdb/doc/gdbint.texinfo gdb-5.0/gdb/doc/gdbint.texinfo
  @end direntry
  
  @ifinfo
-diff -Nur gdb-5.0.orig/gdb/doc/stabs.texinfo gdb-5.0/gdb/doc/stabs.texinfo
---- gdb-5.0.orig/gdb/doc/stabs.texinfo	Mon Jun 28 18:02:18 1999
-+++ gdb-5.0/gdb/doc/stabs.texinfo	Sat Aug  4 16:40:42 2001
-@@ -5,9 +5,10 @@
+--- gdb-6.1/gdb/doc/stabs.texinfo.orig	2004-02-24 16:41:29.000000000 +0100
++++ gdb-6.1/gdb/doc/stabs.texinfo	2004-04-17 22:45:39.781206760 +0200
+@@ -5,9 +5,9 @@
+ 
+ @c This is a dir.info fragment to support semi-automated addition of
+ @c manuals to an info tree.
+-@dircategory Programming & development tools.
++@dircategory Programming tools:
+ @direntry
+-* Stabs: (stabs).                 The "stabs" debugging information format.   
++* Stabs: (stabs).			The "stabs" debugging information format
+ @end direntry
  
  @ifinfo
- @format
--START-INFO-DIR-ENTRY
--* Stabs: (stabs).                 The "stabs" debugging information format.
--END-INFO-DIR-ENTRY
-+@dircategory Programming tools:
-+@direntry
-+* Stabs: (stabs).			The "stabs" debugging information format.
-+@end direntry
- @end format
- @end ifinfo
- 

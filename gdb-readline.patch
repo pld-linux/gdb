@@ -1,14 +1,3 @@
-diff -urN gdb-6.0.org/gdb/event-top.c gdb-6.0/gdb/event-top.c
---- gdb-6.0.org/gdb/event-top.c	2003-10-09 19:42:39.000000000 +0200
-+++ gdb-6.0/gdb/event-top.c	2003-10-09 19:48:08.000000000 +0200
-@@ -33,6 +33,7 @@
- #include "gdbcmd.h"
- 
- /* readline include files */
-+#define savestring
- #include <readline/readline.h>
- #include <readline/history.h>
- 
 diff -urN gdb-6.0.org/gdb/gdbserver/Makefile.in gdb-6.0/gdb/gdbserver/Makefile.in
 --- gdb-6.0.org/gdb/gdbserver/Makefile.in	2003-10-09 19:42:41.000000000 +0200
 +++ gdb-6.0/gdb/gdbserver/Makefile.in	2003-10-09 19:48:08.000000000 +0200
@@ -39,43 +28,9 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  
  WARN_CFLAGS = @WARN_CFLAGS@
  WERROR_CFLAGS = @WERROR_CFLAGS@
-diff -urN gdb-6.0.org/gdb/top.c gdb-6.0/gdb/top.c
---- gdb-6.0.org/gdb/top.c	2003-10-09 19:42:40.000000000 +0200
-+++ gdb-6.0/gdb/top.c	2003-10-09 19:48:08.000000000 +0200
-@@ -47,6 +47,7 @@
- #include "gdb_assert.h"
- 
- /* readline include files */
-+#define savestring
- #include <readline/readline.h>
- #include <readline/history.h>
- 
-diff -urN gdb-6.0.org/gdb/tracepoint.c gdb-6.0/gdb/tracepoint.c
---- gdb-6.0.org/gdb/tracepoint.c	2003-10-09 19:42:40.000000000 +0200
-+++ gdb-6.0/gdb/tracepoint.c	2003-10-09 19:48:08.000000000 +0200
-@@ -44,6 +44,7 @@
- #include "ax-gdb.h"
- 
- /* readline include files */
-+#define savestring
- #include <readline/readline.h>
- #include <readline/history.h>
- 
-diff -urN gdb-6.0.org/gdb/utils.c gdb-6.0/gdb/utils.c
---- gdb-6.0.org/gdb/utils.c	2003-10-09 19:42:40.000000000 +0200
-+++ gdb-6.0/gdb/utils.c	2003-10-09 19:48:08.000000000 +0200
-@@ -59,6 +59,7 @@
- #include <term.h>
- #endif
- 
-+#define savestring
- #include <readline/readline.h>
- 
- #ifdef USE_MMALLOC
-diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
---- gdb-6.0.org/Makefile.in	2003-10-09 19:42:43.000000000 +0200
-+++ gdb-6.0/Makefile.in	2003-10-09 19:52:00.000000000 +0200
-@@ -581,7 +581,6 @@
+--- gdb-6.1/Makefile.in.orig	2004-04-03 18:52:09.000000000 +0200
++++ gdb-6.1/Makefile.in	2004-04-17 22:43:50.603804248 +0200
+@@ -571,7 +571,6 @@
      maybe-configure-perl \
      maybe-configure-prms \
      maybe-configure-rcs \
@@ -83,7 +38,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-configure-release \
      maybe-configure-recode \
      maybe-configure-sed \
-@@ -670,7 +669,6 @@
+@@ -661,7 +660,6 @@
      maybe-all-perl \
      maybe-all-prms \
      maybe-all-rcs \
@@ -91,7 +46,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-all-release \
      maybe-all-recode \
      maybe-all-sed \
-@@ -763,7 +761,6 @@
+@@ -755,7 +753,6 @@
      maybe-info-perl \
      maybe-info-prms \
      maybe-info-rcs \
@@ -99,7 +54,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-info-release \
      maybe-info-recode \
      maybe-info-sed \
-@@ -1731,28 +1728,6 @@
+@@ -1724,28 +1721,6 @@
  	  || exit 1
  
  
@@ -109,8 +64,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -info-readline: \
 -    configure-readline 
 -	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	for flag in $(EXTRA_HOST_FLAGS); do \
 -	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
@@ -128,7 +83,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: maybe-info-release info-release
  maybe-info-release:
  
-@@ -2639,7 +2614,6 @@
+@@ -2654,7 +2629,6 @@
      maybe-dvi-perl \
      maybe-dvi-prms \
      maybe-dvi-rcs \
@@ -136,7 +91,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-dvi-release \
      maybe-dvi-recode \
      maybe-dvi-sed \
-@@ -3607,28 +3581,6 @@
+@@ -3623,28 +3597,6 @@
  	  || exit 1
  
  
@@ -146,8 +101,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -dvi-readline: \
 -    configure-readline 
 -	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	for flag in $(EXTRA_HOST_FLAGS); do \
 -	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
@@ -165,7 +120,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: maybe-dvi-release dvi-release
  maybe-dvi-release:
  
-@@ -4515,7 +4467,6 @@
+@@ -4553,7 +4505,6 @@
      maybe-TAGS-perl \
      maybe-TAGS-prms \
      maybe-TAGS-rcs \
@@ -173,7 +128,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-TAGS-release \
      maybe-TAGS-recode \
      maybe-TAGS-sed \
-@@ -5483,28 +5434,6 @@
+@@ -5522,28 +5473,6 @@
  	  || exit 1
  
  
@@ -183,8 +138,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -TAGS-readline: \
 -    configure-readline 
 -	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	for flag in $(EXTRA_HOST_FLAGS); do \
 -	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
@@ -202,7 +157,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: maybe-TAGS-release TAGS-release
  maybe-TAGS-release:
  
-@@ -6391,7 +6320,6 @@
+@@ -6452,7 +6381,6 @@
      maybe-install-info-perl \
      maybe-install-info-prms \
      maybe-install-info-rcs \
@@ -210,7 +165,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-install-info-release \
      maybe-install-info-recode \
      maybe-install-info-sed \
-@@ -7401,29 +7329,6 @@
+@@ -7463,29 +7391,6 @@
  	  || exit 1
  
  
@@ -221,8 +176,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -    configure-readline \
 -    info-readline 
 -	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	for flag in $(EXTRA_HOST_FLAGS); do \
 -	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
@@ -240,7 +195,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: maybe-install-info-release install-info-release
  maybe-install-info-release:
  
-@@ -8348,7 +8253,6 @@
+@@ -8433,7 +8338,6 @@
      maybe-installcheck-perl \
      maybe-installcheck-prms \
      maybe-installcheck-rcs \
@@ -248,7 +203,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-installcheck-release \
      maybe-installcheck-recode \
      maybe-installcheck-sed \
-@@ -9316,28 +9220,6 @@
+@@ -9402,28 +9306,6 @@
  	  || exit 1
  
  
@@ -258,8 +213,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -installcheck-readline: \
 -    configure-readline 
 -	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	for flag in $(EXTRA_HOST_FLAGS); do \
 -	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
@@ -277,7 +232,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: maybe-installcheck-release installcheck-release
  maybe-installcheck-release:
  
-@@ -10224,7 +10106,6 @@
+@@ -10332,7 +10214,6 @@
      maybe-mostlyclean-perl \
      maybe-mostlyclean-prms \
      maybe-mostlyclean-rcs \
@@ -285,7 +240,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-mostlyclean-release \
      maybe-mostlyclean-recode \
      maybe-mostlyclean-sed \
-@@ -11136,27 +11017,6 @@
+@@ -11245,27 +11126,6 @@
  	  || exit 1
  
  
@@ -294,8 +249,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -
 -mostlyclean-readline: 
 -	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	for flag in $(EXTRA_HOST_FLAGS); do \
 -	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
@@ -313,7 +268,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: maybe-mostlyclean-release mostlyclean-release
  maybe-mostlyclean-release:
  
-@@ -11977,7 +11837,6 @@
+@@ -12107,7 +11967,6 @@
      maybe-clean-perl \
      maybe-clean-prms \
      maybe-clean-rcs \
@@ -321,7 +276,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-clean-release \
      maybe-clean-recode \
      maybe-clean-sed \
-@@ -12903,27 +12762,6 @@
+@@ -13034,27 +12893,6 @@
  	  || exit 1
  
  
@@ -330,8 +285,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -
 -clean-readline: 
 -	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	for flag in $(EXTRA_HOST_FLAGS); do \
 -	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
@@ -349,7 +304,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: maybe-clean-release clean-release
  maybe-clean-release:
  
-@@ -13744,7 +13582,6 @@
+@@ -13896,7 +13734,6 @@
      maybe-distclean-perl \
      maybe-distclean-prms \
      maybe-distclean-rcs \
@@ -357,7 +312,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-distclean-release \
      maybe-distclean-recode \
      maybe-distclean-sed \
-@@ -14670,27 +14507,6 @@
+@@ -14823,27 +14660,6 @@
  	  || exit 1
  
  
@@ -366,8 +321,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -
 -distclean-readline: 
 -	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	for flag in $(EXTRA_HOST_FLAGS); do \
 -	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
@@ -385,7 +340,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: maybe-distclean-release distclean-release
  maybe-distclean-release:
  
-@@ -15511,7 +15327,6 @@
+@@ -15685,7 +15501,6 @@
      maybe-maintainer-clean-perl \
      maybe-maintainer-clean-prms \
      maybe-maintainer-clean-rcs \
@@ -393,7 +348,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-maintainer-clean-release \
      maybe-maintainer-clean-recode \
      maybe-maintainer-clean-sed \
-@@ -16437,27 +16252,6 @@
+@@ -16612,27 +16427,6 @@
  	  || exit 1
  
  
@@ -402,8 +357,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -
 -maintainer-clean-readline: 
 -	@[ -f ./readline/Makefile ] || exit 0; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	for flag in $(EXTRA_HOST_FLAGS); do \
 -	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
@@ -421,7 +376,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: maybe-maintainer-clean-release maintainer-clean-release
  maybe-maintainer-clean-release:
  
-@@ -17336,7 +17130,6 @@
+@@ -17531,7 +17325,6 @@
      maybe-check-perl \
      maybe-check-prms \
      maybe-check-rcs \
@@ -429,7 +384,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-check-release \
      maybe-check-recode \
      maybe-check-sed \
-@@ -17445,7 +17238,6 @@
+@@ -17641,7 +17434,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -437,7 +392,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -17512,7 +17304,6 @@
+@@ -17708,7 +17500,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -445,7 +400,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -20393,72 +20184,6 @@
+@@ -20631,73 +20422,6 @@
  	(cd rcs && $(MAKE) $(FLAGS_TO_PASS) install)
  
  
@@ -454,10 +409,11 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -configure-readline:
 -	@test ! -f readline/Makefile || exit 0; \
 -	[ -d readline ] || mkdir readline; \
--	r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	CC="$(CC)"; export CC; \
 -	CFLAGS="$(CFLAGS)"; export CFLAGS; \
+-	CONFIG_SHELL="$(SHELL)"; export CONFIG_SHELL; \
 -	CXX="$(CXX)"; export CXX; \
 -	CXXFLAGS="$(CXXFLAGS)"; export CXXFLAGS; \
 -	AR="$(AR)"; export AR; \
@@ -490,8 +446,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -.PHONY: all-readline maybe-all-readline
 -maybe-all-readline:
 -all-readline: configure-readline
--	@r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	@r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	(cd readline && $(MAKE) $(FLAGS_TO_PASS) all)
 -
@@ -499,8 +455,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -maybe-check-readline:
 -
 -check-readline:
--	@r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	@r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	(cd readline && $(MAKE) $(FLAGS_TO_PASS) check)
 -
@@ -509,8 +465,8 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
 -maybe-install-readline:
 -
 -install-readline: installdirs
--	@r=`${PWD}`; export r; \
--	s=`cd $(srcdir); ${PWD}`; export s; \
+-	@r=`${PWD_COMMAND}`; export r; \
+-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
 -	$(SET_LIB_PATH) \
 -	(cd readline && $(MAKE) $(FLAGS_TO_PASS) install)
 -
@@ -518,7 +474,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  .PHONY: configure-release maybe-configure-release
  maybe-configure-release:
  configure-release:
-@@ -23750,7 +23475,7 @@
+@@ -23771,7 +23495,7 @@
  # GDB needs to know that the simulator is being built.
  configure-gdb: maybe-configure-itcl maybe-configure-tcl maybe-configure-tk maybe-configure-sim
  GDB_TK = @GDB_TK@
@@ -527,7 +483,7 @@ diff -urN gdb-6.0.org/Makefile.in gdb-6.0/Makefile.in
  install-gdb: maybe-install-tcl maybe-install-tk maybe-install-itcl maybe-install-tix maybe-install-libgui
  configure-libgui: maybe-configure-tcl maybe-configure-tk
  all-libgui: maybe-all-tcl maybe-all-tk maybe-all-itcl
-@@ -23781,7 +23506,7 @@
+@@ -23802,7 +23526,7 @@
  install-itcl: maybe-install-tcl
  all-sid: maybe-all-libiberty maybe-all-bfd maybe-all-opcodes maybe-all-tcl maybe-all-tk
  install-sid: maybe-install-tcl maybe-install-tk

@@ -1,7 +1,6 @@
-diff -urN gdb-6.0.org/gdb/config.in gdb-6.0/gdb/config.in
---- gdb-6.0.org/gdb/config.in	2003-10-09 19:42:39.000000000 +0200
-+++ gdb-6.0/gdb/config.in	2003-10-09 19:44:01.000000000 +0200
-@@ -290,6 +290,9 @@
+--- gdb-6.1/gdb/config.in.orig	2004-01-20 10:29:13.000000000 +0100
++++ gdb-6.1/gdb/config.in	2004-04-17 21:21:46.919318064 +0200
+@@ -293,6 +293,9 @@
  /* Define if you have the <ncurses.h> header file.  */
  #undef HAVE_NCURSES_H
  
@@ -11,10 +10,9 @@ diff -urN gdb-6.0.org/gdb/config.in gdb-6.0/gdb/config.in
  /* Define if you have the <ndir.h> header file.  */
  #undef HAVE_NDIR_H
  
-diff -urN gdb-6.0.org/gdb/configure.in gdb-6.0/gdb/configure.in
---- gdb-6.0.org/gdb/configure.in	2003-10-09 19:42:39.000000000 +0200
-+++ gdb-6.0/gdb/configure.in	2003-10-09 19:44:27.000000000 +0200
-@@ -351,7 +351,7 @@
+--- gdb-6.1/gdb/configure.in.orig	2004-02-26 01:41:46.000000000 +0100
++++ gdb-6.1/gdb/configure.in	2004-04-17 21:21:46.922317608 +0200
+@@ -374,7 +374,7 @@
     Solaris 2.[78] when using GCC. ]])
      fi ;;
  esac
@@ -23,9 +21,8 @@ diff -urN gdb-6.0.org/gdb/configure.in gdb-6.0/gdb/configure.in
  
  # FIXME: kettenis/20030102: In most cases we include these
  # unconditionally, so what's the point in checking these?
-diff -urN gdb-6.0.org/gdb/tui/tuiData.h gdb-6.0/gdb/tui/tuiData.h
---- gdb-6.0.org/gdb/tui/tuiData.h	2003-10-09 19:42:43.000000000 +0200
-+++ gdb-6.0/gdb/tui/tuiData.h	2003-10-09 19:44:01.000000000 +0200
+--- gdb-6.1/gdb/gdb_curses.h.orig	2004-02-10 21:03:44.000000000 +0100
++++ gdb-6.1/gdb/gdb_curses.h	2004-04-17 21:35:43.552130544 +0200
 @@ -24,6 +24,8 @@
  
  #if defined (HAVE_NCURSES_H)
@@ -35,22 +32,16 @@ diff -urN gdb-6.0.org/gdb/tui/tuiData.h gdb-6.0/gdb/tui/tuiData.h
  #elif defined (HAVE_CURSES_H)
  #include <curses.h>
  #endif
-diff -urN gdb-6.0.org/gdb/utils.c gdb-6.0/gdb/utils.c
---- gdb-6.0.org/gdb/utils.c	2003-10-09 19:42:40.000000000 +0200
-+++ gdb-6.0/gdb/utils.c	2003-10-09 19:44:01.000000000 +0200
-@@ -52,9 +52,14 @@
+--- gdb-6.1/gdb/utils.c.orig	2004-02-28 19:04:37.000000000 +0100
++++ gdb-6.1/gdb/utils.c	2004-04-17 21:36:26.623582688 +0200
+@@ -56,9 +56,7 @@
  
  #include <sys/param.h>		/* For MAXPATHLEN */
  
 -#ifdef HAVE_CURSES_H
-+#if defined (HAVE_NCURSES_H)
-+#include <ncurses.h>
-+#elif defined (HAVE_NCURSES_NCURSES_H)
-+#include <ncurses/ncurses.h>
-+#elif defined (HAVE_CURSES_H)
- #include <curses.h>
- #endif
-+
+-#include <curses.h>
+-#endif
++#include "gdb_curses.h"
  #ifdef HAVE_TERM_H
  #include <term.h>
  #endif

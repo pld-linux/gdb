@@ -15,3 +15,14 @@
  #include "gdb_wait.h"
  
  #include "gdbthread.h"
+--- gdb-6.1/gdb/sparc-nat.c.orig	2004-04-24 23:48:09.000000000 +0000
++++ gdb-6.1/gdb/sparc-nat.c	2004-04-25 00:18:12.000000000 +0000
+@@ -23,7 +23,7 @@
+  * between <asm/reg.h> and <sys/ucontext.h> (included in <signal.h>)
+  * gdb needs <asm/reg.h>, so this is workaround to avoid including
+  * <sys/ucontext.h> contents */
+-#define _SYS_UCONTEXT_H 1
++/*#define _SYS_UCONTEXT_H 1*/
+ 
+ #include "defs.h"
+ #include "inferior.h"

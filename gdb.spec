@@ -5,11 +5,11 @@ Summary(pl):	Symboliczny debugger dla C i innych jêzyków
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	4.18
-Release:	1
+Release:	2
 Copyright:	GPL
 Group:		Development/Debuggers
 Group(pl):	Programowanie/Odpluskwiacze
-Source:		ftp://sourceware.cygnus.com/pub/gdb/%{name}-4.18.tar.bz2
+Source:		ftp://sourceware.cygnus.com/pub/gdb/%{name}-%{version}.tar.bz2
 Patch0:		gdb-info.patch
 Prereq:		/sbin/install-info
 Buildroot:	/tmp/%{name}-%{version}-root
@@ -50,29 +50,31 @@ CFLAGS="$RPM_OPT_FLAGS" LDFLAGS="-s" \
 	--prefix=/usr 
 make
 make info
-# MAKEINFO="makeinfo --force"
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT/usr
 
-make install install-info prefix=$RPM_BUILD_ROOT/usr 
+make install install-info \
+	prefix=$RPM_BUILD_ROOT/usr \
+	infodir=$RPM_BUILD_ROOT/usr/share/info \
+	mandir=$RPM_BUILD_ROOT/usr/share/man
 
 strip $RPM_BUILD_ROOT/usr/bin/*
 
-rm -f $RPM_BUILD_ROOT/usr/info/{bfd*,history*,readline*,standard*,texinfo*}
-gzip -fn9 $RPM_BUILD_ROOT/usr/info/*info*
+rm -f $RPM_BUILD_ROOT/usr/share/info/{bfd*,history*,readline*,standard*,texinfo*}
+gzip -fn9 $RPM_BUILD_ROOT/usr/share/{info/*info*,man/man?/*}
 
 %post
-/sbin/install-info /usr/info/gdb.info.gz /etc/info-dir
-/sbin/install-info /usr/info/stabs.info.gz /etc/info-dir
-/sbin/install-info /usr/info/gdbint.info.gz /etc/info-dir
+/sbin/install-info /usr/share/info/gdb.info.gz /etc/info-dir
+/sbin/install-info /usr/share/info/stabs.info.gz /etc/info-dir
+/sbin/install-info /usr/share/info/gdbint.info.gz /etc/info-dir
 
 %preun
 if [ "$1" = 0 ]; then
-	/sbin/install-info --delete /usr/info/gdb.info.gz /usr/info-dir
-	/sbin/install-info --delete /usr/info/stabs.info.gz /etc/info-dir
-	/sbin/install-info --delete /usr/info/gdbint.info.gz /etc/info-dir
+	/sbin/install-info --delete /usr/share/info/gdb.info.gz /usr/share/info-dir
+	/sbin/install-info --delete /usr/share/info/stabs.info.gz /etc/info-dir
+	/sbin/install-info --delete /usr/share/info/gdbint.info.gz /etc/info-dir
 fi
 
 %clean
@@ -81,10 +83,14 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %attr(755,root,root) /usr/bin/*
-/usr/man/man1/*
-/usr/info/*info*
+/usr/share/man/man1/*
+/usr/share/info/*info*
 
 %changelog
+* Fri May 14 1999 Tomasz K³oczko <kloczek@rudy.mif.pg.gda.pl>
+  [4.18-2]
+- now package is FHS 2.0 compliat.
+
 * Tue Apr 13 1999 Tomasz K³oczko <kloczek@rudy.mif.pg.gda.pl>
   [4.18-1]
 - standarized {un}registering info pages (added gdb-info.patch).

@@ -6,13 +6,13 @@ Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
 Summary(pt_BR):	Depurador de programas C e outras linguagens
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
-Version:	5.0
-Release:	8
+Version:	5.1
+Release:	1
 License:	GPL
 Group:		Development/Debuggers
 Group(de):	Entwicklung/Debugger
 Group(pl):	Programowanie/Odpluskwiacze
-Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.bz2
+Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.gz
 Source1:	%{name}-non-english-man-pages.tar.bz2
 Patch0:		%{name}-gettext.patch
 Patch1:		%{name}-ncurses.patch
@@ -82,12 +82,14 @@ verir.
 (cd gdb/testsuite/gdb.asm; autoconf)
 (cd gdb/testsuite/gdb.base; autoconf)
 (cd gdb/testsuite/gdb.c++; autoconf)
-(cd gdb/testsuite/gdb.disasm; autoconf)
 (cd gdb/testsuite/gdb.chill; autoconf)
+(cd gdb/testsuite/gdb.disasm; autoconf)
+(cd gdb/testsuite/gdb.fortran; autoconf)
+(cd gdb/testsuite/gdb.java; autoconf)
 (cd gdb/testsuite/gdb.mi; autoconf)
+(cd gdb/testsuite/gdb.stabs; autoconf)
 (cd gdb/testsuite/gdb.threads; autoconf)
 (cd gdb/testsuite/gdb.trace; autoconf)
-(cd gdb/testsuite/gdb.stabs; autoconf)
 (cd gdb/gdbserver; autoconf)
 # !! Don't enable shared here !! 
 # This will cause serious problems --misiek
@@ -97,19 +99,16 @@ verir.
 	--without-included-gettext \
 	--enable-multi-ice \
 	--enable-gdbmi \
+	--enable-gdcli \
 	--enable-netrom \
 	--with-cpu=%{_target_cpu} \
 	--with-x \
+	--enable-tui \
 %ifnarch alpha
 	--with-mmalloc \
 %endif
 	--with-mmap
-#	--enable-tui
 
-# rebuild main Makefile again (due to some bug, Makefile is deleted)
-%configure2_13 \
-	--norecursion
-			
 %{__make}
 %{__make} info
 

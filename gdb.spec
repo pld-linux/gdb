@@ -1,15 +1,17 @@
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de):	Symbolischer Debugger für C und andere Sprachen 
+Summary(es):	Depurador de programas C y otras lenguajes
 Summary(fr):	Débugger symbolique pour C et d'autres langages
 Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
+Summary(pt_BR):	Depurador de programas C e outras linguagens
 Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
 Name:		gdb
 Version:	5.0
 Release:	8
 License:	GPL
 Group:		Development/Debuggers
-Group(pl):	Programowanie/Odpluskwiacze
 Group(de):	Entwicklung/Debugger
+Group(pl):	Programowanie/Odpluskwiacze
 Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.bz2
 Source1:	%{name}-non-english-man-pages.tar.bz2
 Patch0:		%{name}-gettext.patch
@@ -36,6 +38,12 @@ dem Sie die Ausführung von Programmen verfolgen und jederzeit den
 inneren Zustand überprüfen können. Er funktioniert für C und mit GNU C
 kompiliertes C++.
 
+%description -l es
+Este es un debugger orientado a comandos repleto de características.
+Te permite rastrear la ejecución de programas y examinar su estado
+interno a cualquier momento. Funciona para C y C++ compilado con el
+compilador GNU C.
+
 %description -l fr
 Débugger complet, piloté par commandes. Permet de tracer l'exécution
 des programmes et d'examiner à tout moment leur état interne.
@@ -47,6 +55,12 @@ Gdb jest rozbudowanym odpluskwiaczem (debuggerem), pozwalaj±cym
 ¶ledziæ wykonywanie programu i badaæ jego stan wewnêtrzny. Gdb
 umo¿liwia odpluskwianie programów napisanych w C/C++ i skompilowanych
 przy pomocy kompilatora GNU (gcc).
+
+%description -l pt_BR
+Este é um debugger orientado a comandos repleto de características.
+Ele permite à você rastrear a execução de programas e examinar o seu
+estado interno a qualquer momento. Ele funciona para para C e C++
+compilado com o compilador GNU C.
 
 %description -l tr
 Bir komut arayüzü üzerinden programcýya programýný adým adým izleme

@@ -10,12 +10,12 @@ Summary(uk):	óÉÍ×ÏÌØÎÉÊ ×¦ÄÌÁÄÞÉË ÄÌÑ ó ÔÁ ¦ÎÛÉÈ ÍÏ×
 Summary(zh_CN):	[¿ª·¢]CºÍÆäËûÓïÑÔµÄµ÷ÊÔÆ÷
 Summary(zh_TW):	[.-A¶}µo]C©M.$)B¨ä.-A¥L»y.$)B¨¥ªº½Õ¸Õ¾¹
 Name:		gdb
-Version:	6.1.1
+Version:	6.2
 Release:	1
 License:	GPL
 Group:		Development/Debuggers
-Source0:	ftp://ftp.gnu.org/pub/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	dd25473f61a3a2e1b08dee5f67ebae28
+Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
+# Source0-md5:	01871f7667345262e317a1e6e1a32768
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Patch0:		%{name}-ncurses.patch
@@ -25,14 +25,6 @@ Patch3:		%{name}-passflags.patch
 Patch4:		%{name}-headers.patch
 Patch5:		%{name}-ada-flex.patch
 Patch6:		%{name}-ada-support.patch
-Patch7:		%{name}-ada-update0.patch
-Patch8:		%{name}-ada-update1.patch
-Patch9:		%{name}-ada-update2.patch
-Patch10:	%{name}-ada-update2b.patch
-Patch11:	%{name}-ada-update3.patch
-Patch12:	%{name}-ada-update4.patch
-Patch13:	%{name}-ada-update5.patch
-Patch14:	%{name}-ada-backport.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -104,14 +96,6 @@ verir.
 %patch4 -p1
 %patch5 -p1
 %patch6 -p0
-%patch7 -p0
-%patch8 -p0
-%patch9 -p0
-%patch10 -p0
-%patch11 -p0
-%patch12 -p0
-%patch13 -p0
-%patch14 -p1
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

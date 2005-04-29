@@ -11,7 +11,7 @@ Summary(zh_CN):	[开发]C和其他语言的调试器
 Summary(zh_TW):	[.-A秨祇]C㎝.$)Bㄤ.-A粂.$)Bē秸刚竟
 Name:		gdb
 Version:	6.3
-Release:	1
+Release:	2
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -22,6 +22,8 @@ Patch0:		%{name}-ncurses.patch
 Patch1:		%{name}-readline.patch
 Patch2:		%{name}-info.patch
 Patch3:		%{name}-passflags.patch
+# updated from http://www.math.uni.wroc.pl/~hebisch/gpc/gdb-6.1.diff
+Patch4:		%{name}-gpc.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -91,6 +93,7 @@ verir.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

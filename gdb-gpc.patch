@@ -1,0 +1,67 @@
+--- gdb-6.3/gdb/dwarf2read.c.orig	2004-10-16 02:41:00.000000000 +0200
++++ gdb-6.3/gdb/dwarf2read.c	2005-04-29 21:08:24.974314896 +0200
+@@ -913,6 +913,8 @@
+ 
+ static void read_enumeration_type (struct die_info *, struct dwarf2_cu *);
+ 
++static void read_set_type (struct die_info *, struct dwarf2_cu *);
++
+ static void process_enumeration_scope (struct die_info *, struct dwarf2_cu *);
+ 
+ static struct type *dwarf_base_type (int, int, struct dwarf2_cu *);
+@@ -4009,6 +4011,24 @@
+   return new_prefix;
+ }
+ 
++
++static void 
++read_set_type (struct die_info * die, struct dwarf2_cu *cu)
++{
++  struct type *domain_type;
++
++  /* Return if we've already decoded this type. */
++  if (die->type)
++    {
++      return;
++    }
++
++  domain_type = die_type (die, cu);
++
++  die->type = create_set_type (NULL, domain_type);
++
++}
++
+ /* Given a pointer to a die which begins an enumeration, process all
+    the dies that define the members of the enumeration, and create the
+    symbol for the enumeration type.
+@@ -6096,9 +6116,11 @@
+     case DW_LANG_Ada95:
+       cu->language = language_ada;
+       break;
++    case DW_LANG_Pascal83:
++      cu->language = language_pascal;
++      break;
+     case DW_LANG_Cobol74:
+     case DW_LANG_Cobol85:
+-    case DW_LANG_Pascal83:
+     case DW_LANG_Modula2:
+     default:
+       cu->language = language_minimal;
+@@ -6861,6 +6883,7 @@
+ 	case DW_TAG_structure_type:
+ 	case DW_TAG_union_type:
+ 	case DW_TAG_enumeration_type:
++        case DW_TAG_set_type:
+ 	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+ 	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
+ 
+@@ -7182,6 +7205,9 @@
+     case DW_TAG_enumeration_type:
+       read_enumeration_type (die, cu);
+       break;
++    case DW_TAG_set_type:
++      read_set_type (die, cu);
++      break;
+     case DW_TAG_subprogram:
+     case DW_TAG_subroutine_type:
+       read_subroutine_type (die, cu);

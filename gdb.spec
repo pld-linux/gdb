@@ -1,3 +1,5 @@
+# TODO
+# - http://www.gentoo.org/security/en/glsa/glsa-200505-15.xml
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de):	Symbolischer Debugger für C und andere Sprachen
 Summary(es):	Depurador de programas C y otras lenguajes

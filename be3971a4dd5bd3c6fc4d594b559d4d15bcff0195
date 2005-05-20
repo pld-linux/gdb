@@ -1,0 +1,5 @@
+- updated patch
+- new source
+  DON'T USE IT YET !
+  BUILDER RPM WILL NOT CONTAIN FEW LIBRARIES AND OTHER IMPORTANT THINGS
+  (need to update %files section)

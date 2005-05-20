@@ -1,0 +1,5 @@
+- added info directory fixes to info patch
+- rebuild each configure in gdb tree
+- libtoolize in gdb (to remove 'no' extension from filenames :/)
+- ...but %configure2_13 must be used, main configure is not autoconf-generated
+- release 7

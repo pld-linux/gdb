@@ -13,7 +13,7 @@ Summary(zh_CN):	[开发]C和其他语言的调试器
 Summary(zh_TW):	[.-A秨祇]C㎝.$)Bㄤ.-A粂.$)Bē秸刚竟
 Name:		gdb
 Version:	6.3
-Release:	2
+Release:	3
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2

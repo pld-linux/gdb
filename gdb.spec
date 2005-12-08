@@ -1,5 +1,3 @@
-# TODO
-# - http://www.gentoo.org/security/en/glsa/glsa-200505-15.xml
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de):	Symbolischer Debugger für C und andere Sprachen
 Summary(es):	Depurador de programas C y otras lenguajes
@@ -12,20 +10,20 @@ Summary(uk):	óÉÍ×ÏÌØÎÉÊ ×¦ÄÌÁÄÞÉË ÄÌÑ ó ÔÁ ¦ÎÛÉÈ ÍÏ×
 Summary(zh_CN):	[¿ª·¢]CºÍÆäËûÓïÑÔµÄµ÷ÊÔÆ÷
 Summary(zh_TW):	[.-A¶}µo]C©M.$)B¨ä.-A¥L»y.$)B¨¥ªº½Õ¸Õ¾¹
 Name:		gdb
-Version:	6.3
-Release:	3
+Version:	6.4
+Release:	1
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	05b928f41fa5b482e49ca2c24762a0ae
+# Source0-md5:	f62c14ba0316bc88e1b4b32a4e901ffb
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
-Patch0:		%{name}-ncurses.patch
-Patch1:		%{name}-readline.patch
-Patch2:		%{name}-info.patch
-Patch3:		%{name}-passflags.patch
+Patch0:		%{name}-readline.patch
+Patch1:		%{name}-info.patch
+Patch2:		%{name}-passflags.patch
 # updated from http://www.math.uni.wroc.pl/~hebisch/gpc/gdb-6.1.diff
-Patch4:		%{name}-gpc.patch
+Patch3:		%{name}-gpc.patch
+Patch4:		%{name}-gdbinit-stat.patch
 BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -95,7 +93,7 @@ verir.
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
-%patch4 -p1
+%patch4 -p0
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

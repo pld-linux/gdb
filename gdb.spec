@@ -11,7 +11,7 @@ Summary(zh_CN):	[开发]C和其他语言的调试器
 Summary(zh_TW):	[.-A秨祇]C㎝.$)Bㄤ.-A粂.$)Bē秸刚竟
 Name:		gdb
 Version:	6.4
-Release:	1
+Release:	2
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -24,7 +24,6 @@ Patch2:		%{name}-passflags.patch
 # updated from http://www.math.uni.wroc.pl/~hebisch/gpc/gdb-6.1.diff
 Patch3:		%{name}-gpc.patch
 Patch4:		%{name}-gdbinit-stat.patch
-BuildRequires:	XFree86-devel
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
 BuildRequires:	bison
@@ -109,24 +108,21 @@ cp -f /usr/share/automake/config.* .
 # !! Don't enable shared here !!
 # This will cause serious problems --misiek
 %configure2_13 \
+	--disable-gdbtk \
 	--disable-shared \
-	--enable-nls \
-	--without-included-gettext \
-	--without-included-regex \
-	--enable-gdcli \
+	--enable-gdbcli \
 	--enable-gdbmi \
 	--enable-multi-ice \
 	--enable-netrom \
-	--with-cpu=%{_target_cpu} \
+	--enable-nls \
 	--enable-tui \
+	--with-cpu=%{_target_cpu} \
+	--without-included-gettext \
+	--without-included-regex \
+	--without-x \
 %ifnarch alpha
 	--with-mmalloc
 %endif
-
-# something is wrong after above - e.g. $exeext=="no" - fix it:
-cd gdb
-%configure
-cd ..
 
 %{__make}
 %{__make} info

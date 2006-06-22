@@ -37,9 +37,9 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
  
  ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
---- gdb-6.3/Makefile.in.orig	2004-11-08 17:21:22.000000000 +0100
-+++ gdb-6.3/Makefile.in	2004-11-19 23:30:12.276705120 +0100
-@@ -692,7 +692,6 @@
+--- gdb-6.5/Makefile.in.orig	2006-06-21 07:14:44.000000000 +0200
++++ gdb-6.5/Makefile.in	2006-06-22 15:57:50.144440000 +0200
+@@ -598,7 +598,6 @@
      maybe-configure-perl \
      maybe-configure-prms \
      maybe-configure-rcs \
@@ -47,87 +47,103 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-configure-release \
      maybe-configure-recode \
      maybe-configure-sed \
-@@ -793,7 +792,6 @@
-     maybe-all-perl \
-     maybe-all-prms \
-     maybe-all-rcs \
--    maybe-all-readline \
-     maybe-all-release \
-     maybe-all-recode \
-     maybe-all-sed \
-@@ -889,7 +887,6 @@
-     maybe-info-perl \
-     maybe-info-prms \
-     maybe-info-rcs \
--    maybe-info-readline \
-     maybe-info-release \
-     maybe-info-recode \
-     maybe-info-sed \
-@@ -981,7 +978,6 @@
-     maybe-dvi-perl \
-     maybe-dvi-prms \
-     maybe-dvi-rcs \
--    maybe-dvi-readline \
-     maybe-dvi-release \
-     maybe-dvi-recode \
-     maybe-dvi-sed \
-@@ -1073,7 +1069,6 @@
-     maybe-TAGS-perl \
-     maybe-TAGS-prms \
-     maybe-TAGS-rcs \
--    maybe-TAGS-readline \
-     maybe-TAGS-release \
-     maybe-TAGS-recode \
-     maybe-TAGS-sed \
-@@ -1165,7 +1160,6 @@
-     maybe-install-info-perl \
-     maybe-install-info-prms \
-     maybe-install-info-rcs \
--    maybe-install-info-readline \
-     maybe-install-info-release \
-     maybe-install-info-recode \
-     maybe-install-info-sed \
-@@ -1257,7 +1251,6 @@
-     maybe-installcheck-perl \
-     maybe-installcheck-prms \
-     maybe-installcheck-rcs \
--    maybe-installcheck-readline \
-     maybe-installcheck-release \
-     maybe-installcheck-recode \
-     maybe-installcheck-sed \
-@@ -1349,7 +1342,6 @@
-     maybe-mostlyclean-perl \
-     maybe-mostlyclean-prms \
-     maybe-mostlyclean-rcs \
--    maybe-mostlyclean-readline \
-     maybe-mostlyclean-release \
-     maybe-mostlyclean-recode \
-     maybe-mostlyclean-sed \
-@@ -1441,7 +1433,6 @@
-     maybe-clean-perl \
-     maybe-clean-prms \
-     maybe-clean-rcs \
--    maybe-clean-readline \
-     maybe-clean-release \
-     maybe-clean-recode \
-     maybe-clean-sed \
-@@ -1533,7 +1524,6 @@
-     maybe-distclean-perl \
-     maybe-distclean-prms \
-     maybe-distclean-rcs \
--    maybe-distclean-readline \
-     maybe-distclean-release \
-     maybe-distclean-recode \
-     maybe-distclean-sed \
-@@ -1625,7 +1615,6 @@
-     maybe-maintainer-clean-perl \
-     maybe-maintainer-clean-prms \
-     maybe-maintainer-clean-rcs \
--    maybe-maintainer-clean-readline \
-     maybe-maintainer-clean-release \
-     maybe-maintainer-clean-recode \
-     maybe-maintainer-clean-sed \
-@@ -1774,7 +1763,6 @@
+@@ -740,7 +739,6 @@
+ all-host: maybe-all-perl
+ all-host: maybe-all-prms
+ all-host: maybe-all-rcs
+-all-host: maybe-all-readline
+ all-host: maybe-all-release
+ all-host: maybe-all-recode
+ all-host: maybe-all-sed
+@@ -851,7 +849,6 @@
+ info-host: maybe-info-perl
+ info-host: maybe-info-prms
+ info-host: maybe-info-rcs
+-info-host: maybe-info-readline
+ info-host: maybe-info-release
+ info-host: maybe-info-recode
+ info-host: maybe-info-sed
+@@ -955,7 +952,6 @@
+ dvi-host: maybe-dvi-perl
+ dvi-host: maybe-dvi-prms
+ dvi-host: maybe-dvi-rcs
+-dvi-host: maybe-dvi-readline
+ dvi-host: maybe-dvi-release
+ dvi-host: maybe-dvi-recode
+ dvi-host: maybe-dvi-sed
+@@ -1059,7 +1055,6 @@
+ html-host: maybe-html-perl
+ html-host: maybe-html-prms
+ html-host: maybe-html-rcs
+-html-host: maybe-html-readline
+ html-host: maybe-html-release
+ html-host: maybe-html-recode
+ html-host: maybe-html-sed
+@@ -1163,7 +1158,6 @@
+ TAGS-host: maybe-TAGS-perl
+ TAGS-host: maybe-TAGS-prms
+ TAGS-host: maybe-TAGS-rcs
+-TAGS-host: maybe-TAGS-readline
+ TAGS-host: maybe-TAGS-release
+ TAGS-host: maybe-TAGS-recode
+ TAGS-host: maybe-TAGS-sed
+@@ -1267,7 +1261,6 @@
+ install-info-host: maybe-install-info-perl
+ install-info-host: maybe-install-info-prms
+ install-info-host: maybe-install-info-rcs
+-install-info-host: maybe-install-info-readline
+ install-info-host: maybe-install-info-release
+ install-info-host: maybe-install-info-recode
+ install-info-host: maybe-install-info-sed
+@@ -1371,7 +1364,6 @@
+ install-html-host: maybe-install-html-perl
+ install-html-host: maybe-install-html-prms
+ install-html-host: maybe-install-html-rcs
+-install-html-host: maybe-install-html-readline
+ install-html-host: maybe-install-html-release
+ install-html-host: maybe-install-html-recode
+ install-html-host: maybe-install-html-sed
+@@ -1475,7 +1467,6 @@
+ installcheck-host: maybe-installcheck-perl
+ installcheck-host: maybe-installcheck-prms
+ installcheck-host: maybe-installcheck-rcs
+-installcheck-host: maybe-installcheck-readline
+ installcheck-host: maybe-installcheck-release
+ installcheck-host: maybe-installcheck-recode
+ installcheck-host: maybe-installcheck-sed
+@@ -1579,7 +1570,6 @@
+ mostlyclean-host: maybe-mostlyclean-perl
+ mostlyclean-host: maybe-mostlyclean-prms
+ mostlyclean-host: maybe-mostlyclean-rcs
+-mostlyclean-host: maybe-mostlyclean-readline
+ mostlyclean-host: maybe-mostlyclean-release
+ mostlyclean-host: maybe-mostlyclean-recode
+ mostlyclean-host: maybe-mostlyclean-sed
+@@ -1683,7 +1673,6 @@
+ clean-host: maybe-clean-perl
+ clean-host: maybe-clean-prms
+ clean-host: maybe-clean-rcs
+-clean-host: maybe-clean-readline
+ clean-host: maybe-clean-release
+ clean-host: maybe-clean-recode
+ clean-host: maybe-clean-sed
+@@ -1787,7 +1776,6 @@
+ distclean-host: maybe-distclean-perl
+ distclean-host: maybe-distclean-prms
+ distclean-host: maybe-distclean-rcs
+-distclean-host: maybe-distclean-readline
+ distclean-host: maybe-distclean-release
+ distclean-host: maybe-distclean-recode
+ distclean-host: maybe-distclean-sed
+@@ -1891,7 +1879,6 @@
+ maintainer-clean-host: maybe-maintainer-clean-perl
+ maintainer-clean-host: maybe-maintainer-clean-prms
+ maintainer-clean-host: maybe-maintainer-clean-rcs
+-maintainer-clean-host: maybe-maintainer-clean-readline
+ maintainer-clean-host: maybe-maintainer-clean-release
+ maintainer-clean-host: maybe-maintainer-clean-recode
+ maintainer-clean-host: maybe-maintainer-clean-sed
+@@ -2050,7 +2037,6 @@
      maybe-check-perl \
      maybe-check-prms \
      maybe-check-rcs \
@@ -135,7 +151,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-check-release \
      maybe-check-recode \
      maybe-check-sed \
-@@ -1885,7 +1873,6 @@
+@@ -2180,7 +2166,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -143,7 +159,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -1953,7 +1940,6 @@
+@@ -2251,7 +2236,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -151,7 +167,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -32695,7 +32681,6 @@
+@@ -40764,7 +40748,6 @@
  all-gdb: maybe-all-libiberty
  all-gdb: maybe-all-opcodes
  all-gdb: maybe-all-bfd
@@ -159,7 +175,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  all-gdb: maybe-all-build-bison
  all-gdb: maybe-all-build-byacc
  all-gdb: maybe-all-sim
-@@ -32928,7 +32913,6 @@
+@@ -40993,7 +40976,6 @@
  all-sim: maybe-all-libiberty
  all-sim: maybe-all-bfd
  all-sim: maybe-all-opcodes

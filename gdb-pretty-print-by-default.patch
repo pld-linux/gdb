@@ -1,0 +1,26 @@
+--- gdb-6.5/gdb/cp-valprint.c.orig	2005-12-17 23:33:59.000000000 +0100
++++ gdb-6.5/gdb/cp-valprint.c	2006-08-22 19:10:53.242715750 +0200
+@@ -861,8 +861,8 @@
+ 			   &setprintlist, &showprintlist);
+ 
+   /* Give people the defaults which they are used to.  */
+-  objectprint = 0;
+-  vtblprint = 0;
++  objectprint = 1;
++  vtblprint = 1;
+   obstack_begin (&dont_print_vb_obstack, 32 * sizeof (struct type *));
+   obstack_specify_allocation (&dont_print_statmem_obstack,
+ 			      32 * sizeof (CORE_ADDR), sizeof (CORE_ADDR),
+--- gdb-6.5/gdb/valprint.c.orig	2006-08-22 19:11:55.000000000 +0200
++++ gdb-6.5/gdb/valprint.c	2006-08-22 19:12:08.597733500 +0200
+@@ -1511,8 +1511,8 @@
+                            &setprintlist, &showprintlist);
+ 
+   /* Give people the defaults which they are used to.  */
+-  prettyprint_structs = 0;
+-  prettyprint_arrays = 0;
++  prettyprint_structs = 1;
++  prettyprint_arrays = 1;
+   unionprint = 1;
+   addressprint = 1;
+   print_max = PRINT_MAX_DEFAULT;

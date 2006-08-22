@@ -24,6 +24,7 @@ Patch2:		%{name}-passflags.patch
 # updated from http://www.math.uni.wroc.pl/~hebisch/gpc/gdb-6.1.diff
 Patch3:		%{name}-gpc.patch
 Patch4:		%{name}-gdbinit-stat.patch
+Patch5:		%{name}-pretty-print-by-default.patch
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
 BuildRequires:	bison
@@ -93,6 +94,7 @@ verir.
 %patch2 -p1
 %patch3 -p1
 %patch4 -p0
+%patch5 -p1
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

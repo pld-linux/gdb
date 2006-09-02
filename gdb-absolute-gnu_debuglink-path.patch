@@ -1,0 +1,12 @@
+--- gdb-6.5/gdb/symfile.c.orig	2006-02-25 05:36:39.000000000 +0100
++++ gdb-6.5/gdb/symfile.c	2006-09-02 19:11:49.398989750 +0200
+@@ -1186,6 +1186,9 @@
+   if (basename == NULL)
+     return NULL;
+ 
++  if (separate_debug_file_exists (basename, crc32))
++    return basename;
++
+   dir = xstrdup (objfile->name);
+ 
+   /* Strip off the final filename part, leaving the directory name,

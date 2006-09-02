@@ -11,7 +11,7 @@ Summary(zh_CN):	[开发]C和其他语言的调试器
 Summary(zh_TW):	[.-A秨祇]C㎝.$)Bㄤ.-A粂.$)Bē秸刚竟
 Name:		gdb
 Version:	6.5
-Release:	1
+Release:	1.1
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -25,6 +25,7 @@ Patch2:		%{name}-passflags.patch
 Patch3:		%{name}-gpc.patch
 Patch4:		%{name}-gdbinit-stat.patch
 Patch5:		%{name}-pretty-print-by-default.patch
+Patch6:		%{name}-absolute-gnu_debuglink-path.patch
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
 BuildRequires:	bison
@@ -95,6 +96,7 @@ verir.
 %patch3 -p1
 %patch4 -p0
 %patch5 -p1
+%patch6 -p1
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do

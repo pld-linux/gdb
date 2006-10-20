@@ -1,3 +1,6 @@
+#
+# NOTE:	Do not remove -lib package, it is required by FPC
+#
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de):	Symbolischer Debugger für C und andere Sprachen
 Summary(es):	Depurador de programas C y otras lenguajes

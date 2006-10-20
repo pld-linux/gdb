@@ -11,7 +11,7 @@ Summary(zh_CN):	[¿ª·¢]CºÍÆäËûÓïÑÔµÄµ÷ÊÔÆ÷
 Summary(zh_TW):	[.-A¶}µo]C©M.$)B¨ä.-A¥L»y.$)B¨¥ªº½Õ¸Õ¾¹
 Name:		gdb
 Version:	6.5
-Release:	2
+Release:	3
 License:	GPL
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -89,6 +89,14 @@ verir.
 ÍÏÍÅÎÔ ÞÁÓÕ. ðÒÁÃÀ¤ Ú ÐÒÏÇÒÁÍÁÍÉ ÎÁ C ÔÁ C++, ÚËÏÍÐ¦ÌØÏ×ÁÎÉÍÉ
 ËÏÍÐ¦ÌÑÔÏÒÁÍÉ GNU C (gcc, egcs, pgcc).
 
+%package lib
+Summary:	GDB in the for of a static library
+Group:		Development/Debuggers
+#Requires:	binutils-static >= 2.17.50
+
+%description lib
+GDB in the form of a static library.
+
 %prep
 %setup -q
 %patch0 -p1
@@ -148,6 +156,8 @@ install -d $RPM_BUILD_ROOT%{_infodir}
 
 bzip2 -dc %{SOURCE1} | tar xf - -C $RPM_BUILD_ROOT%{_mandir}
 
+install gdb/libgdb.a $RPM_BUILD_ROOT%{_libdir}
+
 %clean
 rm -rf $RPM_BUILD_ROOT
 
@@ -169,3 +179,7 @@ rm -rf $RPM_BUILD_ROOT
 %lang(pl) %{_mandir}/pl/man1/*
 %{_infodir}/gdb*.info*
 %{_infodir}/stabs*.info*
+
+%files lib
+%defattr(644,root,root,755)
+%{_libdir}/libgdb.a

@@ -93,12 +93,16 @@ verir.
 комп╕ляторами GNU C (gcc, egcs, pgcc).
 
 %package lib
-Summary:	GDB in the for of a static library
+Summary:	GDB in the form of a static library
+Summary(pl):	GDB w postaci biblioteki statycznej
 Group:		Development/Debuggers
 #Requires:	binutils-static >= 2.17.50
 
 %description lib
 GDB in the form of a static library.
+
+%description lib -l pl
+GDB w postaci biblioteki statycznej.
 
 %prep
 %setup -q

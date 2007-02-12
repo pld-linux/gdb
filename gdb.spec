@@ -1,10 +1,10 @@
 Summary:	A GNU source-level debugger for C, C++ and Fortran
-Summary(de):	Symbolischer Debugger für C und andere Sprachen
-Summary(es):	Depurador de programas C y otras lenguajes
-Summary(fr):	Débugger symbolique pour C et d'autres langages
-Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
-Summary(pt_BR):	Depurador de programas C e outras linguagens
-Summary(tr):	C ve diğer diller için sembolik hata ayıklayıcı
+Summary(de.UTF-8):   Symbolischer Debugger fÃ¼r C und andere Sprachen
+Summary(es.UTF-8):   Depurador de programas C y otras lenguajes
+Summary(fr.UTF-8):   DÃ©bugger symbolique pour C et d'autres langages
+Summary(pl.UTF-8):   Symboliczny odpluskwiacz dla C i innych jÄ™zykÃ³w
+Summary(pt_BR.UTF-8):   Depurador de programas C e outras linguagens
+Summary(tr.UTF-8):   C ve diÄŸer diller iÃ§in sembolik hata ayÄ±klayÄ±cÄ±
 Name:		gdb
 Version:	5.1.1
 Release:	2
@@ -33,38 +33,38 @@ trace the execution of programs and examine their internal state at
 any time. Gdb works for C and C++ compiled with the GNU C compiler
 gcc.
 
-%description -l de
-dem Sie die Ausführung von Programmen verfolgen und jederzeit den
-inneren Zustand überprüfen können. Er funktioniert für C und mit GNU C
+%description -l de.UTF-8
+dem Sie die AusfÃ¼hrung von Programmen verfolgen und jederzeit den
+inneren Zustand Ã¼berprÃ¼fen kÃ¶nnen. Er funktioniert fÃ¼r C und mit GNU C
 kompiliertes C++.
 
-%description -l es
-Este es un debugger orientado a comandos repleto de características.
-Te permite rastrear la ejecución de programas y examinar su estado
+%description -l es.UTF-8
+Este es un debugger orientado a comandos repleto de caracterÃ­sticas.
+Te permite rastrear la ejecuciÃ³n de programas y examinar su estado
 interno a cualquier momento. Funciona para C y C++ compilado con el
 compilador GNU C.
 
-%description -l fr
-Débugger complet, piloté par commandes. Permet de tracer l'exécution
-des programmes et d'examiner à tout moment leur état interne.
-Fonctionne avec les binaires C et C++ compilés avec le compilateur C
+%description -l fr.UTF-8
+DÃ©bugger complet, pilotÃ© par commandes. Permet de tracer l'exÃ©cution
+des programmes et d'examiner Ã  tout moment leur Ã©tat interne.
+Fonctionne avec les binaires C et C++ compilÃ©s avec le compilateur C
 de GNU, gcc.
 
-%description -l pl
-Gdb jest rozbudowanym odpluskwiaczem (debuggerem), pozwalaj±cym
-¶ledziæ wykonywanie programu i badaæ jego stan wewnêtrzny. Gdb
-umo¿liwia odpluskwianie programów napisanych w C/C++ i skompilowanych
+%description -l pl.UTF-8
+Gdb jest rozbudowanym odpluskwiaczem (debuggerem), pozwalajÄ…cym
+Å›ledziÄ‡ wykonywanie programu i badaÄ‡ jego stan wewnÄ™trzny. Gdb
+umoÅ¼liwia odpluskwianie programÃ³w napisanych w C/C++ i skompilowanych
 przy pomocy kompilatora GNU (gcc).
 
-%description -l pt_BR
-Este é um debugger orientado a comandos repleto de características.
-Ele permite à você rastrear a execução de programas e examinar o seu
+%description -l pt_BR.UTF-8
+Este Ã© um debugger orientado a comandos repleto de caracterÃ­sticas.
+Ele permite Ã  vocÃª rastrear a execuÃ§Ã£o de programas e examinar o seu
 estado interno a qualquer momento. Ele funciona para para C e C++
 compilado com o compilador GNU C.
 
-%description -l tr
-Bir komut arayüzü üzerinden programcıya programını adım adım izleme
-(trace) ve herhangi bir anda programın durumunu inceleme olanağı
+%description -l tr.UTF-8
+Bir komut arayÃ¼zÃ¼ Ã¼zerinden programcÄ±ya programÄ±nÄ± adÄ±m adÄ±m izleme
+(trace) ve herhangi bir anda programÄ±n durumunu inceleme olanaÄŸÄ±
 verir.
 
 %prep

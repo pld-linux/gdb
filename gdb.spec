@@ -2,16 +2,16 @@
 # NOTE:	Do not remove -lib package, it is required by FPC
 #
 Summary:	A GNU source-level debugger for C, C++ and Fortran
-Summary(de):	Symbolischer Debugger für C und andere Sprachen
-Summary(es):	Depurador de programas C y otras lenguajes
-Summary(fr):	Débugger symbolique pour C et d'autres langages
-Summary(pl):	Symboliczny odpluskwiacz dla C i innych jêzyków
-Summary(pt_BR):	Depurador de programas C e outras linguagens
-Summary(ru):	óÉÍ×ÏÌÉÞÅÓËÉÊ ÏÔÌÁÄÞÉË ÄÌÑ C É ÄÒÕÇÉÈ ÑÚÙËÏ×
-Summary(tr):	C ve diðer diller için sembolik hata ayýklayýcý
-Summary(uk):	óÉÍ×ÏÌØÎÉÊ ×¦ÄÌÁÄÞÉË ÄÌÑ ó ÔÁ ¦ÎÛÉÈ ÍÏ×
-Summary(zh_CN):	[¿ª·¢]CºÍÆäËûÓïÑÔµÄµ÷ÊÔÆ÷
-Summary(zh_TW):	[.-A¶}µo]C©M.$)B¨ä.-A¥L»y.$)B¨¥ªº½Õ¸Õ¾¹
+Summary(de.UTF-8):   Symbolischer Debugger fÃ¼r C und andere Sprachen
+Summary(es.UTF-8):   Depurador de programas C y otras lenguajes
+Summary(fr.UTF-8):   DÃ©bugger symbolique pour C et d'autres langages
+Summary(pl.UTF-8):   Symboliczny odpluskwiacz dla C i innych jÄ™zykÃ³w
+Summary(pt_BR.UTF-8):   Depurador de programas C e outras linguagens
+Summary(ru.UTF-8):   Ð¡Ð¸Ð¼Ð²Ð¾Ð»Ð¸Ñ‡ÐµÑÐºÐ¸Ð¹ Ð¾Ñ‚Ð»Ð°Ð´Ñ‡Ð¸Ðº Ð´Ð»Ñ C Ð¸ Ð´Ñ€ÑƒÐ³Ð¸Ñ… ÑÐ·Ñ‹ÐºÐ¾Ð²
+Summary(tr.UTF-8):   C ve diÄŸer diller iÃ§in sembolik hata ayÄ±klayÄ±cÄ±
+Summary(uk.UTF-8):   Ð¡Ð¸Ð¼Ð²Ð¾Ð»ÑŒÐ½Ð¸Ð¹ Ð²Ñ–Ð´Ð»Ð°Ð´Ñ‡Ð¸Ðº Ð´Ð»Ñ Ð¡ Ñ‚Ð° Ñ–Ð½ÑˆÐ¸Ñ… Ð¼Ð¾Ð²
+Summary(zh_CN.UTF-8):   [å¼€å‘]Cå’Œå…¶ä»–è¯­è¨€çš„è°ƒè¯•å™¨
+Summary(zh_TW.UTF-8):   [.-Aé–‹ç™¼]Cå’Œ.$)Bå…¶.-Aä»–èªž.$)Bè¨€çš„èª¿è©¦å™¨
 Name:		gdb
 Version:	6.6
 Release:	1
@@ -45,62 +45,62 @@ trace the execution of programs and examine their internal state at
 any time. Gdb works for C and C++ compiled with the GNU C compiler
 gcc.
 
-%description -l de
-dem Sie die Ausführung von Programmen verfolgen und jederzeit den
-inneren Zustand überprüfen können. Er funktioniert für C und mit GNU C
+%description -l de.UTF-8
+dem Sie die AusfÃ¼hrung von Programmen verfolgen und jederzeit den
+inneren Zustand Ã¼berprÃ¼fen kÃ¶nnen. Er funktioniert fÃ¼r C und mit GNU C
 kompiliertes C++.
 
-%description -l es
-Este es un debugger orientado a comandos repleto de características.
-Te permite rastrear la ejecución de programas y examinar su estado
+%description -l es.UTF-8
+Este es un debugger orientado a comandos repleto de caracterÃ­sticas.
+Te permite rastrear la ejecuciÃ³n de programas y examinar su estado
 interno a cualquier momento. Funciona para C y C++ compilado con el
 compilador GNU C.
 
-%description -l fr
-Débugger complet, piloté par commandes. Permet de tracer l'exécution
-des programmes et d'examiner à tout moment leur état interne.
-Fonctionne avec les binaires C et C++ compilés avec le compilateur C
+%description -l fr.UTF-8
+DÃ©bugger complet, pilotÃ© par commandes. Permet de tracer l'exÃ©cution
+des programmes et d'examiner Ã  tout moment leur Ã©tat interne.
+Fonctionne avec les binaires C et C++ compilÃ©s avec le compilateur C
 de GNU, gcc.
 
-%description -l pl
-Gdb jest rozbudowanym odpluskwiaczem (debuggerem), pozwalaj±cym
-¶ledziæ wykonywanie programu i badaæ jego stan wewnêtrzny. Gdb
-umo¿liwia odpluskwianie programów napisanych w C/C++ i skompilowanych
+%description -l pl.UTF-8
+Gdb jest rozbudowanym odpluskwiaczem (debuggerem), pozwalajÄ…cym
+Å›ledziÄ‡ wykonywanie programu i badaÄ‡ jego stan wewnÄ™trzny. Gdb
+umoÅ¼liwia odpluskwianie programÃ³w napisanych w C/C++ i skompilowanych
 przy pomocy kompilatora GNU (gcc).
 
-%description -l pt_BR
-Este é um debugger orientado a comandos repleto de características.
-Ele permite à você rastrear a execução de programas e examinar o seu
+%description -l pt_BR.UTF-8
+Este Ã© um debugger orientado a comandos repleto de caracterÃ­sticas.
+Ele permite Ã  vocÃª rastrear a execuÃ§Ã£o de programas e examinar o seu
 estado interno a qualquer momento. Ele funciona para para C e C++
 compilado com o compilador GNU C.
 
-%description -l ru
-üÔÏ ÐÏÌÎÏÃÅÎÎÙÊ ÏÔÌÁÄÞÉË, ÕÐÒÁ×ÌÑÅÍÙÊ ËÏÍÁÎÄÁÍÉ. ïÎ ÐÏÚ×ÏÌÑÅÔ
-ÔÒÁÓÓÉÒÏ×ÁÔØ ÉÓÐÏÌÎÅÎÉÅ ÐÒÏÇÒÁÍÍ É ÉÚÕÞÁÔØ ÉÈ ×ÎÕÔÒÅÎÎÅÅ ÓÏÓÔÏÑÎÉÅ ×
-ÌÀÂÏÊ ÍÏÍÅÎÔ ×ÒÅÍÅÎÉ. òÁÂÏÔÁÅÔ Ó ÐÒÏÇÒÁÍÍÁÍÉ ÎÁ C É C++,
-ÓËÏÍÐÉÌÉÒÏ×ÁÎÎÙÍÉ GNU ËÏÍÐÉÌÑÔÏÒÏÍ C (gcc, egcs, pgcc).
+%description -l ru.UTF-8
+Ð­Ñ‚Ð¾ Ð¿Ð¾Ð»Ð½Ð¾Ñ†ÐµÐ½Ð½Ñ‹Ð¹ Ð¾Ñ‚Ð»Ð°Ð´Ñ‡Ð¸Ðº, ÑƒÐ¿Ñ€Ð°Ð²Ð»ÑÐµÐ¼Ñ‹Ð¹ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð°Ð¼Ð¸. ÐžÐ½ Ð¿Ð¾Ð·Ð²Ð¾Ð»ÑÐµÑ‚
+Ñ‚Ñ€Ð°ÑÑÐ¸Ñ€Ð¾Ð²Ð°Ñ‚ÑŒ Ð¸ÑÐ¿Ð¾Ð»Ð½ÐµÐ½Ð¸Ðµ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼ Ð¸ Ð¸Ð·ÑƒÑ‡Ð°Ñ‚ÑŒ Ð¸Ñ… Ð²Ð½ÑƒÑ‚Ñ€ÐµÐ½Ð½ÐµÐµ ÑÐ¾ÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ð²
+Ð»ÑŽÐ±Ð¾Ð¹ Ð¼Ð¾Ð¼ÐµÐ½Ñ‚ Ð²Ñ€ÐµÐ¼ÐµÐ½Ð¸. Ð Ð°Ð±Ð¾Ñ‚Ð°ÐµÑ‚ Ñ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð¼Ð°Ð¼Ð¸ Ð½Ð° C Ð¸ C++,
+ÑÐºÐ¾Ð¼Ð¿Ð¸Ð»Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð½Ñ‹Ð¼Ð¸ GNU ÐºÐ¾Ð¼Ð¿Ð¸Ð»ÑÑ‚Ð¾Ñ€Ð¾Ð¼ C (gcc, egcs, pgcc).
 
-%description -l tr
-Bir komut arayüzü üzerinden programcýya programýný adým adým izleme
-(trace) ve herhangi bir anda programýn durumunu inceleme olanaðý
+%description -l tr.UTF-8
+Bir komut arayÃ¼zÃ¼ Ã¼zerinden programcÄ±ya programÄ±nÄ± adÄ±m adÄ±m izleme
+(trace) ve herhangi bir anda programÄ±n durumunu inceleme olanaÄŸÄ±
 verir.
 
-%description -l uk
-ãÅ ÐÏ×ÎÏÃ¦ÎÎÉÊ ×¦ÄÌÁÄÞÉË, ÝÏ ËÅÒÕ¤ÔØÓÑ ËÏÍÁÎÄÁÍÉ. ÷¦Î ÄÏÚ×ÏÌÑ¤
-ÔÒÁÓÕ×ÁÔÉ ×ÉËÏÎÁÎÎÑ ÐÒÏÇÒÁÍ ÔÁ ×É×ÞÁÔÉ §È ×ÎÕÔÒ¦ÛÎ¦Ê ÓÔÁÎ × ÄÏ×¦ÌØÎÉÊ
-ÍÏÍÅÎÔ ÞÁÓÕ. ðÒÁÃÀ¤ Ú ÐÒÏÇÒÁÍÁÍÉ ÎÁ C ÔÁ C++, ÚËÏÍÐ¦ÌØÏ×ÁÎÉÍÉ
-ËÏÍÐ¦ÌÑÔÏÒÁÍÉ GNU C (gcc, egcs, pgcc).
+%description -l uk.UTF-8
+Ð¦Ðµ Ð¿Ð¾Ð²Ð½Ð¾Ñ†Ñ–Ð½Ð½Ð¸Ð¹ Ð²Ñ–Ð´Ð»Ð°Ð´Ñ‡Ð¸Ðº, Ñ‰Ð¾ ÐºÐµÑ€ÑƒÑ”Ñ‚ÑŒÑÑ ÐºÐ¾Ð¼Ð°Ð½Ð´Ð°Ð¼Ð¸. Ð’Ñ–Ð½ Ð´Ð¾Ð·Ð²Ð¾Ð»ÑÑ”
+Ñ‚Ñ€Ð°ÑÑƒÐ²Ð°Ñ‚Ð¸ Ð²Ð¸ÐºÐ¾Ð½Ð°Ð½Ð½Ñ Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼ Ñ‚Ð° Ð²Ð¸Ð²Ñ‡Ð°Ñ‚Ð¸ Ñ—Ñ… Ð²Ð½ÑƒÑ‚Ñ€Ñ–ÑˆÐ½Ñ–Ð¹ ÑÑ‚Ð°Ð½ Ð² Ð´Ð¾Ð²Ñ–Ð»ÑŒÐ½Ð¸Ð¹
+Ð¼Ð¾Ð¼ÐµÐ½Ñ‚ Ñ‡Ð°ÑÑƒ. ÐŸÑ€Ð°Ñ†ÑŽÑ” Ð· Ð¿Ñ€Ð¾Ð³Ñ€Ð°Ð¼Ð°Ð¼Ð¸ Ð½Ð° C Ñ‚Ð° C++, Ð·ÐºÐ¾Ð¼Ð¿Ñ–Ð»ÑŒÐ¾Ð²Ð°Ð½Ð¸Ð¼Ð¸
+ÐºÐ¾Ð¼Ð¿Ñ–Ð»ÑÑ‚Ð¾Ñ€Ð°Ð¼Ð¸ GNU C (gcc, egcs, pgcc).
 
 %package lib
 Summary:	GDB in the form of a static library
-Summary(pl):	GDB w postaci biblioteki statycznej
+Summary(pl.UTF-8):   GDB w postaci biblioteki statycznej
 Group:		Development/Debuggers
 #Requires:	binutils-static >= 2.17.50
 
 %description lib
 GDB in the form of a static library.
 
-%description lib -l pl
+%description lib -l pl.UTF-8
 GDB w postaci biblioteki statycznej.
 
 %prep

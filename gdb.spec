@@ -2,16 +2,16 @@
 # NOTE:	Do not remove -lib package, it is required by FPC
 #
 Summary:	A GNU source-level debugger for C, C++ and Fortran
-Summary(de.UTF-8):   Symbolischer Debugger für C und andere Sprachen
-Summary(es.UTF-8):   Depurador de programas C y otras lenguajes
-Summary(fr.UTF-8):   Débugger symbolique pour C et d'autres langages
-Summary(pl.UTF-8):   Symboliczny odpluskwiacz dla C i innych języków
-Summary(pt_BR.UTF-8):   Depurador de programas C e outras linguagens
-Summary(ru.UTF-8):   Символический отладчик для C и других языков
-Summary(tr.UTF-8):   C ve diğer diller için sembolik hata ayıklayıcı
-Summary(uk.UTF-8):   Символьний відладчик для С та інших мов
-Summary(zh_CN.UTF-8):   [开发]C和其他语言的调试器
-Summary(zh_TW.UTF-8):   [.-A開發]C和.$)B其.-A他語.$)B言的調試器
+Summary(de.UTF-8):	Symbolischer Debugger für C und andere Sprachen
+Summary(es.UTF-8):	Depurador de programas C y otras lenguajes
+Summary(fr.UTF-8):	Débugger symbolique pour C et d'autres langages
+Summary(pl.UTF-8):	Symboliczny odpluskwiacz dla C i innych języków
+Summary(pt_BR.UTF-8):	Depurador de programas C e outras linguagens
+Summary(ru.UTF-8):	Символический отладчик для C и других языков
+Summary(tr.UTF-8):	C ve diğer diller için sembolik hata ayıklayıcı
+Summary(uk.UTF-8):	Символьний відладчик для С та інших мов
+Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
+Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	6.6
 Release:	1
@@ -93,7 +93,7 @@ verir.
 
 %package lib
 Summary:	GDB in the form of a static library
-Summary(pl.UTF-8):   GDB w postaci biblioteki statycznej
+Summary(pl.UTF-8):	GDB w postaci biblioteki statycznej
 Group:		Development/Debuggers
 #Requires:	binutils-static >= 2.17.50
 

@@ -1,7 +1,7 @@
-diff -urN gdb-6.0.org/gdb/gdbserver/Makefile.in gdb-6.0/gdb/gdbserver/Makefile.in
---- gdb-6.0.org/gdb/gdbserver/Makefile.in	2003-10-09 19:42:41.000000000 +0200
-+++ gdb-6.0/gdb/gdbserver/Makefile.in	2003-10-09 19:48:08.000000000 +0200
-@@ -76,7 +76,7 @@
+diff -ur gdb-6.7.org/gdb/gdbserver/Makefile.in gdb-6.7/gdb/gdbserver/Makefile.in
+--- gdb-6.7.org/gdb/gdbserver/Makefile.in	2007-06-13 20:50:38.000000000 +0200
++++ gdb-6.7/gdb/gdbserver/Makefile.in	2007-10-10 21:10:05.379655356 +0200
+@@ -78,7 +78,7 @@
  
  # Where is the source dir for the READLINE library?  Traditionally in .. or .
  # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
@@ -10,36 +10,39 @@ diff -urN gdb-6.0.org/gdb/gdbserver/Makefile.in gdb-6.0/gdb/gdbserver/Makefile.i
  READLINE_DEP = $$(READLINE_DIR)
  
  # All the includes used for CFLAGS and for lint.
-diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
---- gdb-6.0.org/gdb/Makefile.in	2003-10-09 19:42:39.000000000 +0200
-+++ gdb-6.0/gdb/Makefile.in	2003-10-09 19:48:08.000000000 +0200
-@@ -116,10 +116,10 @@
+diff -ur gdb-6.7.org/gdb/Makefile.in gdb-6.7/gdb/Makefile.in
+--- gdb-6.7.org/gdb/Makefile.in	2007-09-05 02:14:02.000000000 +0200
++++ gdb-6.7/gdb/Makefile.in	2007-10-10 21:11:18.119976680 +0200
+@@ -126,11 +126,11 @@
  BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
  
  # Where is the READLINE library?  Typically in ../readline.
 -READLINE_DIR = ../readline
--READLINE = $(READLINE_DIR)/libreadline.a
 -READLINE_SRC = $(srcdir)/$(READLINE_DIR)
--READLINE_CFLAGS = -I$(READLINE_SRC)/..
+-READLINE = @READLINE@
+-READLINE_DEPS = @READLINE_DEPS@
+-READLINE_CFLAGS = @READLINE_CFLAGS@
 +READLINE_DIR = /usr/include/readline
 +READLINE = -lreadline
 +READLINE_SRC = /usr/include/readline
++READLINE_DEPS =
 +READLINE_CFLAGS = -I/usr/include/readline
  
- WARN_CFLAGS = @WARN_CFLAGS@
- WERROR_CFLAGS = @WERROR_CFLAGS@
-@@ -369,7 +369,7 @@
+ # Where is expat?  This will be empty if expat was not available.
+ LIBEXPAT = @LIBEXPAT@
+@@ -388,7 +388,7 @@
  	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
- 	$(LIBICONV) \
+ 	$(LIBICONV) $(LIBEXPAT) \
  	$(LIBIBERTY) $(WIN32LIBS)
--CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE) \
+-CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
 +CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) \
  	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
  
  ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
---- gdb-6.5/Makefile.in.orig	2006-06-21 07:14:44.000000000 +0200
-+++ gdb-6.5/Makefile.in	2006-06-22 15:57:50.144440000 +0200
-@@ -598,7 +598,6 @@
+diff -ur gdb-6.7.org/Makefile.in gdb-6.7/Makefile.in
+--- gdb-6.7.org/Makefile.in	2007-10-10 19:09:32.000000000 +0200
++++ gdb-6.7/Makefile.in	2007-10-10 21:10:23.310556251 +0200
+@@ -664,7 +664,6 @@
      maybe-configure-perl \
      maybe-configure-prms \
      maybe-configure-rcs \
@@ -47,7 +50,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-configure-release \
      maybe-configure-recode \
      maybe-configure-sed \
-@@ -740,7 +739,6 @@
+@@ -812,7 +811,6 @@
  all-host: maybe-all-perl
  all-host: maybe-all-prms
  all-host: maybe-all-rcs
@@ -55,7 +58,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  all-host: maybe-all-release
  all-host: maybe-all-recode
  all-host: maybe-all-sed
-@@ -851,7 +849,6 @@
+@@ -927,7 +925,6 @@
  info-host: maybe-info-perl
  info-host: maybe-info-prms
  info-host: maybe-info-rcs
@@ -63,7 +66,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  info-host: maybe-info-release
  info-host: maybe-info-recode
  info-host: maybe-info-sed
-@@ -955,7 +952,6 @@
+@@ -1033,7 +1030,6 @@
  dvi-host: maybe-dvi-perl
  dvi-host: maybe-dvi-prms
  dvi-host: maybe-dvi-rcs
@@ -71,7 +74,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  dvi-host: maybe-dvi-release
  dvi-host: maybe-dvi-recode
  dvi-host: maybe-dvi-sed
-@@ -1059,7 +1055,6 @@
+@@ -1245,7 +1241,6 @@
  html-host: maybe-html-perl
  html-host: maybe-html-prms
  html-host: maybe-html-rcs
@@ -79,7 +82,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  html-host: maybe-html-release
  html-host: maybe-html-recode
  html-host: maybe-html-sed
-@@ -1163,7 +1158,6 @@
+@@ -1351,7 +1346,6 @@
  TAGS-host: maybe-TAGS-perl
  TAGS-host: maybe-TAGS-prms
  TAGS-host: maybe-TAGS-rcs
@@ -87,7 +90,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  TAGS-host: maybe-TAGS-release
  TAGS-host: maybe-TAGS-recode
  TAGS-host: maybe-TAGS-sed
-@@ -1267,7 +1261,6 @@
+@@ -1457,7 +1451,6 @@
  install-info-host: maybe-install-info-perl
  install-info-host: maybe-install-info-prms
  install-info-host: maybe-install-info-rcs
@@ -95,7 +98,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  install-info-host: maybe-install-info-release
  install-info-host: maybe-install-info-recode
  install-info-host: maybe-install-info-sed
-@@ -1371,7 +1364,6 @@
+@@ -1669,7 +1662,6 @@
  install-html-host: maybe-install-html-perl
  install-html-host: maybe-install-html-prms
  install-html-host: maybe-install-html-rcs
@@ -103,7 +106,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  install-html-host: maybe-install-html-release
  install-html-host: maybe-install-html-recode
  install-html-host: maybe-install-html-sed
-@@ -1475,7 +1467,6 @@
+@@ -1775,7 +1767,6 @@
  installcheck-host: maybe-installcheck-perl
  installcheck-host: maybe-installcheck-prms
  installcheck-host: maybe-installcheck-rcs
@@ -111,7 +114,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  installcheck-host: maybe-installcheck-release
  installcheck-host: maybe-installcheck-recode
  installcheck-host: maybe-installcheck-sed
-@@ -1579,7 +1570,6 @@
+@@ -1881,7 +1872,6 @@
  mostlyclean-host: maybe-mostlyclean-perl
  mostlyclean-host: maybe-mostlyclean-prms
  mostlyclean-host: maybe-mostlyclean-rcs
@@ -119,7 +122,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  mostlyclean-host: maybe-mostlyclean-release
  mostlyclean-host: maybe-mostlyclean-recode
  mostlyclean-host: maybe-mostlyclean-sed
-@@ -1683,7 +1673,6 @@
+@@ -1987,7 +1977,6 @@
  clean-host: maybe-clean-perl
  clean-host: maybe-clean-prms
  clean-host: maybe-clean-rcs
@@ -127,7 +130,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  clean-host: maybe-clean-release
  clean-host: maybe-clean-recode
  clean-host: maybe-clean-sed
-@@ -1787,7 +1776,6 @@
+@@ -2093,7 +2082,6 @@
  distclean-host: maybe-distclean-perl
  distclean-host: maybe-distclean-prms
  distclean-host: maybe-distclean-rcs
@@ -135,7 +138,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  distclean-host: maybe-distclean-release
  distclean-host: maybe-distclean-recode
  distclean-host: maybe-distclean-sed
-@@ -1891,7 +1879,6 @@
+@@ -2199,7 +2187,6 @@
  maintainer-clean-host: maybe-maintainer-clean-perl
  maintainer-clean-host: maybe-maintainer-clean-prms
  maintainer-clean-host: maybe-maintainer-clean-rcs
@@ -143,7 +146,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
  maintainer-clean-host: maybe-maintainer-clean-release
  maintainer-clean-host: maybe-maintainer-clean-recode
  maintainer-clean-host: maybe-maintainer-clean-sed
-@@ -2050,7 +2037,6 @@
+@@ -2359,7 +2346,6 @@
      maybe-check-perl \
      maybe-check-prms \
      maybe-check-rcs \
@@ -151,7 +154,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-check-release \
      maybe-check-recode \
      maybe-check-sed \
-@@ -2180,7 +2166,6 @@
+@@ -2491,7 +2477,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -159,7 +162,7 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -2251,7 +2236,6 @@
+@@ -2564,7 +2549,6 @@
      maybe-install-perl \
      maybe-install-prms \
      maybe-install-rcs \
@@ -167,15 +170,15 @@ diff -urN gdb-6.0.org/gdb/Makefile.in gdb-6.0/gdb/Makefile.in
      maybe-install-release \
      maybe-install-recode \
      maybe-install-sed \
-@@ -40764,7 +40748,6 @@
+@@ -51494,7 +51478,6 @@
+ all-gdb: maybe-all-intl
  all-gdb: maybe-all-libiberty
  all-gdb: maybe-all-opcodes
- all-gdb: maybe-all-bfd
 -all-gdb: maybe-all-readline
  all-gdb: maybe-all-build-bison
  all-gdb: maybe-all-build-byacc
  all-gdb: maybe-all-sim
-@@ -40993,7 +40976,6 @@
+@@ -51826,7 +51809,6 @@
  all-sim: maybe-all-libiberty
  all-sim: maybe-all-bfd
  all-sim: maybe-all-opcodes

@@ -13,12 +13,12 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	6.7
+Version:	6.7.1
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	d6e7c0ad7654bc91a3a457fabb6ad6c6
+# Source0-md5:	30a6bf36eded4ae5a152d7d71b86dc14
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Patch0:		%{name}-readline.patch
@@ -27,6 +27,7 @@ Patch2:		%{name}-passflags.patch
 Patch4:		%{name}-gdbinit-stat.patch
 Patch5:		%{name}-pretty-print-by-default.patch
 Patch6:		%{name}-absolute-gnu_debuglink-path.patch
+URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
 BuildRequires:	bison
@@ -34,7 +35,7 @@ BuildRequires:	flex
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	readline-devel >= 4.3
-BuildRequires:	texinfo
+BuildRequires:	texinfo >= 4.4
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -93,7 +94,7 @@ verir.
 Summary:	GDB in the form of a static library
 Summary(pl.UTF-8):	GDB w postaci biblioteki statycznej
 Group:		Development/Debuggers
-#Requires:	binutils-static >= 2.17.50
+#Requires:	binutils-devel >= 2.17.50
 
 %description lib
 GDB in the form of a static library.
@@ -121,8 +122,7 @@ for dir in `find gdb/ -name 'configure.in'`; do
 	cd $olddir
 done
 cp -f /usr/share/automake/config.* .
-# !! Don't enable shared here !!
-# This will cause serious problems.
+# don't --enable-shared here, there would be libs version mismatch with binutils
 %configure \
 	--disable-gdbtk \
 	--disable-shared \
@@ -133,12 +133,12 @@ cp -f /usr/share/automake/config.* .
 	--enable-nls \
 	--enable-tui \
 	--with-cpu=%{_target_cpu} \
+%ifnarch alpha
+	--with-mmalloc \
+%endif
 	--without-included-gettext \
 	--without-included-regex \
-	--without-x \
-%ifnarch alpha
-	--with-mmalloc
-%endif
+	--without-x
 
 %{__make}
 %{__make} info

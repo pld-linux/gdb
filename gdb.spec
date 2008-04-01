@@ -13,12 +13,12 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	6.7.1
+Version:	6.8
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
-Source0:	ftp://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	30a6bf36eded4ae5a152d7d71b86dc14
+Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
+# Source0-md5:	c9da266b884fb8fa54df786dfaadbc7a
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Patch0:		%{name}-readline.patch

@@ -24,3 +24,14 @@
    unionprint = 1;
    addressprint = 1;
    print_max = PRINT_MAX_DEFAULT;
+--- gdb-6.8/gdb/utils.c.orig	2008-01-01 23:53:13.000000000 +0100
++++ gdb-6.8/gdb/utils.c	2008-04-04 10:23:07.000000000 +0200
+@@ -146,7 +146,7 @@
+    C++/ObjC form even in assembler language displays.  If this is set, but
+    DEMANGLE is zero, names are printed raw, i.e. DEMANGLE controls.  */
+ 
+-int asm_demangle = 0;
++int asm_demangle = 1;
+ static void
+ show_asm_demangle (struct ui_file *file, int from_tty,
+ 		   struct cmd_list_element *c, const char *value)

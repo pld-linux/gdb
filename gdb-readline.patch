@@ -33,10 +33,10 @@ diff -ur gdb-6.7.org/gdb/Makefile.in gdb-6.7/gdb/Makefile.in
 @@ -388,7 +388,7 @@
  	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
  	$(LIBICONV) $(LIBEXPAT) \
- 	$(LIBIBERTY) $(WIN32LIBS)
+ 	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU)
 -CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
 +CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) \
- 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
+ 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
  
  ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 diff -ur gdb-6.7.org/Makefile.in gdb-6.7/Makefile.in

@@ -1,15 +1,3 @@
-diff -ur gdb-6.7.org/gdb/gdbserver/Makefile.in gdb-6.7/gdb/gdbserver/Makefile.in
---- gdb-6.7.org/gdb/gdbserver/Makefile.in	2007-06-13 20:50:38.000000000 +0200
-+++ gdb-6.7/gdb/gdbserver/Makefile.in	2007-10-10 21:10:05.379655356 +0200
-@@ -78,7 +78,7 @@
- 
- # Where is the source dir for the READLINE library?  Traditionally in .. or .
- # (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
--READLINE_DIR = ${srcdir}/../readline
-+READLINE_DIR = /usr/lib
- READLINE_DEP = $$(READLINE_DIR)
- 
- # All the includes used for CFLAGS and for lint.
 diff -ur gdb-6.7.org/gdb/Makefile.in gdb-6.7/gdb/Makefile.in
 --- gdb-6.7.org/gdb/Makefile.in	2007-09-05 02:14:02.000000000 +0200
 +++ gdb-6.7/gdb/Makefile.in	2007-10-10 21:11:18.119976680 +0200
@@ -30,12 +18,12 @@ diff -ur gdb-6.7.org/gdb/Makefile.in gdb-6.7/gdb/Makefile.in
  
  # Where is expat?  This will be empty if expat was not available.
  LIBEXPAT = @LIBEXPAT@
-@@ -388,7 +388,7 @@
- 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
+@@ -416,7 +416,7 @@
+ 	$(XM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
  	$(LIBICONV) $(LIBEXPAT) \
  	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU)
--CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
-+CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) \
+-CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
++CDEPS = $(XM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) \
  	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
  
  ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)

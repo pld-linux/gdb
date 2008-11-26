@@ -1,37 +1,19 @@
---- gdb-6.5/gdb/cp-valprint.c.orig	2005-12-17 23:33:59.000000000 +0100
-+++ gdb-6.5/gdb/cp-valprint.c	2006-08-22 19:10:53.242715750 +0200
-@@ -861,8 +861,8 @@
- 			   &setprintlist, &showprintlist);
- 
-   /* Give people the defaults which they are used to.  */
--  objectprint = 0;
--  vtblprint = 0;
-+  objectprint = 1;
-+  vtblprint = 1;
-   obstack_begin (&dont_print_vb_obstack, 32 * sizeof (struct type *));
-   obstack_specify_allocation (&dont_print_statmem_obstack,
- 			      32 * sizeof (CORE_ADDR), sizeof (CORE_ADDR),
---- gdb-6.5/gdb/valprint.c.orig	2006-08-22 19:11:55.000000000 +0200
-+++ gdb-6.5/gdb/valprint.c	2006-08-22 19:12:08.597733500 +0200
-@@ -1511,8 +1511,8 @@
-                            &setprintlist, &showprintlist);
- 
-   /* Give people the defaults which they are used to.  */
--  prettyprint_structs = 0;
--  prettyprint_arrays = 0;
-+  prettyprint_structs = 1;
-+  prettyprint_arrays = 1;
-   unionprint = 1;
-   addressprint = 1;
-   print_max = PRINT_MAX_DEFAULT;
---- gdb-6.8/gdb/utils.c.orig	2008-01-01 23:53:13.000000000 +0100
-+++ gdb-6.8/gdb/utils.c	2008-04-04 10:23:07.000000000 +0200
-@@ -146,7 +146,7 @@
-    C++/ObjC form even in assembler language displays.  If this is set, but
-    DEMANGLE is zero, names are printed raw, i.e. DEMANGLE controls.  */
- 
--int asm_demangle = 0;
-+int asm_demangle = 1;
- static void
- show_asm_demangle (struct ui_file *file, int from_tty,
- 		   struct cmd_list_element *c, const char *value)
+--- gdb-6.8.50.20081125/gdb/valprint.c~	2008-11-26 17:29:53.836145817 +0100
++++ gdb-6.8.50.20081125/gdb/valprint.c	2008-11-26 17:31:59.193231994 +0100
+@@ -65,12 +65,12 @@
+ struct value_print_options user_print_options =
+ {
+   Val_pretty_default,		/* pretty */
+-  0,				/* prettyprint_arrays */
+-  0,				/* prettyprint_structs */
+-  0,				/* vtblprint */
++  1,				/* prettyprint_arrays */
++  1,				/* prettyprint_structs */
++  1,				/* vtblprint */
+   1,				/* unionprint */
+   1,				/* addressprint */
+-  0,				/* objectprint */
++  1,				/* objectprint */
+   PRINT_MAX_DEFAULT,		/* print_max */
+   10,				/* repeat_count_threshold */
+   0,				/* output_format */

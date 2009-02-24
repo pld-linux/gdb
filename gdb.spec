@@ -12,21 +12,20 @@ Summary(tr.UTF-8):	C ve diğer diller için sembolik hata ayıklayıcı
 Summary(uk.UTF-8):	Символьний відладчик для С та інших мов
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
-%define	snap	20090101
+%define	snap	20090224
 Name:		gdb
 Version:	6.8.50
-Release:	0.%{snap}.2
+Release:	0.%{snap}.1
 License:	GPL v3+
 Group:		Development/Debuggers
 # Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
 Source0:	ftp://sourceware.org/pub/gdb/snapshots/current/gdb-%{version}.%{snap}.tar.bz2
-# Source0-md5:	09d1003402a96eef3a448049eb3bdf7c
+# Source0-md5:	81e47961a695a81b2609c09499f4552d
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Patch0:		%{name}-readline.patch
 Patch1:		%{name}-info.patch
 Patch2:		%{name}-passflags.patch
-Patch4:		%{name}-gdbinit-stat.patch
 Patch5:		%{name}-pretty-print-by-default.patch
 Patch6:		%{name}-absolute-gnu_debuglink-path.patch
 URL:		http://www.gnu.org/software/gdb/
@@ -36,7 +35,7 @@ BuildRequires:	bison
 BuildRequires:	flex
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
-BuildRequires:	readline-devel >= 4.3
+BuildRequires:	readline-devel >= 6.0
 BuildRequires:	texinfo >= 4.4
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -109,7 +108,6 @@ GDB w postaci biblioteki statycznej.
 %patch0 -p1
 %patch1 -p1
 %patch2 -p1
-%patch4 -p0
 %patch5 -p1
 %patch6 -p1
 

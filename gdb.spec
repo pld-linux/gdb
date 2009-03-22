@@ -12,22 +12,144 @@ Summary(tr.UTF-8):	C ve diğer diller için sembolik hata ayıklayıcı
 Summary(uk.UTF-8):	Символьний відладчик для С та інших мов
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
-%define	snap	20090311
+%define	snap	20090302
 Name:		gdb
 Version:	6.8.50
 Release:	0.%{snap}.1
 License:	GPL v3+
 Group:		Development/Debuggers
 # Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-Source0:	ftp://sourceware.org/pub/gdb/snapshots/current/gdb-%{version}.%{snap}.tar.bz2
-# Source0-md5:	911b57b37260317251b55ab3393913a5
+# Source0:	ftp://sourceware.org/pub/gdb/snapshots/current/gdb-%{version}.%{snap}.tar.bz2
+Source0:	gdb-%{version}.%{snap}.tar.bz2
+# Source0-md5:	a8eae0d4ef955ebcecfc7511af31070a
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
-Patch0:		%{name}-readline.patch
-Patch1:		%{name}-info.patch
-Patch2:		%{name}-passflags.patch
-Patch5:		%{name}-pretty-print-by-default.patch
-Patch6:		%{name}-absolute-gnu_debuglink-path.patch
+
+# PLD
+
+Patch1000:	%{name}-readline.patch
+Patch1001:	%{name}-info.patch
+Patch1002:	%{name}-passflags.patch
+Patch1005:	%{name}-pretty-print-by-default.patch
+
+# FEDORA
+
+# Work around out-of-date dejagnu that does not have KFAIL
+Patch1:		%{name}-6.3-rh-dummykfail-20041202.patch
+
+# Match the Fedora's version info.
+Patch2:		%{name}-6.3-rh-testversion-20041202.patch
+
+# Check that libunwind works - new test then fix
+Patch3:		%{name}-6.3-rh-testlibunwind-20041202.patch
+Patch4:		%{name}-6.3-rh-testlibunwind1fix-20041202.patch
+
+Patch104:	%{name}-6.3-ppcdotsolib-20041022.patch
+Patch105:	%{name}-6.3-ppc64syscall-20040622.patch
+Patch106:	%{name}-6.3-framepczero-20040927.patch
+Patch111:	%{name}-6.3-ppc64displaysymbol-20041124.patch
+Patch112:	%{name}-6.6-scheduler_locking-step-sw-watchpoints2.patch
+Patch260:	%{name}-6.6-scheduler_locking-step-is-default.patch
+Patch116:	%{name}-6.3-linespec-20041213.patch
+Patch117:	%{name}-6.3-removebp-20041130.patch
+Patch118:	%{name}-6.3-gstack-20050411.patch
+Patch122:	%{name}-6.3-test-pie-20050107.patch
+Patch124:	%{name}-6.3-pie-20050110.patch
+Patch125:	%{name}-6.3-test-self-20050110.patch
+Patch128:	%{name}-6.3-nonthreaded-wp-20050117.patch
+Patch133:	%{name}-6.3-test-dtorfix-20050121.patch
+Patch134:	%{name}-6.3-dtorfix-20050121.patch
+Patch136:	%{name}-6.3-test-movedir-20050125.patch
+Patch140:	%{name}-6.3-gcore-thread-20050204.patch
+Patch141:	%{name}-6.6-step-thread-exit.patch
+Patch259:	%{name}-6.3-step-thread-exit-20050211-test.patch
+Patch142:	%{name}-6.3-terminal-fix-20050214.patch
+Patch145:	%{name}-6.3-threaded-watchpoints2-20050225.patch
+Patch148:	%{name}-6.3-inheritance-20050324.patch
+Patch150:	%{name}-6.3-test-sepcrc-20050402.patch
+Patch151:	%{name}-6.3-sepcrc-20050402.patch
+Patch153:	%{name}-6.3-ia64-gcore-page0-20050421.patch
+Patch157:	%{name}-6.3-security-errata-20050610.patch
+Patch158:	%{name}-6.3-ia64-sigtramp-frame-20050708.patch
+Patch160:	%{name}-6.3-ia64-gcore-speedup-20050714.patch
+Patch161:	%{name}-6.3-inferior-notification-20050721.patch
+Patch162:	%{name}-6.3-ia64-info-frame-fix-20050725.patch
+Patch163:	%{name}-6.3-inheritancetest-20050726.patch
+Patch164:	%{name}-6.3-readnever-20050907.patch
+Patch166:	%{name}-6.3-ia64-sigtramp-fp-20050926.patch
+Patch169:	%{name}-6.3-ia64-sigill-20051115.patch
+Patch170:	%{name}-6.3-bt-past-zero-20051201.patch
+Patch176:	%{name}-6.3-large-core-20051206.patch
+Patch177:	%{name}-6.3-gstack-without-path-20060414.patch
+Patch188:	%{name}-6.5-bz203661-emit-relocs.patch
+Patch190:	%{name}-6.5-dwarf-stack-overflow.patch
+Patch194:	%{name}-6.5-bz185337-resolve-tls-without-debuginfo-v2.patch
+Patch195:	%{name}-6.5-tls-of-separate-debuginfo.patch
+Patch196:	%{name}-6.5-sharedlibrary-path.patch
+Patch199:	%{name}-6.5-bz190810-gdbserver-arch-advice.patch
+Patch200:	%{name}-6.5-bz181390-memory-address-width.patch
+Patch201:	%{name}-6.5-gcore-i386-on-amd64.patch
+Patch211:	%{name}-6.5-last-address-space-byte-test.patch
+Patch208:	%{name}-6.5-BEA-testsuite.patch
+Patch209:	%{name}-6.5-readline-long-line-crash.patch
+Patch213:	%{name}-6.5-readline-long-line-crash-test.patch
+Patch214:	%{name}-6.5-bz216711-clone-is-outermost.patch
+Patch215:	%{name}-6.5-bz218379-ppc-solib-trampoline-fix.patch
+Patch216:	%{name}-6.5-bz218379-ppc-solib-trampoline-test.patch
+Patch217:	%{name}-6.5-bz218379-solib-trampoline-lookup-lock-fix.patch
+Patch225:	%{name}-6.5-bz109921-DW_AT_decl_file-test.patch
+Patch229:	%{name}-6.3-bz140532-ppc-unwinding-test.patch
+Patch231:	%{name}-6.3-bz202689-exec-from-pthread-test.patch
+Patch234:	%{name}-6.6-bz230000-power6-disassembly-test.patch
+Patch235:	%{name}-6.3-bz231832-obstack-2gb.patch
+Patch240:	%{name}-6.6-bz225783-prelink-path.patch
+Patch241:	%{name}-6.6-bz225783-gdb-debuginfo-paths.patch
+Patch245:	%{name}-6.6-bz229517-gcore-without-terminal.patch
+Patch247:	%{name}-6.6-bz235197-fork-detach-info.patch
+Patch249:	%{name}-6.6-gcore32-test.patch
+Patch254:	%{name}-6.6-testsuite-timeouts.patch
+Patch258:	%{name}-6.6-bz237572-ppc-atomic-sequence-test.patch
+Patch261:	%{name}-6.6-readline-system.patch
+Patch263:	%{name}-6.3-attach-see-vdso-test.patch
+Patch265:	%{name}-6.6-bz247354-leader-exit-fix.patch
+Patch266:	%{name}-6.6-bz247354-leader-exit-test.patch
+Patch271:	%{name}-6.5-bz243845-stale-testing-zombie-test.patch
+Patch274:	%{name}-6.6-buildid-locate.patch
+Patch353:	%{name}-6.6-buildid-locate-rpm.patch
+Patch280:	%{name}-6.6-multifork-debugreg.patch
+Patch282:	%{name}-6.7-charsign-test.patch
+Patch284:	%{name}-6.7-ppc-clobbered-registers-O2-test.patch
+Patch287:	%{name}-6.7-testsuite-stable-results.patch
+Patch289:	%{name}-6.5-ia64-libunwind-leak-test.patch
+Patch290:	%{name}-6.5-missed-trap-on-step-test.patch
+Patch293:	%{name}-6.7-bz426600-DW_TAG_interface_type-fix.patch
+Patch294:	%{name}-6.7-bz426600-DW_TAG_interface_type-test.patch
+Patch296:	%{name}-6.5-gcore-buffer-limit-test.patch
+Patch298:	%{name}-6.6-threads-static-test.patch
+Patch304:	%{name}-6.7-kernel-headers-compat.patch
+Patch309:	%{name}-6.3-mapping-zero-inode-test.patch
+Patch311:	%{name}-6.3-focus-cmd-prev-test.patch
+Patch314:	%{name}-6.3-watchpoint-cond-gone-test.patch
+Patch315:	%{name}-6.8-bz442765-threaded-exec-test.patch
+Patch317:	%{name}-6.8-sparc64-silence-memcpy-check.patch
+Patch318:	%{name}-6.8-gcc35998-ada-memory-trash.patch
+Patch320:	%{name}-6.5-section-num-fixup-test.patch
+Patch322:	%{name}-6.8-constant-watchpoints.patch
+Patch324:	%{name}-6.8-glibc-headers-compat.patch
+Patch326:	%{name}-6.8-tui-singlebinary.patch
+Patch327:	%{name}-6.8-inlining.patch
+Patch350:	%{name}-6.8-inlining-addon.patch
+Patch328:	%{name}-6.8-inlining-by-name.patch
+Patch329:	%{name}-6.8-bz254229-gcore-prpsinfo.patch
+Patch330:	%{name}-6.8-bz436037-reg-no-longer-active.patch
+Patch331:	%{name}-6.8-quit-never-aborts.patch
+Patch332:	%{name}-6.8-fortran-tag-constant.patch
+Patch334:	%{name}-6.8-ctors-dtors-unique.patch
+Patch337:	%{name}-6.8-attach-signalled-detach-stopped.patch
+Patch343:	%{name}-6.8-watchpoint-conditionals-test.patch
+Patch348:	%{name}-6.8-bz466901-backtrace-full-prelinked.patch
+Patch349:	%{name}-archer.patch
+Patch352:	%{name}-6.8-bz457187-largefile.patch
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -35,7 +157,9 @@ BuildRequires:	bison
 BuildRequires:	flex
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
+BuildRequires:	python-devel
 BuildRequires:	readline-devel >= 6.0
+BuildRequires:	rpm-pythonprov
 BuildRequires:	texinfo >= 4.4
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -105,11 +229,132 @@ GDB w postaci biblioteki statycznej.
 
 %prep
 %setup -q -n %{name}-%{version}.%{snap}
-%patch0 -p1
-%patch1 -p1
+
+%patch1000 -p1
+%patch1001 -p1
+%patch1002 -p1
+%patch1005 -p1
+
+# Files have `# <number> <file>' statements breaking VPATH / find-debuginfo.sh .
+rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
+rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
+
+# Apply patches defined above.
+
+# Match the Fedora's version info.
 %patch2 -p1
-%patch5 -p1
-%patch6 -p1
+
+###patch232 -p1
+%patch349 -p1
+%patch1 -p1
+%patch3 -p1
+%patch4 -p1
+
+%patch104 -p1
+%patch105 -p1
+%patch106 -p1
+%patch111 -p1
+%patch112 -p1
+%patch116 -p1
+%patch117 -p1
+%patch118 -p1
+%patch122 -p1
+%patch125 -p1
+%patch128 -p1
+%patch133 -p1
+%patch134 -p1
+%patch136 -p1
+%patch140 -p1
+%patch141 -p1
+%patch259 -p1
+%patch142 -p1
+%patch145 -p1
+%patch148 -p1
+%patch150 -p1
+%patch151 -p1
+%patch153 -p1
+%patch157 -p1
+%patch158 -p1
+%patch160 -p1
+%patch161 -p1
+%patch162 -p1
+%patch163 -p1
+%patch164 -p1
+%patch166 -p1
+%patch169 -p1
+%patch170 -p1
+%patch176 -p1
+%patch177 -p1
+%patch188 -p1
+%patch190 -p1
+%patch194 -p1
+%patch195 -p1
+%patch196 -p1
+%patch199 -p1
+%patch200 -p1
+%patch201 -p1
+%patch208 -p1
+%patch209 -p1
+%patch211 -p1
+%patch213 -p1
+%patch214 -p1
+%patch215 -p1
+%patch216 -p1
+%patch217 -p1
+%patch225 -p1
+%patch229 -p1
+%patch231 -p1
+%patch234 -p1
+%patch235 -p1
+%patch240 -p1
+%patch241 -p1
+%patch245 -p1
+%patch247 -p1
+%patch249 -p1
+%patch254 -p1
+%patch258 -p1
+%patch260 -p1
+%patch261 -p1
+%patch263 -p1
+%patch265 -p1
+%patch266 -p1
+%patch271 -p1
+%patch274 -p1
+%patch353 -p1
+%patch280 -p1
+%patch282 -p1
+%patch284 -p1
+%patch287 -p1
+%patch289 -p1
+%patch290 -p1
+%patch293 -p1
+%patch294 -p1
+%patch296 -p1
+%patch298 -p1
+%patch304 -p1
+%patch309 -p1
+%patch311 -p1
+%patch314 -p1
+%patch315 -p1
+%patch317 -p1
+%patch318 -p1
+%patch320 -p1
+%patch322 -p1
+%patch324 -p1
+%patch326 -p1
+%patch327 -p1
+%patch350 -p1
+%patch328 -p1
+%patch329 -p1
+%patch330 -p1
+%patch331 -p1
+%patch332 -p1
+%patch334 -p1
+%patch337 -p1
+%patch343 -p1
+%patch348 -p1
+%patch352 -p1
+%patch124 -p1
 
 %build
 for dir in `find gdb/ -name 'configure.in'`; do
@@ -124,6 +369,9 @@ done
 cp -f /usr/share/automake/config.* .
 # don't --enable-shared here, there would be libs version mismatch with binutils
 %configure \
+	--with-gdb-datadir=%{_datadir}/gdb \
+	--with-separate-debug-dir=/usr/lib/debug \
+	--with-pythondir=%{py_sitedir} \
 	--disable-gdbtk \
 	--disable-shared \
 	--enable-gdbcli \
@@ -148,13 +396,7 @@ rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_infodir}
 
 %{__make} install install-info \
-	prefix=$RPM_BUILD_ROOT%{_prefix} \
-	bindir=$RPM_BUILD_ROOT%{_bindir} \
-	sbindir=$RPM_BUILD_ROOT%{_sbindir} \
-	infodir=$RPM_BUILD_ROOT%{_infodir} \
-	includedir=$RPM_BUILD_ROOT%{_includedir} \
-	libdir=$RPM_BUILD_ROOT%{_libdir} \
-	mandir=$RPM_BUILD_ROOT%{_mandir}
+	DESTDIR=$RPM_BUILD_ROOT
 
 bzip2 -dc %{SOURCE1} | tar xf - -C $RPM_BUILD_ROOT%{_mandir}
 
@@ -173,6 +415,8 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %doc gdb/{ChangeLog,NEWS,PROBLEMS,README}
 %attr(755,root,root) %{_bindir}/*
+%{_datadir}/gdb
+%{py_sitedir}/gdb
 %{_mandir}/man1/*
 %lang(es) %{_mandir}/es/man1/*
 %lang(fr) %{_mandir}/fr/man1/*

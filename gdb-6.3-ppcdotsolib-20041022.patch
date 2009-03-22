@@ -1,0 +1,31 @@
+2004-10-22  Andrew Cagney  <cagney@gnu.org>
+ 
+ 	* solib-svr4.c (enable_break): Convert a symbol descriptor into
+ 	the corresponding function entry point.
+ 	(solib_break_names): Delete "._dl_debug_state", no longer needed.
+
+2007-10-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Port to GDB-6.7.
+ 	
+Index: gdb-6.7/gdb/solib-svr4.c
+===================================================================
+--- gdb-6.7.orig/gdb/solib-svr4.c	2007-10-09 20:03:30.000000000 +0200
++++ gdb-6.7/gdb/solib-svr4.c	2007-10-12 22:34:03.000000000 +0200
+@@ -1089,7 +1089,15 @@ enable_break (void)
+ 	{
+ 	  sym_addr = bfd_lookup_symbol (tmp_bfd, *bkpt_namep);
+ 	  if (sym_addr != 0)
+-	    break;
++	    {
++	      /* The symbol might be a descriptor, convert to into the
++		 corresponding code address.  */
++	      sym_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
++							     sym_addr,
++							     tmp_bfd_target);
++	      if (sym_addr != 0)
++		break;
++	    }
+ 	}
+ 
+       if (sym_addr != 0)

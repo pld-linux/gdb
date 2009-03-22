@@ -1,0 +1,208 @@
+gdb/testsuite/gdb.base/fileio.c:
+gdb/testsuite/gdb.base/fileio.exp:
+2007-12-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/fileio.c (ROOTSUBDIR): New macro.
+	(main): CHDIR into ROOTSUBDIR.  CHOWN ROOTSUBDIR and CHDIR into
+	ROOTSUBDIR if we are being run as root.
+	* gdb.base/fileio.exp: Change the startup and finish cleanup.
+	Change the test file reference to be into the `fileio.dir' directory.
+
+
+sources/gdb/testsuite/gdb.base/dump.exp:
+Found on RHEL-5.s390x.
+
+
+gdb-6.8.50.20090209/gdb/testsuite/gdb.base/auxv.exp:
+random FAIL: gdb.base/auxv.exp: matching auxv data from live and gcore
+
+
+gdb-6.8.50.20090209/gdb/testsuite/gdb.base/annota1.exp:
+frames-invalid can happen asynchronously.
+
+--- ./gdb/testsuite/gdb.base/fileio.c	13 Jun 2006 08:55:22 -0000	1.10
++++ ./gdb/testsuite/gdb.base/fileio.c	8 Dec 2007 16:04:10 -0000
+@@ -58,6 +58,8 @@ system (const char * string);
+ 1) Invalid string/command. -  returns 127.  */
+ static const char *strerrno (int err);
+ 
++#define ROOTSUBDIR "fileio.dir"
++
+ #define FILENAME    "foo.fileio.test"
+ #define RENAMED     "bar.fileio.test"
+ #define NONEXISTANT "nofoo.fileio.test"
+@@ -542,6 +544,37 @@ strerrno (int err)
+ int
+ main ()
+ {
++  /* ROOTSUBDIR is already prepared by fileio.exp.  We use it for easy cleanup
++     (by fileio.exp) if we are run by multiple users in the same directory.  */
++
++  if (chdir (ROOTSUBDIR) != 0)
++    {
++      printf ("chdir " ROOTSUBDIR ": %s\n", strerror (errno));
++      exit (1);
++    }
++
++  /* These tests
++       Open for write but no write permission returns EACCES
++       Unlinking a file in a directory w/o write access returns EACCES
++     fail if we are being run as root - drop the privileges here.  */
++
++  if (geteuid () == 0)
++    {
++      uid_t uid = 99;
++
++      if (chown (".", uid, uid) != 0)
++	{
++	  printf ("chown %d.%d " ROOTSUBDIR ": %s\n", (int) uid, (int) uid,
++		  strerror (errno));
++	  exit (1);
++	}
++      if (setuid (uid) || geteuid () == 0)
++	{
++	  printf ("setuid %d: %s\n", (int) uid, strerror (errno));
++	  exit (1);
++	}
++    }
++
+   /* Don't change the order of the calls.  They partly depend on each other */
+   test_open ();
+   test_write ();
+--- ./gdb/testsuite/gdb.base/fileio.exp	23 Aug 2007 18:14:16 -0000	1.12
++++ ./gdb/testsuite/gdb.base/fileio.exp	8 Dec 2007 16:04:10 -0000
+@@ -46,8 +46,8 @@ if [get_compiler_info ${binfile}] {
+     return -1;
+ }
+ 
+-remote_exec build {sh -xc test\ -r\ dir2.fileio.test\ &&\ chmod\ -f\ +w\ dir2.fileio.test}
+-remote_exec build {sh -xc rm\ -rf\ *.fileio.test}
++remote_exec build {sh -xc rm\ -rf\ fileio.dir}
++remote_exec build {sh -xc mkdir\ -m777\ fileio.dir}
+ 
+ set oldtimeout $timeout
+ set timeout [expr "$timeout + 60"]
+@@ -88,7 +88,7 @@ gdb_test continue \
+ "Opening nonexistant file returns ENOENT"
+ 
+ send_gdb "continue\n" ; gdb_expect -re "$gdb_prompt $"
+-catch "system \"chmod -f -w nowrt.fileio.test\""
++catch "system \"chmod -f -w fileio.dir/nowrt.fileio.test\""
+ 
+ gdb_test continue \
+ "Continuing\\..*open 5:.*EACCES$stop_msg" \
+@@ -252,8 +252,8 @@ gdb_test continue \
+ send_gdb "quit\n"
+ send_gdb "y\n"
+ 
+-remote_exec build {sh -xc test\ -r\ dir2.fileio.test\ &&\ chmod\ -f\ +w\ dir2.fileio.test}
+-remote_exec build {sh -xc rm\ -rf\ *.fileio.test}
++remote_exec build {sh -xc test\ -r\ fileio.dir/dir2.fileio.test\ &&\ chmod\ -f\ +w\ fileio.dir/dir2.fileio.test}
++remote_exec build {sh -xc rm\ -rf\ fileio.dir}
+ 
+ set timeout $oldtimeout
+ return 0
+--- sources/gdb/testsuite/gdb.base/dump.exp-orig	2008-08-28 11:44:40.000000000 +0200
++++ sources/gdb/testsuite/gdb.base/dump.exp	2008-08-28 11:44:49.000000000 +0200
+@@ -493,8 +493,10 @@ if ![string compare $is64bitonly "no"] t
+   gdb_test "print zero_all ()" "" ""
+ 
+   # restore with expressions 
++  # Address may fit in int32 but its negative result would be 0xffffxxxx for
++  # 64-bit LONGEST addresses.
+   test_restore_saved_value \
+-	"intarr3.srec ${array2_start}-${array_start} &intarray\[3\] &intarray\[4\]" \
++	"intarr3.srec (long)${array2_start}-${array_start} &intarray\[3\] &intarray\[4\]" \
+ 	"array partial with expressions" 4 "intarray2\[3\]"
+ 
+   gdb_test "print intarray2\[2\] == 0" " = 1" "element 2 not changed, == 4"
+--- gdb-6.8.50.20090209/gdb/testsuite/gdb.base/annota1.exp-orig	2009-02-09 16:31:11.000000000 +0100
++++ gdb-6.8.50.20090209/gdb/testsuite/gdb.base/annota1.exp	2009-02-09 21:27:38.000000000 +0100
+@@ -286,7 +286,7 @@ if [target_info exists gdb,nosignals] {
+ } else {
+     send_gdb "signal SIGUSR1\n"
+     gdb_expect {
+-	-re "\r\n\032\032post-prompt\r\nContinuing with signal SIGUSR1.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032breakpoint 2\r\n\r\nBreakpoint 2, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nhandle_USR1\r\n\032\032frame-args\r\n \\(\r\n\032\032arg-begin\r\nsig\r\n\032\032arg-name-end\r\n=\r\n\032\032arg-value -\r\n$decimal\r\n\032\032arg-end\r\n\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n${escapedsrcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*annota1.c:.*:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
++	-re "\r\n\032\032post-prompt\r\nContinuing with signal SIGUSR1.\r\n\r\n\032\032starting\r\n(\r\n\032\032frames-invalid\r\n)*\r\n\032\032breakpoint 2\r\n\r\nBreakpoint 2, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nhandle_USR1\r\n\032\032frame-args\r\n \\(\r\n\032\032arg-begin\r\nsig\r\n\032\032arg-name-end\r\n=\r\n\032\032arg-value -\r\n$decimal\r\n\032\032arg-end\r\n\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n${escapedsrcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*annota1.c:.*:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
+ 	    { pass "send SIGUSR1" }
+ 	-re "\r\n\032\032post-prompt\r\nContinuing with signal SIGUSR1.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032breakpoint 2\r\n\r\nBreakpoint 2, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nhandle_USR1\r\n\032\032frame-args\r\n \\(\r\n\032\032arg-begin\r\nsig\r\n\032\032arg-name-end\r\n=\r\n\032\032arg-value -\r\n$decimal\r\n\032\032arg-end\r\n\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*${srcfile}\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n.*\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*annota1.c:.*:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
+ 	    { setup_xfail "*-*-*" 1270
+--- ./gdb/testsuite/gdb.base/auxv.exp	2009-02-11 00:54:54.000000000 +0100
++++ ./gdb/testsuite/gdb.base/auxv.exp	2009-02-11 00:51:30.000000000 +0100
+@@ -78,8 +78,10 @@ proc fetch_auxv {test} {
+ 
+     set auxv_lines {}
+     set bad -1
++    # Former trailing `\[\r\n\]+' may eat just \r leaving \n in the buffer
++    # corrupting the next matches.
+     if {[gdb_test_multiple "info auxv" $test {
+-	-re "info auxv\[\r\n\]+" {
++	-re "info auxv\r\n" {
+ 	    exp_continue
+ 	}
+ 	-ex "The program has no auxiliary information now" {
+@@ -94,20 +96,20 @@ proc fetch_auxv {test} {
+ 	    set bad 1
+ 	    exp_continue
+ 	}
+-	-re "^\[0-9\]+\[ \t\]+(AT_\[^ \t\]+)\[^\r\n\]+\[\r\n\]+" {
++	-re "^\[0-9\]+\[ \t\]+(AT_\[^ \t\]+)\[^\r\n\]+\r\n" {
+ 	    lappend auxv_lines $expect_out(0,string)
+ 	    exp_continue
+ 	}
+-	-re "^\[0-9\]+\[ \t\]+\\?\\?\\?\[^\r\n\]+\[\r\n\]+" {
++	-re "^\[0-9\]+\[ \t\]+\\?\\?\\?\[^\r\n\]+\r\n" {
+ 	    warning "Unrecognized tag value: $expect_out(0,string)"
+ 	    set bad 1
+ 	    lappend auxv_lines $expect_out(0,string)
+ 	    exp_continue
+ 	}
+-	-re ".*$gdb_prompt $" {
++	-re "$gdb_prompt $" {
+ 	    incr bad
+ 	}
+-	-re "^\[^\r\n\]+\[\r\n\]+" {
++	-re "^\[^\r\n\]+\r\n" {
+ 	    if {!$bad} {
+ 		warning "Unrecognized output: $expect_out(0,string)"
+ 		set bad 1
+--- ./gdb/testsuite/gdb.base/callfuncs.exp	2009-01-03 06:58:03.000000000 +0100
++++ ./gdb/testsuite/gdb.base/callfuncs.exp	2009-02-11 00:51:42.000000000 +0100
+@@ -249,15 +249,17 @@ proc fetch_all_registers {test} {
+ 
+     set all_registers_lines {}
+     set bad -1
++    # Former trailing `\[\r\n\]+' may eat just \r leaving \n in the buffer
++    # corrupting the next matches.
+     if {[gdb_test_multiple "info all-registers" $test {
+-	-re "info all-registers\[\r\n\]+" {
++	-re "info all-registers\r\n" {
+ 	    exp_continue
+ 	}
+ 	-ex "The program has no registers now" {
+ 	    set bad 1
+ 	    exp_continue
+ 	}
+-	-re "^bspstore\[ \t\]+\[^\r\n\]+\[\r\n\]+" {
++	-re "^bspstore\[ \t\]+\[^\r\n\]+\r\n" {
+ 	    if [istarget "ia64-*-*"] {
+ 		# Filter out bspstore which is specially tied to bsp,
+ 		# giving spurious differences.
+@@ -266,14 +268,14 @@ proc fetch_all_registers {test} {
+ 	    }
+ 	    exp_continue
+ 	}
+-	-re "^\[^ \t\]+\[ \t\]+\[^\r\n\]+\[\r\n\]+" {
++	-re "^\[^ \t\]+\[ \t\]+\[^\r\n\]+\r\n" {
+ 	    lappend all_registers_lines $expect_out(0,string)
+ 	    exp_continue
+ 	}
+-	-re ".*$gdb_prompt $" {
++	-re "$gdb_prompt $" {
+ 	    incr bad
+ 	}
+-	-re "^\[^\r\n\]+\[\r\n\]+" {
++	-re "^\[^\r\n\]+\r\n" {
+ 	    if {!$bad} {
+ 		warning "Unrecognized output: $expect_out(0,string)"
+ 		set bad 1

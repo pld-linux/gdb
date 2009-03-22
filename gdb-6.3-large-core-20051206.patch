@@ -1,0 +1,316 @@
+2005-12-14  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* symfile-mem.c (read_memory): New static read callback function.
+	(symfile_add_from_memory): Pass read_memory to bfd instead of
+	target_read_memory.
+	* target.c (target_xfer_memory): Add support for LONGEST len and
+	change all callers.
+	(deprecated_debug_xfer_memory, target_read_memory): Ditto.
+	(target_write_memory, do_xfer_memory): Ditto.
+	(target_xfer_memory_partial, target_read_memory_partial): Ditto.
+	(target_write_memory_partial): Ditto.
+	* infptrace.c (child_xfer_memory): Ditto.
+	* linux-nat.c (linux_nat_xfer_memory): Ditto.
+	(linux_nat_proc_xfer_memory): Ditto.
+	* dcache.c (dcache_xfer_memory): Ditto.
+	* exec.c (xfer_memory): Ditto.
+	* remote.c (remote_xfer_memory): Ditto.
+	* remote-sim.c (gdbsim_xfer_interior_memory): Ditto.
+	* target.h: Change prototypes for functions changed above.
+	* linux-nat.h: Ditto.
+	* remote.h: Ditto.
+	* dcache.h: Ditto.
+
+2007-10-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Port to GDB-6.7.
+
+Index: gdb-6.8.50.20090226/gdb/symfile-mem.c
+===================================================================
+--- gdb-6.8.50.20090226.orig/gdb/symfile-mem.c	2009-02-21 17:14:49.000000000 +0100
++++ gdb-6.8.50.20090226/gdb/symfile-mem.c	2009-02-28 07:22:09.000000000 +0100
+@@ -56,6 +56,14 @@
+ #include "elf/common.h"
+ 
+ 
++/* Local callback routine to pass to bfd to read from target memory,
++   using a len constrained to INT_MAX.  */
++static int
++read_target_memory (bfd_vma addr, bfd_byte *buf, int len)
++{
++  return target_read_memory (addr, buf, (LONGEST)len);
++}
++
+ /* Read inferior memory at ADDR to find the header of a loaded object file
+    and read its in-core symbols out of inferior memory.  TEMPL is a bfd
+    representing the target's format.  NAME is the name to use for this
+@@ -76,7 +84,7 @@ symbol_file_add_from_memory (struct bfd 
+     error (_("add-symbol-file-from-memory not supported for this target"));
+ 
+   nbfd = bfd_elf_bfd_from_remote_memory (templ, addr, &loadbase,
+-					 target_read_memory);
++					 read_target_memory);
+   if (nbfd == NULL)
+     error (_("Failed to read a valid object file image from memory."));
+ 
+Index: gdb-6.8.50.20090226/gdb/target.c
+===================================================================
+--- gdb-6.8.50.20090226.orig/gdb/target.c	2009-02-27 00:04:32.000000000 +0100
++++ gdb-6.8.50.20090226/gdb/target.c	2009-02-28 07:22:09.000000000 +0100
+@@ -57,7 +57,7 @@ static int nosymbol (char *, CORE_ADDR *
+ 
+ static void tcomplain (void) ATTR_NORETURN;
+ 
+-static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
++static LONGEST nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
+ 
+ static int return_zero (void);
+ 
+@@ -286,7 +286,7 @@ target_create_inferior (char *exec_file,
+ }
+ 
+ 
+-static int
++static LONGEST
+ nomemory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+ 	  struct target_ops *t)
+ {
+@@ -507,7 +507,7 @@ update_current_target (void)
+ 	    (void (*) (struct regcache *))
+ 	    noprocess);
+   de_fault (deprecated_xfer_memory,
+-	    (int (*) (CORE_ADDR, gdb_byte *, int, int, struct mem_attrib *, struct target_ops *))
++	    (LONGEST (*) (CORE_ADDR, gdb_byte *, LONGEST, int, struct mem_attrib *, struct target_ops *))
+ 	    nomemory);
+   de_fault (to_files_info,
+ 	    (void (*) (struct target_ops *))
+@@ -1237,7 +1237,7 @@ target_xfer_partial (struct target_ops *
+    it makes no progress, and then return how much was transferred). */
+ 
+ int
+-target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
++target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, LONGEST len)
+ {
+   if (target_read (&current_target, TARGET_OBJECT_MEMORY, NULL,
+ 		   myaddr, memaddr, len) == len)
+@@ -1247,7 +1247,7 @@ target_read_memory (CORE_ADDR memaddr, g
+ }
+ 
+ int
+-target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
++target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, LONGEST len)
+ {
+   if (target_write (&current_target, TARGET_OBJECT_MEMORY, NULL,
+ 		    myaddr, memaddr, len) == len)
+@@ -2777,8 +2777,8 @@ debug_to_prepare_to_store (struct regcac
+   fprintf_unfiltered (gdb_stdlog, "target_prepare_to_store ()\n");
+ }
+ 
+-static int
+-deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
++static LONGEST
++deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, LONGEST len,
+ 			      int write, struct mem_attrib *attrib,
+ 			      struct target_ops *target)
+ {
+@@ -2788,8 +2788,8 @@ deprecated_debug_xfer_memory (CORE_ADDR 
+ 						attrib, target);
+ 
+   fprintf_unfiltered (gdb_stdlog,
+-		      "target_xfer_memory (%s, xxx, %d, %s, xxx) = %d",
+-		      paddress (memaddr), len, write ? "write" : "read",
++		      "target_xfer_memory (%s, xxx, %ld, %s, xxx) = %d",
++		      paddress (memaddr), (long) len, write ? "write" : "read",
+                       retval);
+ 
+   if (retval > 0)
+Index: gdb-6.8.50.20090226/gdb/target.h
+===================================================================
+--- gdb-6.8.50.20090226.orig/gdb/target.h	2009-02-27 00:04:32.000000000 +0100
++++ gdb-6.8.50.20090226/gdb/target.h	2009-02-28 07:22:09.000000000 +0100
+@@ -376,10 +376,10 @@ struct target_ops
+        NOTE: cagney/2004-10-01: This has been entirely superseeded by
+        to_xfer_partial and inferior inheritance.  */
+ 
+-    int (*deprecated_xfer_memory) (CORE_ADDR memaddr, gdb_byte *myaddr,
+-				   int len, int write,
+-				   struct mem_attrib *attrib,
+-				   struct target_ops *target);
++    LONGEST (*deprecated_xfer_memory) (CORE_ADDR memaddr, gdb_byte *myaddr,
++				       LONGEST len, int write,
++				       struct mem_attrib *attrib,
++				       struct target_ops *target);
+ 
+     void (*to_files_info) (struct target_ops *);
+     int (*to_insert_breakpoint) (struct bp_target_info *);
+@@ -679,13 +679,14 @@ extern DCACHE *target_dcache;
+ 
+ extern int target_read_string (CORE_ADDR, char **, int, int *);
+ 
+-extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len);
++extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
++			       LONGEST len);
+ 
+ extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
+-				int len);
++				LONGEST len);
+ 
+-extern int xfer_memory (CORE_ADDR, gdb_byte *, int, int,
+-			struct mem_attrib *, struct target_ops *);
++extern LONGEST xfer_memory (CORE_ADDR, gdb_byte *, LONGEST, int,
++			    struct mem_attrib *, struct target_ops *);
+ 
+ /* Fetches the target's memory map.  If one is found it is sorted
+    and returned, after some consistency checking.  Otherwise, NULL
+Index: gdb-6.8.50.20090226/gdb/dcache.c
+===================================================================
+--- gdb-6.8.50.20090226.orig/gdb/dcache.c	2009-01-03 06:57:51.000000000 +0100
++++ gdb-6.8.50.20090226/gdb/dcache.c	2009-02-28 07:22:09.000000000 +0100
+@@ -524,9 +524,9 @@ dcache_free (DCACHE *dcache)
+ 
+    This routine is indended to be called by remote_xfer_ functions. */
+ 
+-int
++LONGEST
+ dcache_xfer_memory (DCACHE *dcache, CORE_ADDR memaddr, gdb_byte *myaddr,
+-		    int len, int should_write)
++		    LONGEST len, int should_write)
+ {
+   int i;
+   int (*xfunc) (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr);
+Index: gdb-6.8.50.20090226/gdb/dcache.h
+===================================================================
+--- gdb-6.8.50.20090226.orig/gdb/dcache.h	2009-01-03 06:57:51.000000000 +0100
++++ gdb-6.8.50.20090226/gdb/dcache.h	2009-02-28 07:22:09.000000000 +0100
+@@ -35,7 +35,7 @@ void dcache_free (DCACHE *);
+ 
+ /* Simple to call from <remote>_xfer_memory */
+ 
+-int dcache_xfer_memory (DCACHE *cache, CORE_ADDR mem, gdb_byte *my,
+-			int len, int should_write);
++LONGEST dcache_xfer_memory (DCACHE *cache, CORE_ADDR mem, gdb_byte *my,
++			    LONGEST len, int should_write);
+ 
+ #endif /* DCACHE_H */
+Index: gdb-6.8.50.20090226/gdb/exec.c
+===================================================================
+--- gdb-6.8.50.20090226.orig/gdb/exec.c	2009-02-22 20:35:47.000000000 +0100
++++ gdb-6.8.50.20090226/gdb/exec.c	2009-02-28 07:22:09.000000000 +0100
+@@ -464,8 +464,8 @@ map_vmap (bfd *abfd, bfd *arch)
+    The same routine is used to handle both core and exec files;
+    we just tail-call it with more arguments to select between them.  */
+ 
+-int
+-xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
++LONGEST
++xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, LONGEST len, int write,
+ 	     struct mem_attrib *attrib, struct target_ops *target)
+ {
+   int res;
+Index: gdb-6.8.50.20090226/gdb/linux-nat.c
+===================================================================
+--- gdb-6.8.50.20090226.orig/gdb/linux-nat.c	2009-02-28 07:22:02.000000000 +0100
++++ gdb-6.8.50.20090226/gdb/linux-nat.c	2009-02-28 07:22:32.000000000 +0100
+@@ -4407,7 +4407,7 @@ linux_xfer_partial (struct target_ops *o
+ #endif
+       if (iterate_over_lwps (ia64_linux_check_stack_region, &range) != NULL)
+ 	{ /* This region contains ia64 rse registers, we have to re-read.  */
+-	  int xxfer;
++	  LONGEST xxfer;
+ 
+ 	  /* Re-read register stack area.  */
+ 	  xxfer = super_xfer_partial (ops, object, annex,
+Index: gdb-6.8.50.20090226/gdb/remote.c
+===================================================================
+--- gdb-6.8.50.20090226.orig/gdb/remote.c	2009-02-25 03:14:22.000000000 +0100
++++ gdb-6.8.50.20090226/gdb/remote.c	2009-02-28 07:22:09.000000000 +0100
+@@ -25,6 +25,7 @@
+ #include "gdb_string.h"
+ #include <ctype.h>
+ #include <fcntl.h>
++#include <limits.h>
+ #include "inferior.h"
+ #include "bfd.h"
+ #include "symfile.h"
+@@ -5683,12 +5684,19 @@ handle_notification (char *buf, size_t l
+    if SHOULD_WRITE is nonzero.  Returns length of data written or
+    read; 0 for error.  TARGET is unused.  */
+ 
+-static int
+-remote_xfer_memory (CORE_ADDR mem_addr, gdb_byte *buffer, int mem_len,
++static LONGEST
++remote_xfer_memory (CORE_ADDR mem_addr, gdb_byte *buffer, LONGEST mem_len,
+ 		    int should_write, struct mem_attrib *attrib,
+ 		    struct target_ops *target)
+ {
+   int res;
++  int len;
++
++  /* This routine is not set up to handle > INT_MAX bytes.  */
++  if (mem_len >= (LONGEST)INT_MAX)
++    return 0;
++
++  len = (int)mem_len;
+ 
+   set_general_thread (inferior_ptid);
+ 
+@@ -5697,7 +5705,7 @@ remote_xfer_memory (CORE_ADDR mem_addr, 
+   else
+     res = remote_read_bytes (mem_addr, buffer, mem_len);
+ 
+-  return res;
++  return (LONGEST)res;
+ }
+ 
+ /* Sends a packet with content determined by the printf format string
+Index: gdb-6.8.50.20090226/gdb/remote-sim.c
+===================================================================
+--- gdb-6.8.50.20090226.orig/gdb/remote-sim.c	2009-02-23 19:31:23.000000000 +0100
++++ gdb-6.8.50.20090226/gdb/remote-sim.c	2009-02-28 07:22:09.000000000 +0100
+@@ -754,11 +754,14 @@ gdbsim_prepare_to_store (struct regcache
+ 
+    Returns the number of bytes transferred. */
+ 
+-static int
+-gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
++static LONGEST
++gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, LONGEST len,
+ 			     int write, struct mem_attrib *attrib,
+ 			     struct target_ops *target)
+ {
++  /* Convert to len type that sim_read and sim_write can handle.  */
++  int xfer_len = (int)len;
++
+   /* If no program is running yet, then ignore the simulator for
+      memory.  Pass the request down to the next target, hopefully
+      an exec file.  */
+@@ -774,22 +777,22 @@ gdbsim_xfer_inferior_memory (CORE_ADDR m
+       printf_filtered ("gdbsim_xfer_inferior_memory: myaddr 0x");
+       gdb_print_host_address (myaddr, gdb_stdout);
+       printf_filtered (", memaddr 0x%s, len %d, write %d\n",
+-		       paddr_nz (memaddr), len, write);
++		       paddr_nz (memaddr), xfer_len, write);
+       if (remote_debug && write)
+-	dump_mem (myaddr, len);
++	dump_mem (myaddr, xfer_len);
+     }
+ 
+   if (write)
+     {
+-      len = sim_write (gdbsim_desc, memaddr, myaddr, len);
++      xfer_len = sim_write (gdbsim_desc, memaddr, myaddr, xfer_len);
+     }
+   else
+     {
+-      len = sim_read (gdbsim_desc, memaddr, myaddr, len);
+-      if (remote_debug && len > 0)
+-	dump_mem (myaddr, len);
++      xfer_len = sim_read (gdbsim_desc, memaddr, myaddr, xfer_len);
++      if (remote_debug && xfer_len > 0)
++	dump_mem (myaddr, xfer_len);
+     }
+-  return len;
++  return (LONGEST)xfer_len;
+ }
+ 
+ static void

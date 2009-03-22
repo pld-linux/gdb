@@ -1,0 +1,41 @@
+Index: gdb-6.8.50.20081128/gdb/infrun.c
+===================================================================
+--- gdb-6.8.50.20081128.orig/gdb/infrun.c	2008-12-09 15:56:16.000000000 +0100
++++ gdb-6.8.50.20081128/gdb/infrun.c	2008-12-09 15:56:59.000000000 +0100
+@@ -931,7 +931,7 @@ static const char *scheduler_enums[] = {
+   schedlock_step,
+   NULL
+ };
+-static const char *scheduler_mode = schedlock_off;
++static const char *scheduler_mode = schedlock_step;
+ static void
+ show_scheduler_mode (struct ui_file *file, int from_tty,
+ 		     struct cmd_list_element *c, const char *value)
+Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.mi/mi-console.exp
+===================================================================
+--- gdb-6.8.50.20081128.orig/gdb/testsuite/gdb.mi/mi-console.exp	2008-08-06 14:52:08.000000000 +0200
++++ gdb-6.8.50.20081128/gdb/testsuite/gdb.mi/mi-console.exp	2008-12-09 15:59:34.000000000 +0100
+@@ -47,6 +47,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/
+ 
+ mi_run_to_main
+ 
++# thread-id=\"all\" vs. thread-id=\"1\" below:
++mi_gdb_test "210-gdb-set scheduler-locking off" "210\\^done" "set scheduler-locking off"
++
+ # Next over the hello() call which will produce lots of output
+ mi_gdb_test "220-exec-next" \
+ 	    "220\\^running(\r\n\\*running,thread-id=\"all\")?" \
+Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.mi/mi2-console.exp
+===================================================================
+--- gdb-6.8.50.20081128.orig/gdb/testsuite/gdb.mi/mi2-console.exp	2008-08-06 14:52:08.000000000 +0200
++++ gdb-6.8.50.20081128/gdb/testsuite/gdb.mi/mi2-console.exp	2008-12-09 16:00:33.000000000 +0100
+@@ -47,6 +47,9 @@ if  { [gdb_compile "${srcdir}/${subdir}/
+ 
+ mi_run_to_main
+ 
++# thread-id=\"all\" vs. thread-id=\"1\" below:
++mi_gdb_test "210-gdb-set scheduler-locking off" "210\\^done" "set scheduler-locking off"
++
+ # Next over the hello() call which will produce lots of output
+ send_gdb "220-exec-next\n"
+ gdb_expect {

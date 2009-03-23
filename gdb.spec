@@ -364,6 +364,7 @@ for dir in `find gdb/ -name 'configure.in'`; do
 	rm -f aclocal.m4
 	%{__aclocal}
 	%{__autoconf}
+	%{__autoheader}
 	cd $olddir
 done
 cp -f /usr/share/automake/config.* .

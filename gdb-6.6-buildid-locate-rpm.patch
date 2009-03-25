@@ -486,6 +486,17 @@ Index: gdb-6.8.50.20090302/gdb/testsuite/lib/gdb.exp
      send_gdb "set build-id-verbose 0\n"
      gdb_expect 10 {
  	-re "$gdb_prompt $" {
+--- ./gdb/testsuite/lib/mi-support.exp	2009-03-22 16:37:58.000000000 +0100
++++ ./gdb/testsuite/lib/mi-support.exp	2009-03-22 16:37:12.000000000 +0100
+@@ -221,7 +221,7 @@ proc default_mi_gdb_start { args } {
+ 	    }
+     	}
+     }
+-    # Turn off the missing warnings as the testsuite does not expect it.
++    # Turn off the missing RPMs warnings as the testsuite does not expect it.
+     send_gdb "190-gdb-set build-id-verbose 0\n"
+     gdb_expect 10 {
+ 	-re ".*190-gdb-set build-id-verbose 0\r\n190\\\^done\r\n$mi_gdb_prompt$" {
 Index: gdb-6.8.50.20090302/gdb/tui/tui-interp.c
 ===================================================================
 --- gdb-6.8.50.20090302.orig/gdb/tui/tui-interp.c	2009-03-07 17:13:33.000000000 +0100

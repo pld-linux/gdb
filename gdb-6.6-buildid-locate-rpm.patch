@@ -455,8 +455,8 @@ Index: gdb-6.8.50.20090302/gdb/symfile.c
 +	fprintf_unfiltered (gdb_stdlog,
 +			    _("Missing separate debuginfo for %s\n"), binary);
 +        if (debug != NULL)
-+	  fprintf_unfiltered (gdb_stdlog, _("Try: %s %s\n"),
-+			      "yum --enablerepo='*-debuginfo' install", debug);
++	  fprintf_unfiltered (gdb_stdlog, _("Try to install package that provides `%s' file\n"),
++			      debug);
 +      }
  }
  

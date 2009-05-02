@@ -15,7 +15,7 @@ Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define	snap	20090302
 Name:		gdb
 Version:	6.8.50
-Release:	1.%{snap}.2
+Release:	1.%{snap}.3
 License:	GPL v3+
 Group:		Development/Debuggers
 # Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2

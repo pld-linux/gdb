@@ -1,8 +1,9 @@
-diff -d -urpN src.0/gdb/valops.c src.1/gdb/valops.c
---- src.0/gdb/valops.c	2008-07-27 04:00:03.000000000 +0200
-+++ src.1/gdb/valops.c	2008-07-31 15:17:42.000000000 +0200
-@@ -813,10 +813,18 @@ value_assign (struct value *toval, struc
- 	struct frame_info *frame;
+Index: gdb-6.8.50.20090803/gdb/valops.c
+===================================================================
+--- gdb-6.8.50.20090803.orig/gdb/valops.c	2009-08-04 06:30:45.000000000 +0200
++++ gdb-6.8.50.20090803/gdb/valops.c	2009-08-04 06:33:05.000000000 +0200
+@@ -926,10 +926,18 @@ value_assign (struct value *toval, struc
+ 	struct gdbarch *gdbarch;
  	int value_reg;
  
 -	/* Figure out which frame this is in currently.  */
@@ -21,4 +22,4 @@ diff -d -urpN src.0/gdb/valops.c src.1/gdb/valops.c
 +	/* Probably never happens.  */
  	if (!frame)
  	  error (_("Value being assigned to is no longer active."));
- 	
+ 

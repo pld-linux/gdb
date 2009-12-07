@@ -1,40 +1,40 @@
-Index: gdb-6.8.50.20081128/gdb/testsuite/configure.ac
+Index: gdb-6.8.50.20090909/gdb/testsuite/configure.ac
 ===================================================================
---- gdb-6.8.50.20081128.orig/gdb/testsuite/configure.ac	2008-12-09 17:02:39.000000000 +0100
-+++ gdb-6.8.50.20081128/gdb/testsuite/configure.ac	2008-12-09 17:02:55.000000000 +0100
-@@ -116,6 +116,6 @@ AC_OUTPUT([Makefile \
+--- gdb-6.8.50.20090909.orig/gdb/testsuite/configure.ac	2009-07-31 17:38:16.000000000 +0200
++++ gdb-6.8.50.20090909/gdb/testsuite/configure.ac	2009-09-09 19:06:01.000000000 +0200
+@@ -144,6 +144,6 @@ AC_OUTPUT([Makefile \
    gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile \
    gdb.fortran/Makefile gdb.server/Makefile \
    gdb.java/Makefile gdb.mi/Makefile gdb.modula2/Makefile \
 -  gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile \
 +  gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile gdb.pie/Makefile \
-   gdb.python/Makefile \
+   gdb.python/Makefile gdb.reverse/Makefile \
    gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile])
-Index: gdb-6.8.50.20081128/gdb/testsuite/configure
+Index: gdb-6.8.50.20090909/gdb/testsuite/configure
 ===================================================================
---- gdb-6.8.50.20081128.orig/gdb/testsuite/configure	2008-12-09 17:02:39.000000000 +0100
-+++ gdb-6.8.50.20081128/gdb/testsuite/configure	2008-12-09 17:02:55.000000000 +0100
-@@ -3131,7 +3131,7 @@ done
+--- gdb-6.8.50.20090909.orig/gdb/testsuite/configure	2009-08-22 18:56:43.000000000 +0200
++++ gdb-6.8.50.20090909/gdb/testsuite/configure	2009-09-09 19:06:27.000000000 +0200
+@@ -3515,7 +3515,7 @@ done
  
  
  
--                                                                                                                                                                                                        ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile gdb.mi/Makefile gdb.modula2/Makefile gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile gdb.python/Makefile gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile"
-+                                                                                                                                                                                                        ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile gdb.mi/Makefile gdb.modula2/Makefile gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile gdb.pie/Makefile gdb.python/Makefile gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile"
+-ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile gdb.mi/Makefile gdb.modula2/Makefile gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile gdb.python/Makefile gdb.reverse/Makefile gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile"
++ac_config_files="$ac_config_files Makefile gdb.ada/Makefile gdb.arch/Makefile gdb.asm/Makefile gdb.base/Makefile gdb.cp/Makefile gdb.disasm/Makefile gdb.dwarf2/Makefile gdb.fortran/Makefile gdb.server/Makefile gdb.java/Makefile gdb.mi/Makefile gdb.modula2/Makefile gdb.objc/Makefile gdb.opt/Makefile gdb.pascal/Makefile gdb.pie/Makefile gdb.python/Makefile gdb.reverse/Makefile gdb.threads/Makefile gdb.trace/Makefile gdb.xml/Makefile"
+ 
  cat >confcache <<\_ACEOF
  # This file is a shell script that caches the results of configure
- # tests run on this system so they can be shared between configure
-@@ -3698,6 +3698,7 @@ do
-   "gdb.objc/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.objc/Makefile" ;;
-   "gdb.opt/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.opt/Makefile" ;;
-   "gdb.pascal/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.pascal/Makefile" ;;
-+  "gdb.pie/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.pie/Makefile" ;;
-   "gdb.python/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.python/Makefile" ;;
-   "gdb.threads/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.threads/Makefile" ;;
-   "gdb.trace/Makefile" ) CONFIG_FILES="$CONFIG_FILES gdb.trace/Makefile" ;;
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/attach.c
+@@ -4231,6 +4231,7 @@ do
+     "gdb.objc/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.objc/Makefile" ;;
+     "gdb.opt/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.opt/Makefile" ;;
+     "gdb.pascal/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.pascal/Makefile" ;;
++    "gdb.pie/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.pie/Makefile" ;;
+     "gdb.python/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.python/Makefile" ;;
+     "gdb.reverse/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.reverse/Makefile" ;;
+     "gdb.threads/Makefile") CONFIG_FILES="$CONFIG_FILES gdb.threads/Makefile" ;;
+Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/attach.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/attach.c	2008-12-09 17:02:55.000000000 +0100
++++ gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/attach.c	2009-09-09 19:06:01.000000000 +0200
 @@ -0,0 +1,20 @@
 +/* This program is intended to be started outside of gdb, and then
 +   attached to by gdb.  Thus, it simply spins in a loop.  The loop
@@ -56,10 +56,10 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/attach.c
 +    }
 +  return 0;
 +}
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/attach2.c
+Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/attach2.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/attach2.c	2008-12-09 17:02:55.000000000 +0100
++++ gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/attach2.c	2009-09-09 19:06:01.000000000 +0200
 @@ -0,0 +1,24 @@
 +/* This program is intended to be started outside of gdb, and then
 +   attached to by gdb.  Thus, it simply spins in a loop.  The loop
@@ -85,10 +85,10 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/attach2.c
 +    }
 +  return (0);
 +}
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break.c
+Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/break.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break.c	2008-12-09 17:02:55.000000000 +0100
++++ gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/break.c	2009-09-09 19:06:01.000000000 +0200
 @@ -0,0 +1,146 @@
 +/* This testcase is part of GDB, the GNU debugger.
 +
@@ -236,10 +236,10 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break.c
 +    }
 +  return 0;
 +}
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break1.c
+Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/break1.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break1.c	2008-12-09 17:02:55.000000000 +0100
++++ gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/break1.c	2009-09-09 19:06:01.000000000 +0200
 @@ -0,0 +1,44 @@
 +/* This testcase is part of GDB, the GNU debugger.
 +
@@ -285,10 +285,10 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break1.c
 +void marker3 (a, b) char *a, *b; {}	/* set breakpoint 18 here */
 +void marker4 (d) long d; {}		/* set breakpoint 13 here */
 +#endif
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/coremaker.c
+Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/coremaker.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/coremaker.c	2008-12-09 17:02:55.000000000 +0100
++++ gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/coremaker.c	2009-09-09 19:06:01.000000000 +0200
 @@ -0,0 +1,142 @@
 +/* Copyright 1992, 1993, 1994, 1995, 1996, 1999
 +   Free Software Foundation, Inc.
@@ -432,10 +432,10 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/coremaker.c
 +  return 0;
 +}
 +
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/attach.exp
+Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/attach.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/attach.exp	2008-12-09 17:02:55.000000000 +0100
++++ gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/attach.exp	2009-09-09 19:06:01.000000000 +0200
 @@ -0,0 +1,432 @@
 +#   Copyright 1997, 1999, 2002 Free Software Foundation, Inc.
 +
@@ -869,11 +869,11 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/attach.exp
 +do_call_attach_tests
 +
 +return 0
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break.exp
+Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/break.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break.exp	2008-12-09 17:24:34.000000000 +0100
-@@ -0,0 +1,973 @@
++++ gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/break.exp	2009-09-09 19:06:01.000000000 +0200
+@@ -0,0 +1,977 @@
 +#   Copyright 1988, 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 1999,
 +#   2000, 2002, 2003, 2004
 +#   Free Software Foundation, Inc.
@@ -1055,6 +1055,9 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break.exp
 +set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
 +set bp_location9 [gdb_get_line_number "set breakpoint 9 here" $srcfile1]
 +
++# Test a pending breakpoint in PIE executable does not crash later GDB.
++gdb_breakpoint "non_existent_function" allow-pending
++
 +gdb_test "info break" \
 +    "Num\[ \]+Type\[ \]+Disp Enb Address\[ \]+What.*
 +\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$main_line.*
@@ -1064,7 +1067,8 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break.exp
 +\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location1.*
 +\[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location2.*
 +\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_if_conditional at .*$srcfile:$bp_location3.*
-+\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_while_conditional at .*$srcfile:$bp_location4" \
++\[0-9\]+\[\t \]+breakpoint     keep y.* in multi_line_while_conditional at .*$srcfile:$bp_location4.*
++\[0-9\]+\[\t \]+breakpoint     keep y.* <PENDING> *non_existent_function" \
 +    "breakpoint info"
 +
 +# FIXME: The rest of this test doesn't work with anything that can't
@@ -1490,7 +1494,7 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break.exp
 +}
 +send_gdb "print marker2(99)\n"
 +gdb_expect {
-+  -re "The program being debugged stopped while in a function called from GDB.\r\nWhen the function .marker2$proto. is done executing, GDB will silently\r\nstop .instead of continuing to evaluate the expression containing\r\nthe function call...*$gdb_prompt $"\
++  -re "The program being debugged stopped while in a function called from GDB.\r\nEvaluation of the expression containing the function\r\n.marker2$proto. will be abandoned.\r\nWhen the function is done executing, GDB will silently stop.\r\n$gdb_prompt $"\
 +          {pass "hit breakpoint on called function"}
 +  -re "$gdb_prompt $"\
 +          {fail "hit breakpoint on called function"}
@@ -1847,10 +1851,10 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/break.exp
 +    send_gdb "set args main\n"
 +    gdb_expect -re ".*$gdb_prompt $" {}
 +}
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/corefile.exp
+Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/corefile.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/corefile.exp	2008-12-09 17:02:55.000000000 +0100
++++ gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/corefile.exp	2009-09-09 19:06:01.000000000 +0200
 @@ -0,0 +1,243 @@
 +# Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
 +# Free Software Foundation, Inc.
@@ -2095,10 +2099,10 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/corefile.exp
 +gdb_test "up" "#\[0-9\]* *\[0-9xa-fH'\]* in .* \\(\\).*" "up in corefile.exp (reinit)"
 +
 +gdb_test "core" "No core file now."
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/Makefile.in
+Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/Makefile.in
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.pie/Makefile.in	2008-12-09 17:02:55.000000000 +0100
++++ gdb-6.8.50.20090909/gdb/testsuite/gdb.pie/Makefile.in	2009-09-09 19:06:01.000000000 +0200
 @@ -0,0 +1,19 @@
 +VPATH = @srcdir@
 +srcdir = @srcdir@

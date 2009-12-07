@@ -3,11 +3,53 @@
         From Jeff Johnston <jjohnstn@redhat.com>
         * gdb.arch/ia64-libunwind.exp: New file.
         * gdb.arch/ia64-libunwind.c: New file.
+
+2004-08-03  Jeff Johnston  <jjohnstn@redhat.com>
+   
+        * gdb.arch/ia64-libunwind.exp: Fix test string to match
+	current code base.
+
+	[ acquire_unwind_info -> ia64_find_proc_info_x ]
+
+2009-04-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove a race from send_gdb "COMMAND\n".
+	Cleanup.
+	Merge in: Patch4: gdb-6.3-rh-testlibunwind1fix-20041202.patch
  
---- /dev/null	Thu Apr 11 10:25:15 2002
-+++ gdb+dejagnu-20040223/gdb/testsuite/gdb.arch/ia64-libunwind.exp	Mon Nov 17 15:57:04 2003
-@@ -0,0 +1,55 @@
-+#   Copyright 2003 Free Software Foundation, Inc.
+--- /dev/null	2009-04-19 08:52:54.499000000 +0200
++++ gdb-6.8/gdb/testsuite/gdb.arch/ia64-libunwind.c	2009-04-30 19:15:16.000000000 +0200
+@@ -0,0 +1,26 @@
++/* Copyright 2003, 2009 Free Software Foundation, Inc.
++
++   This file is part of GDB.
++
++   This program is free software; you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++#include <stdio.h>
++
++int
++main ()
++{
++  printf ("hello world\n");
++ 
++  return 0;
++}
+--- /dev/null	2009-04-19 08:52:54.499000000 +0200
++++ gdb-6.8/gdb/testsuite/gdb.arch/ia64-libunwind.exp	2009-04-30 19:19:22.000000000 +0200
+@@ -0,0 +1,52 @@
++# Copyright 2003, 2009 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
 +# it under the terms of the GNU General Public License as published by
@@ -27,16 +69,6 @@
 +# bug-gdb@prep.ai.mit.edu
 +
 +# This file was written by Jeff Johnston (jjohnstn@redhat.com)
-+
-+if $tracelevel then {
-+    strace $tracelevel
-+}
-+
-+#
-+# test running programs
-+#
-+set prms_id 0
-+set bug_id 0
 +
 +if ![istarget "ia64-*-*"] then {
 +    return
@@ -58,19 +90,14 @@
 +gdb_start
 +gdb_reinitialize_dir $srcdir/$subdir
 +gdb_load ${binfile}
-+send_gdb "set debug arch 1\n"
-+send_gdb "break main\n"
-+gdb_test "run" ".*acquire_unwind_info.*"
-+ 
---- /dev/null	Thu Apr 11 10:25:15 2002
-+++ gdb+dejagnu-20040223/gdb/testsuite/gdb.arch/ia64-libunwind.c	Mon Nov 17 15:58:27 2003
-@@ -0,0 +1,9 @@
-+#include <stdio.h>
 +
-+int main()
-+{
-+  printf ("hello world\n");
-+ 
-+  return 0;
++gdb_test "set debug arch 1"
++gdb_breakpoint "main"
++gdb_run_cmd
++
++set test "libunwind message"
++gdb_test_multiple "" $test {
++    -re "ia64_find_proc_info_x.*$gdb_prompt $" {
++	pass $test
++    }
 +}
-+

@@ -5,10 +5,10 @@ causing: FAIL: gdb.base/unwindonsignal.exp: unwindonsignal, stack unwound
 resume() -> target_resume() move of clear_inline_frame_state() is for:
 gdb.mi/mi-nsmoribund.exp
 
-Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-bt.c
+Index: gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-bt.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/testsuite/gdb.opt/inline-bt.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-bt.c	2009-03-06 19:07:30.000000000 +0100
+--- gdb-6.8.91.20090917.orig/gdb/testsuite/gdb.opt/inline-bt.c	2009-06-28 02:20:24.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-bt.c	2009-09-17 12:49:01.000000000 +0200
 @@ -13,10 +13,16 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
@@ -28,42 +28,10 @@ Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-bt.c
  
  inline int func1(void)
  {
-Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-bt.exp
+Index: gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-cmds.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/testsuite/gdb.opt/inline-bt.exp	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-bt.exp	2009-03-06 19:07:30.000000000 +0100
-@@ -41,18 +41,19 @@ if { [skip_inline_frame_tests] } {
-     return
- }
- 
--set line1 [gdb_get_line_number "set breakpoint 1 here" ${fullsrcfile2}]
--gdb_breakpoint $srcfile2:$line1
-+set line1 [gdb_get_line_number "set breakpoint 1 here" ${srcfile}]
-+gdb_breakpoint $srcfile:$line1
- 
- gdb_test "continue" ".*set breakpoint 1 here.*" "continue to bar (1)"
- gdb_test "backtrace" "#0  bar.*#1  .*main.*" "backtrace from bar (1)"
--gdb_test "info frame" ".*called by frame.*" "bar not inlined"
-+gdb_test "info frame" ".*inlined into frame.*" "bar inlined"
- 
--gdb_test "continue" ".*set breakpoint 1 here.*" "continue to bar (2)"
--gdb_test "backtrace" "#0  bar.*#1  .*func1.*#2  .*main.*" \
--    "backtrace from bar (2)"
--gdb_test "up" "#1  .*func1.*" "up from bar (2)"
--gdb_test "info frame" ".*inlined into frame.*" "func1 inlined (2)"
-+# gcc-4.3.1 omits the line number information for (2).
-+#gdb_test "continue" ".*set breakpoint 1 here.*" "continue to bar (2)"
-+#gdb_test "backtrace" "#0  bar.*#1  .*func1.*#2  .*main.*" \
-+#    "backtrace from bar (2)"
-+#gdb_test "up" "#1  .*func1.*" "up from bar (2)"
-+#gdb_test "info frame" ".*inlined into frame.*" "func1 inlined (2)"
- 
- gdb_test "continue" ".*set breakpoint 1 here.*" "continue to bar (3)"
- gdb_test "backtrace" "#0  bar.*#1  .*func1.*#2  .*func2.*#3  .*main.*" \
-Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-cmds.c
-===================================================================
---- gdb-6.8.50.20090302.orig/gdb/testsuite/gdb.opt/inline-cmds.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-cmds.c	2009-03-06 19:07:30.000000000 +0100
+--- gdb-6.8.91.20090917.orig/gdb/testsuite/gdb.opt/inline-cmds.c	2009-06-28 02:20:24.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-cmds.c	2009-09-17 12:49:01.000000000 +0200
 @@ -13,13 +13,19 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
@@ -86,49 +54,11 @@ Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-cmds.c
  inline int func1(void)
  {
    bar ();
-Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-cmds.exp
+Index: gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-cmds.exp
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/testsuite/gdb.opt/inline-cmds.exp	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-cmds.exp	2009-03-06 19:07:30.000000000 +0100
-@@ -45,28 +45,28 @@ if { [skip_inline_frame_tests] } {
- 
- # First, check that the things we expected to be inlined really were,
- # and those that shouldn't be weren't.
--set line1 [gdb_get_line_number "set breakpoint 1 here" ${fullsrcfile2}]
-+set line1 [gdb_get_line_number "set breakpoint 1 here" ${srcfile2}]
- gdb_breakpoint $srcfile2:$line1
--set line2 [gdb_get_line_number "set breakpoint 2 here" ${fullsrcfile2}]
-+set line2 [gdb_get_line_number "set breakpoint 2 here" ${srcfile2}]
- gdb_breakpoint $srcfile2:$line2
- 
--gdb_test "continue" ".*set breakpoint 1 here.*" "continue to bar (1)"
-+gdb_test "continue" "set breakpoint 1 here.*" "continue to bar (1)"
- gdb_test "backtrace" "#0  bar.*#1  .*func1.*#2  .*main.*" \
-     "backtrace from bar (1)"
- gdb_test "up" "#1  .*func1.*" "up from bar (1)"
--gdb_test "info frame" ".*inlined into frame.*" "func1 inlined (1)"
-+gdb_test "info frame" "inlined into frame.*" "func1 inlined (1)"
- 
--gdb_test "continue" ".*set breakpoint 1 here.*" "continue to bar (2)"
-+gdb_test "continue" "set breakpoint 1 here.*" "continue to bar (2)"
- gdb_test "backtrace" "#0  bar.*#1  .*func1.*#2  .*func2.*#3  .*main.*" \
-     "backtrace from bar (2)"
- gdb_test "up" "#1  .*func1.*" "up from bar (2)"
--gdb_test "info frame" ".*inlined into frame.*" "func1 inlined (2)"
-+gdb_test "info frame" "inlined into frame.*" "func1 inlined (2)"
- gdb_test "up" "#2  .*func2.*" "up from func1 (2)"
--gdb_test "info frame" ".*inlined into frame.*" "func2 inlined (2)"
-+gdb_test "info frame" "inlined into frame.*" "func2 inlined (2)"
- 
--gdb_test "continue" ".*set breakpoint 2 here.*" "continue to marker"
-+gdb_test "continue" "set breakpoint 2 here.*" "continue to marker"
- gdb_test "backtrace" "#0  marker.*#1  .*main.*" "backtrace from marker"
--gdb_test "info frame" ".*called by frame.*" "marker not inlined"
-+gdb_test "info frame" "\n called by frame.*" "marker not inlined"
- 
- # Next, check that we can next over inlined functions.  We should not end up
- # inside any of them.
-@@ -201,7 +201,7 @@ set line3 [gdb_get_line_number "set brea
+--- gdb-6.8.91.20090917.orig/gdb/testsuite/gdb.opt/inline-cmds.exp	2009-06-28 02:20:24.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-cmds.exp	2009-09-17 12:49:01.000000000 +0200
+@@ -230,7 +230,7 @@ set line3 [gdb_get_line_number "set brea
  gdb_breakpoint $line3
  gdb_continue_to_breakpoint "consecutive func1"
  
@@ -137,7 +67,7 @@ Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-cmds.exp
  set msg "next to second func1"
  gdb_test_multiple "next" $msg {
      -re ".*func1 .*second call.*$gdb_prompt $" {
-@@ -224,16 +224,16 @@ set line4 [gdb_get_line_number "set brea
+@@ -253,16 +253,16 @@ set line4 [gdb_get_line_number "set brea
  gdb_breakpoint $line4
  gdb_continue_to_breakpoint "func1 then func3"
  
@@ -158,7 +88,7 @@ Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-cmds.exp
  gdb_test "finish" "func1 \\\(\\\);" "finish from marker to func1"
  
  gdb_test "step" "bar \\\(\\\);" "step into func1 for finish"
-@@ -268,12 +268,12 @@ gdb_test "step" "noinline \\\(\\\) at .*
+@@ -297,12 +297,12 @@ gdb_test "step" "noinline \\\(\\\) at .*
  gdb_test "bt" "#0  noinline.*#1  .*outer_inline1.*#2  .*outer_inline2.*#3  main.*" "backtrace at noinline from outer_inline1"
  gdb_test "step" "inlined_fn \\\(\\\) at .*" "enter inlined_fn from noinline"
  gdb_test "bt" "#0  inlined_fn.*#1  noinline.*#2  .*outer_inline1.*#3  .*outer_inline2.*#4  main.*" "backtrace at inlined_fn from noinline"
@@ -180,10 +110,10 @@ Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-cmds.exp
 +gdb_test "info frame" "inlined into frame.*" "outer_inline2 inlined"
 +gdb_test "fini" "" "up from outer_inline2"
 +gdb_test "info frame" " in main \[^\n\]*\n source language.*" "main not inlined"
-Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-locals.c
+Index: gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-locals.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/testsuite/gdb.opt/inline-locals.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-locals.c	2009-03-06 19:07:30.000000000 +0100
+--- gdb-6.8.91.20090917.orig/gdb/testsuite/gdb.opt/inline-locals.c	2009-06-28 02:20:24.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-locals.c	2009-09-17 12:49:01.000000000 +0200
 @@ -13,11 +13,16 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
@@ -203,21 +133,10 @@ Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-locals.c
  
  inline int func1(int arg1)
  {
-Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-locals.exp
+Index: gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-locals.exp
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/testsuite/gdb.opt/inline-locals.exp	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-locals.exp	2009-03-06 19:07:30.000000000 +0100
-@@ -43,8 +43,8 @@ if { [skip_inline_var_tests] } {
- 
- set no_frames [skip_inline_frame_tests]
- 
--set line1 [gdb_get_line_number "set breakpoint 1 here" ${fullsrcfile2}]
--gdb_breakpoint $srcfile2:$line1
-+set line1 [gdb_get_line_number "set breakpoint 1 here" ${srcfile}]
-+gdb_breakpoint $srcfile:$line1
- 
- gdb_test "continue" ".*set breakpoint 1 here.*" "continue to bar (1)"
- 
+--- gdb-6.8.91.20090917.orig/gdb/testsuite/gdb.opt/inline-locals.exp	2009-06-30 17:50:27.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-locals.exp	2009-09-17 12:49:01.000000000 +0200
 @@ -77,6 +77,9 @@ if { ! $no_frames } {
  
  # Make sure that locals on the stack are found.  This is an array to
@@ -236,11 +155,11 @@ Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-locals.exp
 +    setup_kfail *-*-* "gcc/debug.optimization"
 +}
  gdb_test "print array\[0\]" "\\\$$decimal = 184" "print local (3)"
-Index: gdb-6.8.50.20090302/gdb/frame.c
+Index: gdb-6.8.91.20090917/gdb/frame.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/frame.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/frame.c	2009-03-06 19:07:30.000000000 +0100
-@@ -269,7 +269,7 @@ fprint_frame (struct ui_file *file, stru
+--- gdb-6.8.91.20090917.orig/gdb/frame.c	2009-09-17 12:48:49.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/frame.c	2009-09-17 12:49:01.000000000 +0200
+@@ -310,7 +310,7 @@ fprint_frame (struct ui_file *file, stru
  static struct frame_info *
  skip_inlined_frames (struct frame_info *frame)
  {
@@ -249,7 +168,7 @@ Index: gdb-6.8.50.20090302/gdb/frame.c
      frame = get_prev_frame (frame);
  
    return frame;
-@@ -1670,6 +1670,7 @@ get_frame_address_in_block (struct frame
+@@ -1778,6 +1778,7 @@ get_frame_address_in_block (struct frame
  {
    /* A draft address.  */
    CORE_ADDR pc = get_frame_pc (this_frame);
@@ -257,7 +176,7 @@ Index: gdb-6.8.50.20090302/gdb/frame.c
  
    struct frame_info *next_frame = this_frame->next;
  
-@@ -1712,6 +1713,9 @@ get_frame_address_in_block (struct frame
+@@ -1820,6 +1821,9 @@ get_frame_address_in_block (struct frame
       while in an inlined function, then the code address of the
       "calling" normal function should not be adjusted either.  */
  
@@ -267,7 +186,7 @@ Index: gdb-6.8.50.20090302/gdb/frame.c
    while (get_frame_type (next_frame) == INLINE_FRAME)
      next_frame = next_frame->next;
  
-@@ -1743,7 +1747,7 @@ find_frame_sal (struct frame_info *frame
+@@ -1851,7 +1855,7 @@ find_frame_sal (struct frame_info *frame
  	sym = inline_skipped_symbol (inferior_ptid);
  
        init_sal (sal);
@@ -276,19 +195,19 @@ Index: gdb-6.8.50.20090302/gdb/frame.c
  	{
  	  sal->symtab = SYMBOL_SYMTAB (sym);
  	  sal->line = SYMBOL_LINE (sym);
-Index: gdb-6.8.50.20090302/gdb/breakpoint.c
+Index: gdb-6.8.91.20090917/gdb/breakpoint.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/breakpoint.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/breakpoint.c	2009-03-06 19:07:30.000000000 +0100
-@@ -57,6 +57,7 @@
- #include "top.h"
- #include "wrapper.h"
- #include "valprint.h"
+--- gdb-6.8.91.20090917.orig/gdb/breakpoint.c	2009-09-17 12:48:51.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/breakpoint.c	2009-09-17 12:49:12.000000000 +0200
+@@ -62,6 +62,7 @@
+ #include "jit.h"
+ #include "xml-syscall.h"
+ #include "parser-defs.h"
 +#include "inline-frame.h"
  
- #include "mi/mi-common.h"
- 
-@@ -2902,10 +2903,24 @@ bpstat_check_breakpoint_conditions (bpst
+ /* readline include files */
+ #include "readline/readline.h"
+@@ -3220,10 +3221,24 @@ bpstat_check_breakpoint_conditions (bpst
    const struct bp_location *bl = bs->breakpoint_at;
    struct breakpoint *b = bl->owner;
  
@@ -317,7 +236,7 @@ Index: gdb-6.8.50.20090302/gdb/breakpoint.c
      {
        int value_is_zero = 0;
        
-@@ -3044,6 +3059,12 @@ bpstat_stop_status (CORE_ADDR bp_addr, p
+@@ -3383,6 +3398,12 @@ bpstat_stop_status (CORE_ADDR bp_addr, p
  	    bs->print = 0;
  	  }
  	bs->commands = copy_command_lines (bs->commands);
@@ -330,7 +249,7 @@ Index: gdb-6.8.50.20090302/gdb/breakpoint.c
        }
  
      /* Print nothing for this entry if we dont stop or if we dont print.  */
-@@ -5168,9 +5189,9 @@ set_momentary_breakpoint (struct symtab_
+@@ -5572,9 +5593,9 @@ set_momentary_breakpoint (struct gdbarch
  {
    struct breakpoint *b;
  
@@ -341,13 +260,13 @@ Index: gdb-6.8.50.20090302/gdb/breakpoint.c
 +     shortcut the case of returning _from_ an inline frame we still may be
 +     returning from non-inlined frame _to_ an inlined frame.  */
  
-   b = set_raw_breakpoint (sal, type);
+   b = set_raw_breakpoint (gdbarch, sal, type);
    b->enable_state = bp_enabled;
-Index: gdb-6.8.50.20090302/gdb/inline-frame.c
+Index: gdb-6.8.91.20090917/gdb/inline-frame.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/inline-frame.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/inline-frame.c	2009-03-06 19:07:30.000000000 +0100
-@@ -183,6 +183,12 @@ inline_frame_sniffer (const struct frame
+--- gdb-6.8.91.20090917.orig/gdb/inline-frame.c	2009-09-13 18:28:28.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/inline-frame.c	2009-09-17 12:49:01.000000000 +0200
+@@ -199,6 +199,12 @@ inline_frame_sniffer (const struct frame
    if (frame_block == NULL)
      return 0;
  
@@ -360,7 +279,7 @@ Index: gdb-6.8.50.20090302/gdb/inline-frame.c
    /* Calculate DEPTH, the number of inlined functions at this
       location.  */
    depth = 0;
-@@ -192,6 +198,10 @@ inline_frame_sniffer (const struct frame
+@@ -208,6 +214,10 @@ inline_frame_sniffer (const struct frame
        if (block_inlined_p (cur_block))
  	depth++;
  
@@ -371,7 +290,7 @@ Index: gdb-6.8.50.20090302/gdb/inline-frame.c
        cur_block = BLOCK_SUPERBLOCK (cur_block);
      }
  
-@@ -275,7 +285,6 @@ skip_inline_frames (ptid_t ptid)
+@@ -291,7 +301,6 @@ skip_inline_frames (ptid_t ptid)
  {
    CORE_ADDR this_pc;
    struct block *frame_block, *cur_block;
@@ -379,7 +298,7 @@ Index: gdb-6.8.50.20090302/gdb/inline-frame.c
    int skip_count = 0;
    struct inline_state *state;
  
-@@ -296,10 +305,7 @@ skip_inline_frames (ptid_t ptid)
+@@ -312,10 +321,7 @@ skip_inline_frames (ptid_t ptid)
  		 of BLOCK_START.  */
  	      if (BLOCK_START (cur_block) == this_pc
  		  || block_starting_point_at (this_pc, cur_block))
@@ -391,7 +310,7 @@ Index: gdb-6.8.50.20090302/gdb/inline-frame.c
  	      else
  		break;
  	    }
-@@ -311,7 +317,6 @@ skip_inline_frames (ptid_t ptid)
+@@ -327,7 +333,6 @@ skip_inline_frames (ptid_t ptid)
    state = allocate_inline_frame_state (ptid);
    state->skipped_frames = skip_count;
    state->saved_pc = this_pc;
@@ -399,7 +318,7 @@ Index: gdb-6.8.50.20090302/gdb/inline-frame.c
  
    if (skip_count != 0)
      reinit_frame_cache ();
-@@ -329,6 +334,23 @@ step_into_inline_frame (ptid_t ptid)
+@@ -345,6 +350,23 @@ step_into_inline_frame (ptid_t ptid)
    reinit_frame_cache ();
  }
  
@@ -423,10 +342,10 @@ Index: gdb-6.8.50.20090302/gdb/inline-frame.c
  /* Return the number of hidden functions inlined into the current
     frame.  */
  
-Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-markers.c
+Index: gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-markers.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/testsuite/gdb.opt/inline-markers.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-markers.c	2009-03-06 19:07:30.000000000 +0100
+--- gdb-6.8.91.20090917.orig/gdb/testsuite/gdb.opt/inline-markers.c	2009-06-28 02:20:24.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/testsuite/gdb.opt/inline-markers.c	2009-09-17 12:49:01.000000000 +0200
 @@ -15,11 +15,6 @@
  
  extern int x, y;
@@ -439,11 +358,11 @@ Index: gdb-6.8.50.20090302/gdb/testsuite/gdb.opt/inline-markers.c
  void marker(void)
  {
    x += y; /* set breakpoint 2 here */
-Index: gdb-6.8.50.20090302/gdb/gdbthread.h
+Index: gdb-6.8.91.20090917/gdb/gdbthread.h
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/gdbthread.h	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/gdbthread.h	2009-03-06 19:07:30.000000000 +0100
-@@ -180,6 +180,12 @@ struct thread_info
+--- gdb-6.8.91.20090917.orig/gdb/gdbthread.h	2009-09-17 12:47:07.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/gdbthread.h	2009-09-17 12:49:01.000000000 +0200
+@@ -191,6 +191,12 @@ struct thread_info
  
    /* Private data used by the target vector implementation.  */
    struct private_thread_info *private;
@@ -456,11 +375,11 @@ Index: gdb-6.8.50.20090302/gdb/gdbthread.h
  };
  
  /* Create an empty thread list, or empty the existing one.  */
-Index: gdb-6.8.50.20090302/gdb/infcmd.c
+Index: gdb-6.8.91.20090917/gdb/infcmd.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/infcmd.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/infcmd.c	2009-03-06 19:07:30.000000000 +0100
-@@ -1391,11 +1391,11 @@ finish_command_continuation (void *arg)
+--- gdb-6.8.91.20090917.orig/gdb/infcmd.c	2009-09-17 12:47:07.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/infcmd.c	2009-09-17 12:49:01.000000000 +0200
+@@ -1434,11 +1434,11 @@ finish_command_continuation (void *arg)
        struct type *value_type;
  
        value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (a->function));
@@ -474,9 +393,9 @@ Index: gdb-6.8.50.20090302/gdb/infcmd.c
  	print_return_value (SYMBOL_TYPE (a->function), value_type);
      }
  
-@@ -1499,6 +1499,16 @@ finish_forward (struct symbol *function,
- 
-   old_chain = make_cleanup_delete_breakpoint (breakpoint);
+@@ -1546,6 +1546,16 @@ finish_forward (struct symbol *function,
+   tp->initiating_frame = get_frame_id (frame);
+   make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
  
 +  /* We should _always_ set CURRENT_PC_IS_NOTCURRENT here to always see the
 +     calling line with the message `Value returned is ...'.  Currently it is
@@ -489,9 +408,9 @@ Index: gdb-6.8.50.20090302/gdb/infcmd.c
 +    tp->current_pc_is_notcurrent = 1;
 +
    tp->proceed_to_finish = 1;    /* We want stop_registers, please...  */
-   make_cleanup_restore_integer (&suppress_stop_observer);
-   suppress_stop_observer = 1;
-@@ -1522,7 +1532,9 @@ finish_forward (struct symbol *function,
+   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+ 
+@@ -1567,7 +1577,9 @@ finish_forward (struct symbol *function,
  static void
  finish_command (char *arg, int from_tty)
  {
@@ -502,7 +421,7 @@ Index: gdb-6.8.50.20090302/gdb/infcmd.c
    struct symbol *function;
  
    int async_exec = 0;
-@@ -1553,46 +1565,63 @@ finish_command (char *arg, int from_tty)
+@@ -1598,45 +1610,63 @@ finish_command (char *arg, int from_tty)
    if (!target_has_execution)
      error (_("The program is not running."));
  
@@ -523,16 +442,15 @@ Index: gdb-6.8.50.20090302/gdb/infcmd.c
 -      == INLINE_FRAME)
 +  if (get_frame_type (current_frame) == INLINE_FRAME)
      {
-       struct thread_info *tp = inferior_thread ();
--
 -      /* Claim we are stepping in the calling frame.  An empty step
 -	 range means that we will stop once we aren't in a function
 -	 called by that frame.  We don't use the magic "1" value for
 -	 step_range_end, because then infrun will think this is nexti,
 -	 and not step over the rest of this inlined function call.  */
+       struct thread_info *tp = inferior_thread ();
        struct symtab_and_line empty_sal;
 -      init_sal (&empty_sal);
--      set_step_info (tp, frame, empty_sal);
+-      set_step_info (frame, empty_sal);
 -      tp->step_range_start = tp->step_range_end = get_frame_pc (frame);
 -      tp->step_over_calls = STEP_OVER_ALL;
 +      struct block *frame_block;
@@ -544,8 +462,8 @@ Index: gdb-6.8.50.20090302/gdb/infcmd.c
  	  printf_filtered (_("Run till exit from "));
 -	  print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
 +	  print_stack_frame (current_frame, 1, LOCATION);
- 	}
- 
++	}
++
 +      /* Even just a single stepi would get us out of the caller function PC
 +	 range.  */
 +
@@ -561,15 +479,15 @@ Index: gdb-6.8.50.20090302/gdb/infcmd.c
 +	  tp->current_pc_is_notcurrent = 1;
 +	  normal_stop ();
 +	  return;
-+	}
-+
+ 	}
+ 
 +      /* Claim we are stepping in the calling frame.  An empty step
 +	 range means that we will stop once we aren't in a function
 +	 called by that frame.  We don't use the magic "1" value for
 +	 step_range_end, because then infrun will think this is nexti,
 +	 and not step over the rest of this inlined function call.  */
 +      init_sal (&empty_sal);
-+      set_step_info (tp, prev_frame, empty_sal);
++      set_step_info (prev_frame, empty_sal);
 +      tp->step_range_start = tp->step_range_end = get_frame_pc (prev_frame);
 +      tp->step_over_calls = STEP_OVER_ALL;
 +
@@ -584,7 +502,7 @@ Index: gdb-6.8.50.20090302/gdb/infcmd.c
  
    /* Print info on the selected frame, including level number but not
       source.  */
-@@ -1606,10 +1635,14 @@ finish_command (char *arg, int from_tty)
+@@ -1650,10 +1680,14 @@ finish_command (char *arg, int from_tty)
        print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
      }
  
@@ -600,52 +518,22 @@ Index: gdb-6.8.50.20090302/gdb/infcmd.c
  }
  
  
-Index: gdb-6.8.50.20090302/gdb/infrun.c
+Index: gdb-6.8.91.20090917/gdb/target.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/infrun.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/infrun.c	2009-03-06 19:07:30.000000000 +0100
-@@ -1152,8 +1152,6 @@ a command like `return' or `jump' to con
- 	    step = 0;
- 	}
- 
--      clear_inline_frame_state (resume_ptid);
--
-       if (debug_displaced
-           && use_displaced_stepping (gdbarch)
-           && tp->trap_expected)
-@@ -1205,6 +1203,8 @@ clear_proceed_status_thread (struct thre
- 
-   /* Discard any remaining commands or status from previous stop.  */
-   bpstat_clear (&tp->stop_bpstat);
-+
-+  tp->current_pc_is_notcurrent = 0;
- }
- 
- static int
-Index: gdb-6.8.50.20090302/gdb/target.c
-===================================================================
---- gdb-6.8.50.20090302.orig/gdb/target.c	2009-03-06 19:07:26.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/target.c	2009-03-06 19:07:30.000000000 +0100
-@@ -41,6 +41,7 @@
- #include "target-descriptions.h"
- #include "gdbthread.h"
- #include "solib.h"
-+#include "inline-frame.h"
- 
- static void target_info (char *, int);
- 
-@@ -1925,6 +1926,7 @@ target_resume (ptid_t ptid, int step, en
+--- gdb-6.8.91.20090917.orig/gdb/target.c	2009-09-17 12:48:49.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/target.c	2009-09-17 12:49:01.000000000 +0200
+@@ -2187,6 +2187,7 @@ target_resume (ptid_t ptid, int step, en
  {
    struct target_ops *t;
  
 +  clear_inline_frame_state (ptid);
-   dcache_invalidate (target_dcache);
+   target_dcache_invalidate ();
  
    for (t = current_target.beneath; t != NULL; t = t->beneath)
-Index: gdb-6.8.50.20090302/gdb/inline-frame.h
+Index: gdb-6.8.91.20090917/gdb/inline-frame.h
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/inline-frame.h	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/inline-frame.h	2009-03-06 19:07:30.000000000 +0100
+--- gdb-6.8.91.20090917.orig/gdb/inline-frame.h	2009-06-28 02:20:22.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/inline-frame.h	2009-09-17 12:49:01.000000000 +0200
 @@ -43,6 +43,10 @@ void clear_inline_frame_state (ptid_t pt
  
  void step_into_inline_frame (ptid_t ptid);
@@ -657,41 +545,19 @@ Index: gdb-6.8.50.20090302/gdb/inline-frame.h
  /* Return the number of hidden functions inlined into the current
     frame.  */
  
-Index: gdb-6.8.50.20090302/gdb/infcall.c
+Index: gdb-6.8.91.20090917/gdb/dwarf2read.c
 ===================================================================
---- gdb-6.8.50.20090302.orig/gdb/infcall.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/infcall.c	2009-03-06 19:07:30.000000000 +0100
-@@ -898,8 +898,15 @@ The program being debugged exited while 
- 
- 	  if (unwind_on_signal_p)
- 	    {
--	      /* The user wants the context restored.  Calling error will
--	         run inf_status_cleanup, which does all the work.  */
-+	      /* The user wants the context restored. */
-+
-+	      /* We must get back to the frame we were before the
-+		 dummy call.  */
-+	      dummy_frame_pop (dummy_id);
-+
-+	      /* We also need to restore inferior status to that before the
-+		 dummy call.  */
-+	      restore_inferior_status (inf_status);
- 
- 	      /* FIXME: Insert a bunch of wrap_here; name can be very
- 		 long if it's a C++ name with arguments and stuff.  */
-Index: gdb-6.8.50.20090302/gdb/dwarf2read.c
-===================================================================
---- gdb-6.8.50.20090302.orig/gdb/dwarf2read.c	2009-03-06 19:07:30.000000000 +0100
-+++ gdb-6.8.50.20090302/gdb/dwarf2read.c	2009-03-06 19:07:40.000000000 +0100
-@@ -3463,6 +3463,7 @@ read_func_scope (struct die_info *die, s
+--- gdb-6.8.91.20090917.orig/gdb/dwarf2read.c	2009-09-17 12:48:51.000000000 +0200
++++ gdb-6.8.91.20090917/gdb/dwarf2read.c	2009-09-17 12:49:01.000000000 +0200
+@@ -4128,6 +4128,7 @@ read_func_scope (struct die_info *die, s
+   struct block *block;
    unsigned die_children = 0;
-   struct attribute *call_line, *call_file;
    int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
 +  struct type *type;
  
    if (inlined_func)
      {
-@@ -3504,7 +3505,10 @@ read_func_scope (struct die_info *die, s
+@@ -4169,7 +4170,10 @@ read_func_scope (struct die_info *die, s
    add_to_cu_func_list (name, lowpc, highpc, cu);
  
    new = push_context (0, lowpc);
@@ -703,11 +569,3 @@ Index: gdb-6.8.50.20090302/gdb/dwarf2read.c
  
    /* If there is a location expression for DW_AT_frame_base, record
       it.  */
-@@ -8746,6 +8750,7 @@ read_type_die (struct die_info *die, str
-       break;
-     case DW_TAG_subprogram:
-     case DW_TAG_subroutine_type:
-+    case DW_TAG_inlined_subroutine:
-       this_type = read_subroutine_type (die, cu);
-       break;
-     case DW_TAG_array_type:

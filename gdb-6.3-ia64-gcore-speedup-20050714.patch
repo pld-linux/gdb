@@ -7,13 +7,13 @@
 	(ia64_rse_skip_regs): Ditto.
 	(ia64_linux_check_stack_region): New function.
 	
-Index: gdb-6.8.50.20090226/gdb/linux-nat.c
+Index: gdb-6.8.50.20090803/gdb/linux-nat.c
 ===================================================================
---- gdb-6.8.50.20090226.orig/gdb/linux-nat.c	2009-02-27 07:51:44.000000000 +0100
-+++ gdb-6.8.50.20090226/gdb/linux-nat.c	2009-02-28 07:19:05.000000000 +0100
-@@ -4386,15 +4386,38 @@ linux_xfer_partial (struct target_ops *o
-     return linux_nat_xfer_osdata (ops, object, annex, readbuf, writebuf,
-                                offset, len);
+--- gdb-6.8.50.20090803.orig/gdb/linux-nat.c	2009-08-04 06:29:55.000000000 +0200
++++ gdb-6.8.50.20090803/gdb/linux-nat.c	2009-08-04 06:30:53.000000000 +0200
+@@ -4495,15 +4495,38 @@ linux_xfer_partial (struct target_ops *o
+ 	offset &= ((ULONGEST) 1 << addr_bit) - 1;
+     }
  
 -#ifndef NATIVE_XFER_UNWIND_TABLE
 -  /* FIXME: For ia64, we cannot currently use linux_proc_xfer_memory
@@ -55,10 +55,10 @@ Index: gdb-6.8.50.20090226/gdb/linux-nat.c
  
    return super_xfer_partial (ops, object, annex, readbuf, writebuf,
  			     offset, len);
-Index: gdb-6.8.50.20090226/gdb/ia64-linux-nat.c
+Index: gdb-6.8.50.20090803/gdb/ia64-linux-nat.c
 ===================================================================
---- gdb-6.8.50.20090226.orig/gdb/ia64-linux-nat.c	2009-02-23 01:03:49.000000000 +0100
-+++ gdb-6.8.50.20090226/gdb/ia64-linux-nat.c	2009-02-28 07:18:10.000000000 +0100
+--- gdb-6.8.50.20090803.orig/gdb/ia64-linux-nat.c	2009-02-23 01:03:49.000000000 +0100
++++ gdb-6.8.50.20090803/gdb/ia64-linux-nat.c	2009-08-04 06:30:53.000000000 +0200
 @@ -809,6 +809,64 @@ ia64_linux_xfer_partial (struct target_o
  
  void _initialize_ia64_linux_nat (void);

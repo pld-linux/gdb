@@ -5,8 +5,10 @@
 	* gdb.cp/b146835b.cc: Ditto.
 	* gdb.cp/b146835.h: Ditto.
 
---- gdb-6.3/gdb/testsuite/gdb.cp/b146835b.cc.fix3	2005-07-26 16:47:12.000000000 -0400
-+++ gdb-6.3/gdb/testsuite/gdb.cp/b146835b.cc	2005-07-26 16:53:31.000000000 -0400
+Index: gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835b.cc
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835b.cc	2009-08-12 06:07:50.000000000 +0200
 @@ -0,0 +1,11 @@
 +#include "b146835.h"
 +
@@ -19,8 +21,10 @@
 +void A::funcD (class E *e, class D *d) {}
 +void A::funcE (E *e, D *d) {}
 +void A::funcF (unsigned long x, D *d) {}
---- gdb-6.3/gdb/testsuite/gdb.cp/b146835.cc.fix3	2005-07-26 16:47:20.000000000 -0400
-+++ gdb-6.3/gdb/testsuite/gdb.cp/b146835.cc	2005-07-26 16:46:50.000000000 -0400
+Index: gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835.cc
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835.cc	2009-08-12 06:07:50.000000000 +0200
 @@ -0,0 +1,32 @@
 +#include "b146835.h"
 +#include <iostream>
@@ -54,9 +58,11 @@
 +   f.foo();
 +}
 +
---- gdb-6.3/gdb/testsuite/gdb.cp/b146835.exp.fix3	2005-07-26 16:47:26.000000000 -0400
-+++ gdb-6.3/gdb/testsuite/gdb.cp/b146835.exp	2005-07-26 16:46:50.000000000 -0400
-@@ -0,0 +1,55 @@
+Index: gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835.exp
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835.exp	2009-08-12 06:58:28.000000000 +0200
+@@ -0,0 +1,54 @@
 +# This testcase is part of GDB, the GNU debugger.
 +
 +# Copyright 2005 Free Software Foundation, Inc.
@@ -110,10 +116,11 @@
 +gdb_continue_to_breakpoint "First line foo"
 +
 +# Verify that we can access the inherited member d
-+gdb_test "p d" ".*(struct D \*.).*0x0" "Verify inherited member d accessible"
-+
---- gdb-6.3/gdb/testsuite/gdb.cp/b146835.h.fix3	2005-07-26 16:47:36.000000000 -0400
-+++ gdb-6.3/gdb/testsuite/gdb.cp/b146835.h	2005-07-26 16:53:18.000000000 -0400
++gdb_test "p d" " = \\(D \\*\\) *0x0" "Verify inherited member d accessible"
+Index: gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835.h
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835.h	2009-08-12 06:07:50.000000000 +0200
 @@ -0,0 +1,36 @@
 +
 +class A {

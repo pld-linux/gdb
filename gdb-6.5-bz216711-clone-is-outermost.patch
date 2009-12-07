@@ -23,11 +23,11 @@ instead.
 
 	Port to GDB-6.7.
 
-Index: gdb-6.8.50.20081128/gdb/amd64-linux-tdep.c
+Index: gdb-6.8.50.20090802/gdb/amd64-linux-tdep.c
 ===================================================================
---- gdb-6.8.50.20081128.orig/gdb/amd64-linux-tdep.c	2008-12-08 10:56:17.000000000 +0100
-+++ gdb-6.8.50.20081128/gdb/amd64-linux-tdep.c	2008-12-08 21:11:08.000000000 +0100
-@@ -234,6 +234,80 @@ amd64_linux_register_reggroup_p (struct 
+--- gdb-6.8.50.20090802.orig/gdb/amd64-linux-tdep.c	2009-07-02 19:25:52.000000000 +0200
++++ gdb-6.8.50.20090802/gdb/amd64-linux-tdep.c	2009-08-03 15:50:08.000000000 +0200
+@@ -238,6 +238,80 @@ amd64_linux_register_reggroup_p (struct 
  
  /* Set the program counter for process PTID to PC.  */
  
@@ -108,7 +108,7 @@ Index: gdb-6.8.50.20081128/gdb/amd64-linux-tdep.c
  static void
  amd64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
  {
-@@ -272,6 +346,8 @@ amd64_linux_init_abi (struct gdbarch_inf
+@@ -276,6 +350,8 @@ amd64_linux_init_abi (struct gdbarch_inf
    tdep->sc_reg_offset = amd64_linux_sc_reg_offset;
    tdep->sc_num_regs = ARRAY_SIZE (amd64_linux_sc_reg_offset);
  
@@ -117,11 +117,11 @@ Index: gdb-6.8.50.20081128/gdb/amd64-linux-tdep.c
    /* GNU/Linux uses SVR4-style shared libraries.  */
    set_solib_svr4_fetch_link_map_offsets
      (gdbarch, svr4_lp64_fetch_link_map_offsets);
-Index: gdb-6.8.50.20081128/gdb/amd64-tdep.c
+Index: gdb-6.8.50.20090802/gdb/amd64-tdep.c
 ===================================================================
---- gdb-6.8.50.20081128.orig/gdb/amd64-tdep.c	2008-12-08 10:56:17.000000000 +0100
-+++ gdb-6.8.50.20081128/gdb/amd64-tdep.c	2008-12-08 21:05:12.000000000 +0100
-@@ -1044,11 +1044,16 @@ amd64_frame_this_id (struct frame_info *
+--- gdb-6.8.50.20090802.orig/gdb/amd64-tdep.c	2009-07-02 19:25:52.000000000 +0200
++++ gdb-6.8.50.20090802/gdb/amd64-tdep.c	2009-08-03 15:50:08.000000000 +0200
+@@ -1736,11 +1736,16 @@ amd64_frame_this_id (struct frame_info *
  {
    struct amd64_frame_cache *cache =
      amd64_frame_cache (this_frame, this_cache);
@@ -138,38 +138,34 @@ Index: gdb-6.8.50.20081128/gdb/amd64-tdep.c
    (*this_id) = frame_id_build (cache->base + 16, cache->pc);
  }
  
-Index: gdb-6.8.50.20081128/gdb/i386-tdep.c
-===================================================================
---- gdb-6.8.50.20081128.orig/gdb/i386-tdep.c	2008-12-08 10:56:17.000000000 +0100
-+++ gdb-6.8.50.20081128/gdb/i386-tdep.c	2008-12-08 11:00:43.000000000 +0100
-@@ -2698,6 +2698,9 @@ i386_gdbarch_init (struct gdbarch_info i
+--- gdb-6.8.50.20090811/gdb/i386-tdep.c.orig	2009-08-10 05:02:39.000000000 +0200
++++ gdb-6.8.50.20090811/gdb/i386-tdep.c	2009-08-11 16:33:51.000000000 +0200
+@@ -5432,6 +5432,9 @@ i386_gdbarch_init (struct gdbarch_info i
    tdep->sc_pc_offset = -1;
    tdep->sc_sp_offset = -1;
  
 +  /* Unwinding stops on i386 automatically.  */
 +  tdep->outermost_frame_p = NULL;
 +
+   tdep->record_regmap = i386_record_regmap;
+ 
    /* The format used for `long double' on almost all i386 targets is
-      the i387 extended floating-point format.  In fact, of all targets
-      in the GCC 2.95 tree, only OSF/1 does it different, and insists
-Index: gdb-6.8.50.20081128/gdb/i386-tdep.h
-===================================================================
---- gdb-6.8.50.20081128.orig/gdb/i386-tdep.h	2008-12-08 10:56:17.000000000 +0100
-+++ gdb-6.8.50.20081128/gdb/i386-tdep.h	2008-12-08 21:07:47.000000000 +0100
-@@ -106,6 +106,9 @@ struct gdbarch_tdep
-   /* ISA-specific data types.  */
-   struct type *i386_mmx_type;
-   struct type *i386_sse_type;
+--- gdb-6.8.50.20090811/gdb/i386-tdep.h.orig	2009-08-10 05:02:39.000000000 +0200
++++ gdb-6.8.50.20090811/gdb/i386-tdep.h	2009-08-11 16:34:08.000000000 +0200
+@@ -120,6 +120,9 @@ struct gdbarch_tdep
+   int (*i386_sysenter_record) (struct regcache *regcache);
+   /* Parse syscall args.  */
+   int (*i386_syscall_record) (struct regcache *regcache);
 +
 +  /* Detect OS dependent outermost frames; such as `clone'.  */
 +  int (*outermost_frame_p) (struct frame_info *this_frame);
  };
  
  /* Floating-point registers.  */
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.threads/bt-clone-stop.c
+Index: gdb-6.8.50.20090802/gdb/testsuite/gdb.threads/bt-clone-stop.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.threads/bt-clone-stop.c	2008-12-08 11:00:43.000000000 +0100
++++ gdb-6.8.50.20090802/gdb/testsuite/gdb.threads/bt-clone-stop.c	2009-08-03 15:50:08.000000000 +0200
 @@ -0,0 +1,39 @@
 +/* This testcase is part of GDB, the GNU debugger.
 +
@@ -210,10 +206,10 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.threads/bt-clone-stop.c
 +	for (;;)
 +		pause();
 +}
-Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.threads/bt-clone-stop.exp
+Index: gdb-6.8.50.20090802/gdb/testsuite/gdb.threads/bt-clone-stop.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20081128/gdb/testsuite/gdb.threads/bt-clone-stop.exp	2008-12-08 11:00:43.000000000 +0100
++++ gdb-6.8.50.20090802/gdb/testsuite/gdb.threads/bt-clone-stop.exp	2009-08-03 15:50:08.000000000 +0200
 @@ -0,0 +1,61 @@
 +# Copyright 2006 Free Software Foundation, Inc.
 +

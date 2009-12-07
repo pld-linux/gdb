@@ -30,75 +30,55 @@ glibc-debuginfo-2.7-2.x86_64: /usr/lib/debug/lib64/libc.so.6.debug:
   <81a2>     DW_AT_name        : (indirect string, offset: 0x280e): __errno_location
   <81a8>     DW_AT_MIPS_linkage_name: (indirect string, offset: 0x2808): *__GI___errno_location
 
-Index: gdb-6.8.50.20090228/gdb/gdbtypes.c
+Index: gdb-6.8.50.20090802/gdb/gdbtypes.c
 ===================================================================
---- gdb-6.8.50.20090228.orig/gdb/gdbtypes.c	2009-03-02 01:01:15.000000000 +0100
-+++ gdb-6.8.50.20090228/gdb/gdbtypes.c	2009-03-02 01:01:53.000000000 +0100
-@@ -3633,6 +3633,8 @@ gdbtypes_post_init (struct gdbarch *gdba
-     init_type (TYPE_CODE_INT, 
- 	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
- 	       0, "int", OBJFILE_INTERNAL);
-+  builtin_type->builtin_int_ptr =
-+    make_pointer_type (builtin_type->builtin_int, NULL);
-   builtin_type->builtin_unsigned_int =
-     init_type (TYPE_CODE_INT, 
- 	       gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT,
-@@ -3742,6 +3744,12 @@ gdbtypes_post_init (struct gdbarch *gdba
- 	       "<text variable, no debug info>", OBJFILE_INTERNAL);
-   TYPE_TARGET_TYPE (builtin_type->nodebug_text_symbol) =
-     builtin_type->builtin_int;
-+  builtin_type->nodebug_text_symbol_errno_location =
-+    init_type (TYPE_CODE_FUNC, 1, 0, 
-+	       "<text variable for __errno_location, no debug info>",
-+	       OBJFILE_INTERNAL);
-+  TYPE_TARGET_TYPE (builtin_type->nodebug_text_symbol_errno_location) =
-+    builtin_type->builtin_int_ptr;
-   builtin_type->nodebug_data_symbol =
-     init_type (TYPE_CODE_INT, 
- 	       gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT, 0,
-Index: gdb-6.8.50.20090228/gdb/gdbtypes.h
-===================================================================
---- gdb-6.8.50.20090228.orig/gdb/gdbtypes.h	2009-03-02 01:01:15.000000000 +0100
-+++ gdb-6.8.50.20090228/gdb/gdbtypes.h	2009-03-02 01:01:53.000000000 +0100
-@@ -1053,6 +1053,7 @@ struct builtin_type
+--- gdb-6.8.50.20090802.orig/gdb/gdbtypes.c	2009-08-03 09:50:57.000000000 +0200
++++ gdb-6.8.50.20090802/gdb/gdbtypes.c	2009-08-03 15:42:51.000000000 +0200
+@@ -3769,6 +3769,9 @@ gdbtypes_post_init (struct gdbarch *gdba
+     = arch_type (gdbarch, TYPE_CODE_INTERNAL_FUNCTION, 0,
+ 		 "<internal function>");
  
-   /* Types used for symbols with no debug information.  */
-   struct type *nodebug_text_symbol;
-+  struct type *nodebug_text_symbol_errno_location;
-   struct type *nodebug_data_symbol;
-   struct type *nodebug_unknown_symbol;
-   struct type *nodebug_tls_symbol;
-@@ -1065,6 +1066,7 @@ struct builtin_type
-   struct type *builtin_char;
-   struct type *builtin_short;
-   struct type *builtin_int;
-+  struct type *builtin_int_ptr;
-   struct type *builtin_long;
-   struct type *builtin_signed_char;
-   struct type *builtin_unsigned_char;
-Index: gdb-6.8.50.20090228/gdb/parse.c
++  builtin_type->nodebug_text_symbol_errno_location
++    = lookup_function_type (lookup_pointer_type (builtin_type->builtin_int));
++
+   return builtin_type;
+ }
+ 
+Index: gdb-6.8.50.20090802/gdb/gdbtypes.h
 ===================================================================
---- gdb-6.8.50.20090228.orig/gdb/parse.c	2009-03-02 01:01:15.000000000 +0100
-+++ gdb-6.8.50.20090228/gdb/parse.c	2009-03-02 01:01:53.000000000 +0100
-@@ -508,7 +508,12 @@ write_exp_msymbol (struct minimal_symbol
+--- gdb-6.8.50.20090802.orig/gdb/gdbtypes.h	2009-08-03 09:50:57.000000000 +0200
++++ gdb-6.8.50.20090802/gdb/gdbtypes.h	2009-08-03 15:40:02.000000000 +0200
+@@ -1128,6 +1128,8 @@ struct builtin_type
+ 
+   /* This type is used to represent a GDB internal function.  */
+   struct type *internal_fn;
++
++  struct type *nodebug_text_symbol_errno_location;
+ };
+ 
+ /* Return the type table for the specified architecture.  */
+Index: gdb-6.8.50.20090802/gdb/parse.c
+===================================================================
+--- gdb-6.8.50.20090802.orig/gdb/parse.c	2009-08-03 09:50:57.000000000 +0200
++++ gdb-6.8.50.20090802/gdb/parse.c	2009-08-03 15:41:54.000000000 +0200
+@@ -510,7 +510,11 @@ write_exp_msymbol (struct minimal_symbol
      case mst_text:
      case mst_file_text:
      case mst_solib_trampoline:
--      write_exp_elt_type (builtin_type (gdbarch)->nodebug_text_symbol);
+-      write_exp_elt_type (objfile_type (objfile)->nodebug_text_symbol);
 +      if (builtin_type (gdbarch)->nodebug_text_symbol_errno_location != NULL
 +          && strcmp (SYMBOL_LINKAGE_NAME (msymbol), "__errno_location") == 0)
-+	write_exp_elt_type (builtin_type (gdbarch)
-+					  ->nodebug_text_symbol_errno_location);
++	write_exp_elt_type (builtin_type (gdbarch)->nodebug_text_symbol_errno_location);
 +      else
-+	write_exp_elt_type (builtin_type (gdbarch)->nodebug_text_symbol);
++	write_exp_elt_type (objfile_type (objfile)->nodebug_text_symbol);
        break;
  
      case mst_data:
-Index: gdb-6.8.50.20090228/gdb/target.c
+Index: gdb-6.8.50.20090802/gdb/target.c
 ===================================================================
---- gdb-6.8.50.20090228.orig/gdb/target.c	2009-03-02 01:01:44.000000000 +0100
-+++ gdb-6.8.50.20090228/gdb/target.c	2009-03-02 01:01:53.000000000 +0100
-@@ -827,6 +827,25 @@ pop_all_targets (int quitting)
+--- gdb-6.8.50.20090802.orig/gdb/target.c	2009-08-03 12:38:47.000000000 +0200
++++ gdb-6.8.50.20090802/gdb/target.c	2009-08-03 12:49:33.000000000 +0200
+@@ -933,6 +933,25 @@ pop_all_targets (int quitting)
    pop_all_targets_above (dummy_stratum, quitting);
  }
  
@@ -124,7 +104,7 @@ Index: gdb-6.8.50.20090228/gdb/target.c
  /* Using the objfile specified in OBJFILE, find the address for the
     current thread's thread-local storage with offset OFFSET.  */
  CORE_ADDR
-@@ -917,7 +936,28 @@ target_translate_tls_address (struct obj
+@@ -1023,7 +1042,28 @@ target_translate_tls_address (struct obj
    /* It wouldn't be wrong here to try a gdbarch method, too; finding
       TLS is an ABI-specific thing.  But we don't do that yet.  */
    else
@@ -154,10 +134,10 @@ Index: gdb-6.8.50.20090228/gdb/target.c
  
    return addr;
  }
-Index: gdb-6.8.50.20090228/gdb/testsuite/gdb.dwarf2/dw2-errno.c
+Index: gdb-6.8.50.20090802/gdb/testsuite/gdb.dwarf2/dw2-errno.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20090228/gdb/testsuite/gdb.dwarf2/dw2-errno.c	2009-03-02 01:01:53.000000000 +0100
++++ gdb-6.8.50.20090802/gdb/testsuite/gdb.dwarf2/dw2-errno.c	2009-08-03 12:49:33.000000000 +0200
 @@ -0,0 +1,28 @@
 +/* This testcase is part of GDB, the GNU debugger.
 +
@@ -187,10 +167,10 @@ Index: gdb-6.8.50.20090228/gdb/testsuite/gdb.dwarf2/dw2-errno.c
 +
 +  return 0;	/* breakpoint */
 +}
-Index: gdb-6.8.50.20090228/gdb/testsuite/gdb.dwarf2/dw2-errno.exp
+Index: gdb-6.8.50.20090802/gdb/testsuite/gdb.dwarf2/dw2-errno.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-6.8.50.20090228/gdb/testsuite/gdb.dwarf2/dw2-errno.exp	2009-03-02 01:01:53.000000000 +0100
++++ gdb-6.8.50.20090802/gdb/testsuite/gdb.dwarf2/dw2-errno.exp	2009-08-03 12:49:33.000000000 +0200
 @@ -0,0 +1,67 @@
 +# Copyright 2007 Free Software Foundation, Inc.
 +

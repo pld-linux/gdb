@@ -3,13 +3,13 @@
         * linux-nat.c (linux_nat_xfer_memory): Don't use
         linux_proc_xfer_memory for ia64.
 
-Index: gdb-6.8.50.20081209/gdb/linux-nat.c
+Index: gdb-6.8.50.20090803/gdb/linux-nat.c
 ===================================================================
---- gdb-6.8.50.20081209.orig/gdb/linux-nat.c	2008-12-10 01:22:23.000000000 +0100
-+++ gdb-6.8.50.20081209/gdb/linux-nat.c	2008-12-10 01:25:26.000000000 +0100
-@@ -4123,10 +4123,15 @@ linux_xfer_partial (struct target_ops *o
-     return linux_nat_xfer_osdata (ops, object, annex, readbuf, writebuf,
-                                offset, len);
+--- gdb-6.8.50.20090803.orig/gdb/linux-nat.c	2009-08-04 06:29:47.000000000 +0200
++++ gdb-6.8.50.20090803/gdb/linux-nat.c	2009-08-04 06:29:55.000000000 +0200
+@@ -4495,10 +4495,15 @@ linux_xfer_partial (struct target_ops *o
+ 	offset &= ((ULONGEST) 1 << addr_bit) - 1;
+     }
  
 +#ifndef NATIVE_XFER_UNWIND_TABLE
 +  /* FIXME: For ia64, we cannot currently use linux_proc_xfer_memory

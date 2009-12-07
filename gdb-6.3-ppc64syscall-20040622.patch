@@ -6,11 +6,11 @@
 	use to skip over first half of a GNU/Linux syscall and update
 	"func_start".
 
-Index: gdb-6.8/gdb/rs6000-tdep.c
+Index: gdb-6.8.50.20090802/gdb/rs6000-tdep.c
 ===================================================================
---- gdb-6.8.orig/gdb/rs6000-tdep.c	2008-02-20 15:34:43.000000000 +0100
-+++ gdb-6.8/gdb/rs6000-tdep.c	2008-07-14 10:25:29.000000000 +0200
-@@ -124,6 +124,7 @@ static const char *powerpc_vector_abi_st
+--- gdb-6.8.50.20090802.orig/gdb/rs6000-tdep.c	2009-07-31 17:23:20.000000000 +0200
++++ gdb-6.8.50.20090802/gdb/rs6000-tdep.c	2009-08-03 09:52:39.000000000 +0200
+@@ -126,6 +126,7 @@ static const char *powerpc_vector_abi_st
  
  struct rs6000_framedata
    {
@@ -18,7 +18,7 @@ Index: gdb-6.8/gdb/rs6000-tdep.c
      int offset;			/* total size of frame --- the distance
  				   by which we decrement sp to allocate
  				   the frame */
-@@ -1262,7 +1263,6 @@ static CORE_ADDR
+@@ -1488,7 +1489,6 @@ static CORE_ADDR
  skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
  	       struct rs6000_framedata *fdata)
  {
@@ -26,7 +26,7 @@ Index: gdb-6.8/gdb/rs6000-tdep.c
    CORE_ADDR last_prologue_pc = pc;
    CORE_ADDR li_found_pc = 0;
    gdb_byte buf[4];
-@@ -1280,11 +1280,13 @@ skip_prologue (struct gdbarch *gdbarch, 
+@@ -1506,12 +1506,14 @@ skip_prologue (struct gdbarch *gdbarch, 
    int minimal_toc_loaded = 0;
    int prev_insn_was_prologue_insn = 1;
    int num_skip_non_prologue_insns = 0;
@@ -34,15 +34,16 @@ Index: gdb-6.8/gdb/rs6000-tdep.c
    int r0_contains_arg = 0;
    const struct bfd_arch_info *arch_info = gdbarch_bfd_arch_info (gdbarch);
    struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
  
    memset (fdata, 0, sizeof (struct rs6000_framedata));
 +  fdata->func_start = pc;
    fdata->saved_gpr = -1;
    fdata->saved_fpr = -1;
    fdata->saved_vr = -1;
-@@ -1313,6 +1315,55 @@ skip_prologue (struct gdbarch *gdbarch, 
+@@ -1545,6 +1547,55 @@ skip_prologue (struct gdbarch *gdbarch, 
  	break;
-       op = extract_unsigned_integer (buf, 4);
+       op = extract_unsigned_integer (buf, 4, byte_order);
  
 +      /* A PPC64 GNU/Linux system call function is split into two
 +	 sub-functions: a non-threaded fast-path (__NAME_nocancel)
@@ -96,7 +97,7 @@ Index: gdb-6.8/gdb/rs6000-tdep.c
        if ((op & 0xfc1fffff) == 0x7c0802a6)
  	{			/* mflr Rx */
  	  /* Since shared library / PIC code, which needs to get its
-@@ -1486,9 +1537,9 @@ skip_prologue (struct gdbarch *gdbarch, 
+@@ -1726,9 +1777,9 @@ skip_prologue (struct gdbarch *gdbarch, 
  	     we have no line table information or the line info tells
  	     us that the subroutine call is not part of the line
  	     associated with the prologue.  */

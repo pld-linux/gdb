@@ -1,6 +1,15 @@
+# NOTE
+# - Do not remove -lib package, it is required by FPC
+
+# TODO
+# - python subpkg
+# - gdbtui is as big as gdb, but different md5, some kind of duplicate?
 #
-# NOTE:	Do not remove -lib package, it is required by FPC
-#
+# Conditional build:
+%bcond_without	python		# build without python support
+
+%define		snap	20090930
+%define		rel		0.1
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de.UTF-8):	Symbolischer Debugger für C und andere Sprachen
 Summary(es.UTF-8):	Depurador de programas C y otras lenguajes
@@ -12,53 +21,41 @@ Summary(tr.UTF-8):	C ve diğer diller için sembolik hata ayıklayıcı
 Summary(uk.UTF-8):	Символьний відладчик для С та інших мов
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
-%define	snap	20090302
 Name:		gdb
-Version:	6.8.50
-Release:	1.%{snap}.4
+Version:	6.8.91
+Release:	1.%{snap}.%{rel}
 License:	GPL v3+
 Group:		Development/Debuggers
-# Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0:	ftp://sourceware.org/pub/gdb/snapshots/current/gdb-%{version}.%{snap}.tar.bz2
-Source0:	gdb-%{version}.%{snap}.tar.bz2
-# Source0-md5:	a8eae0d4ef955ebcecfc7511af31070a
+Source0:	ftp://sourceware.org/pub/gdb/snapshots/branch/%{name}-%{version}.%{snap}.tar.bz2
+# Source0-md5:	729517cc8e6ca6e25cf4be343ffc4c3d
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
+# libstdc++ pretty printers from GCC SVN HEAD (4.5 experimental).
+Source4:	libstdc++-v3-python-r151798.tar.bz2
+# Source4-md5:	7507540c50a1edeb2fc22a37bc4a08b8
 
 # PLD
-
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
 
 # FEDORA
-
-# Work around out-of-date dejagnu that does not have KFAIL
 Patch1:		%{name}-6.3-rh-dummykfail-20041202.patch
-
-# Match the Fedora's version info.
 Patch2:		%{name}-6.3-rh-testversion-20041202.patch
-
-# Check that libunwind works - new test then fix
 Patch3:		%{name}-6.3-rh-testlibunwind-20041202.patch
-Patch4:		%{name}-6.3-rh-testlibunwind1fix-20041202.patch
-
 Patch104:	%{name}-6.3-ppcdotsolib-20041022.patch
 Patch105:	%{name}-6.3-ppc64syscall-20040622.patch
 Patch106:	%{name}-6.3-framepczero-20040927.patch
 Patch111:	%{name}-6.3-ppc64displaysymbol-20041124.patch
 Patch112:	%{name}-6.6-scheduler_locking-step-sw-watchpoints2.patch
 Patch260:	%{name}-6.6-scheduler_locking-step-is-default.patch
-Patch116:	%{name}-6.3-linespec-20041213.patch
-Patch117:	%{name}-6.3-removebp-20041130.patch
 Patch118:	%{name}-6.3-gstack-20050411.patch
 Patch122:	%{name}-6.3-test-pie-20050107.patch
 Patch124:	%{name}-6.3-pie-20050110.patch
 Patch125:	%{name}-6.3-test-self-20050110.patch
 Patch128:	%{name}-6.3-nonthreaded-wp-20050117.patch
 Patch133:	%{name}-6.3-test-dtorfix-20050121.patch
-Patch134:	%{name}-6.3-dtorfix-20050121.patch
 Patch136:	%{name}-6.3-test-movedir-20050125.patch
 Patch140:	%{name}-6.3-gcore-thread-20050204.patch
 Patch141:	%{name}-6.6-step-thread-exit.patch
@@ -76,7 +73,6 @@ Patch161:	%{name}-6.3-inferior-notification-20050721.patch
 Patch162:	%{name}-6.3-ia64-info-frame-fix-20050725.patch
 Patch163:	%{name}-6.3-inheritancetest-20050726.patch
 Patch164:	%{name}-6.3-readnever-20050907.patch
-Patch166:	%{name}-6.3-ia64-sigtramp-fp-20050926.patch
 Patch169:	%{name}-6.3-ia64-sigill-20051115.patch
 Patch170:	%{name}-6.3-bt-past-zero-20051201.patch
 Patch176:	%{name}-6.3-large-core-20051206.patch
@@ -87,7 +83,6 @@ Patch194:	%{name}-6.5-bz185337-resolve-tls-without-debuginfo-v2.patch
 Patch195:	%{name}-6.5-tls-of-separate-debuginfo.patch
 Patch196:	%{name}-6.5-sharedlibrary-path.patch
 Patch199:	%{name}-6.5-bz190810-gdbserver-arch-advice.patch
-Patch200:	%{name}-6.5-bz181390-memory-address-width.patch
 Patch201:	%{name}-6.5-gcore-i386-on-amd64.patch
 Patch211:	%{name}-6.5-last-address-space-byte-test.patch
 Patch208:	%{name}-6.5-BEA-testsuite.patch
@@ -116,7 +111,6 @@ Patch266:	%{name}-6.6-bz247354-leader-exit-test.patch
 Patch271:	%{name}-6.5-bz243845-stale-testing-zombie-test.patch
 Patch274:	%{name}-6.6-buildid-locate.patch
 Patch353:	%{name}-6.6-buildid-locate-rpm.patch
-Patch280:	%{name}-6.6-multifork-debugreg.patch
 Patch282:	%{name}-6.7-charsign-test.patch
 Patch284:	%{name}-6.7-ppc-clobbered-registers-O2-test.patch
 Patch287:	%{name}-6.7-testsuite-stable-results.patch
@@ -137,19 +131,21 @@ Patch320:	%{name}-6.5-section-num-fixup-test.patch
 Patch322:	%{name}-6.8-constant-watchpoints.patch
 Patch324:	%{name}-6.8-glibc-headers-compat.patch
 Patch326:	%{name}-6.8-tui-singlebinary.patch
-Patch327:	%{name}-6.8-inlining.patch
 Patch350:	%{name}-6.8-inlining-addon.patch
 Patch328:	%{name}-6.8-inlining-by-name.patch
 Patch329:	%{name}-6.8-bz254229-gcore-prpsinfo.patch
 Patch330:	%{name}-6.8-bz436037-reg-no-longer-active.patch
 Patch331:	%{name}-6.8-quit-never-aborts.patch
 Patch332:	%{name}-6.8-fortran-tag-constant.patch
-Patch334:	%{name}-6.8-ctors-dtors-unique.patch
 Patch337:	%{name}-6.8-attach-signalled-detach-stopped.patch
 Patch343:	%{name}-6.8-watchpoint-conditionals-test.patch
 Patch348:	%{name}-6.8-bz466901-backtrace-full-prelinked.patch
 Patch349:	%{name}-archer.patch
 Patch352:	%{name}-6.8-bz457187-largefile.patch
+Patch360:	%{name}-6.8-bz457187-largefile-test.patch
+Patch375:	%{name}-readline-6.0.patch
+Patch376:	libstdc++-v3-python-common-prefix.patch
+Patch381:	%{name}-simultaneous-step-resume-breakpoint-test.patch
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -161,6 +157,7 @@ BuildRequires:	python-devel
 BuildRequires:	readline-devel >= 6.0
 BuildRequires:	rpm-pythonprov
 BuildRequires:	texinfo >= 4.4
+%{?with_python:Requires: python-libs}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -215,6 +212,19 @@ verir.
 момент часу. Працює з програмами на C та C++, зкомпільованими
 компіляторами GNU C (gcc, egcs, pgcc).
 
+%package gdbserver
+Summary:	A standalone server for GDB (the GNU source-level debugger)
+Group:		Development/Debuggers
+
+%description gdbserver
+GDB, the GNU debugger, allows you to debug programs written in C, C++,
+Java, and other languages, by executing them in a controlled fashion
+and printing their data.
+
+This package provides a program that allows you to run GDB on a
+different machine than the one which is running the program being
+debugged.
+
 %package lib
 Summary:	GDB in the form of a static library
 Summary(pl.UTF-8):	GDB w postaci biblioteki statycznej
@@ -230,6 +240,9 @@ GDB w postaci biblioteki statycznej.
 %prep
 %setup -q -n %{name}-%{version}.%{snap}
 
+# libstdc++ pretty printers.
+bzip2 -dc %{SOURCE4} | tar xf -
+
 %patch1000 -p1
 %patch1001 -p1
 %patch1002 -p1
@@ -239,30 +252,20 @@ GDB w postaci biblioteki statycznej.
 rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 
-# Apply patches defined above.
-
-# Match the Fedora's version info.
 %patch2 -p1
-
-###patch232 -p1
 %patch349 -p1
 %patch1 -p1
 %patch3 -p1
-%patch4 -p1
-
 %patch104 -p1
 %patch105 -p1
 %patch106 -p1
 %patch111 -p1
 %patch112 -p1
-%patch116 -p1
-%patch117 -p1
 %patch118 -p1
 %patch122 -p1
 %patch125 -p1
 %patch128 -p1
 %patch133 -p1
-%patch134 -p1
 %patch136 -p1
 %patch140 -p1
 %patch141 -p1
@@ -280,7 +283,6 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch162 -p1
 %patch163 -p1
 %patch164 -p1
-%patch166 -p1
 %patch169 -p1
 %patch170 -p1
 %patch176 -p1
@@ -291,7 +293,6 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch195 -p1
 %patch196 -p1
 %patch199 -p1
-%patch200 -p1
 %patch201 -p1
 %patch208 -p1
 %patch209 -p1
@@ -321,7 +322,6 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch271 -p1
 %patch274 -p1
 %patch353 -p1
-%patch280 -p1
 %patch282 -p1
 %patch284 -p1
 %patch287 -p1
@@ -342,22 +342,26 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch322 -p1
 %patch324 -p1
 %patch326 -p1
-%patch327 -p1
 %patch350 -p1
 %patch328 -p1
 %patch329 -p1
 %patch330 -p1
 %patch331 -p1
 %patch332 -p1
-%patch334 -p1
 %patch337 -p1
 %patch343 -p1
 %patch348 -p1
 %patch352 -p1
 %patch124 -p1
+%patch360 -p1
+%patch375 -p1
+%patch376 -p1
+%patch381 -p1
+
+mv $(basename %{SOURCE4} .tar.bz2) libstdcxxpython
 
 %build
-for dir in `find gdb/ -name 'configure.in'`; do
+for dir in $(find gdb -name 'configure.in'); do
 	dir=$(dirname "$dir")
 	olddir=$(pwd)
 	cd $dir
@@ -372,7 +376,12 @@ cp -f /usr/share/automake/config.* .
 %configure \
 	--with-gdb-datadir=%{_datadir}/gdb \
 	--with-separate-debug-dir=/usr/lib/debug \
-	--with-pythondir=%{py_sitedir} \
+%if %{with python}
+	--with-python \
+	--with-pythondir=%{py_sitescriptdir} \
+%else
+	--without-python \
+%endif
 	--disable-gdbtk \
 	--disable-shared \
 	--enable-gdbcli \
@@ -400,8 +409,36 @@ install -d $RPM_BUILD_ROOT%{_infodir}
 	DESTDIR=$RPM_BUILD_ROOT
 
 bzip2 -dc %{SOURCE1} | tar xf - -C $RPM_BUILD_ROOT%{_mandir}
+cp -a gdb/libgdb.a $RPM_BUILD_ROOT%{_libdir}
 
-install gdb/libgdb.a $RPM_BUILD_ROOT%{_libdir}
+rm -f $RPM_BUILD_ROOT%{_infodir}/dir
+rm -f $RPM_BUILD_ROOT%{_mandir}/README.gdb-non-english-man-pages
+
+%if %{with python}
+# Temporarily now:
+for LIB in lib lib64; do
+	LIBPATH="$RPM_BUILD_ROOT%{_datadir}/gdb/auto-load%{_prefix}/$LIB"
+	install -d $LIBPATH
+	# basename is being run only for the native (non-biarch) file.
+	sed -e 's,@pythondir@,%{_datadir}/gdb/python,'		\
+	  -e 's,@toolexeclibdir@,%{_prefix}/'"$LIB,"		\
+	  < libstdcxxpython/hook.in	\
+	  > $LIBPATH/$(basename %{_prefix}/%{_lib}/libstdc++.so.6.*)-gdb.py
+done
+test ! -e $RPM_BUILD_ROOT%{_datadir}/gdb/python/libstdcxx
+install -d $RPM_BUILD_ROOT%{_datadir}/gdb/python
+cp -a libstdcxxpython/libstdcxx	$RPM_BUILD_ROOT%{_datadir}/gdb/python/libstdcxx
+%endif
+
+# Remove the files that are part of a gdb build but that are owned and provided by other packages.
+# These are part of binutils
+rm -rf $RPM_BUILD_ROOT%{_datadir}/locale
+rm -f $RPM_BUILD_ROOT%{_infodir}/bfd*
+rm -f $RPM_BUILD_ROOT%{_infodir}/standard*
+rm -f $RPM_BUILD_ROOT%{_infodir}/mmalloc*
+rm -f $RPM_BUILD_ROOT%{_infodir}/configure*
+rm -rf $RPM_BUILD_ROOT%{_includedir}
+rm -rf $RPM_BUILD_ROOT%{_libdir}/lib{bfd*,opcodes*,iberty*,mmalloc*}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -415,17 +452,33 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(644,root,root,755)
 %doc gdb/{ChangeLog,NEWS,PROBLEMS,README}
-%attr(755,root,root) %{_bindir}/*
-%{_datadir}/gdb
-%{py_sitedir}/gdb
-%{_mandir}/man1/*
+%attr(755,root,root) %{_bindir}/gdb
+%attr(755,root,root) %{_bindir}/gdbtui
+%attr(755,root,root) %{_bindir}/gstack
+%dir %{_datadir}/gdb
+%{_datadir}/gdb/syscalls
+%{_mandir}/man1/gdb.1*
+%{_mandir}/man1/gdbtui.1*
 %lang(es) %{_mandir}/es/man1/*
 %lang(fr) %{_mandir}/fr/man1/*
 %lang(hu) %{_mandir}/hu/man1/*
 %lang(ja) %{_mandir}/ja/man1/*
 %lang(pl) %{_mandir}/pl/man1/*
-%{_infodir}/gdb*.info*
-%{_infodir}/stabs*.info*
+%{_infodir}/annotate.info*
+%{_infodir}/gdb.info*
+%{_infodir}/gdbint.info*
+%{_infodir}/stabs.info*
+
+%if %{with python}
+%{py_sitescriptdir}/gdb
+%{_datadir}/gdb/auto-load
+%{_datadir}/gdb/python
+%endif
+
+%files gdbserver
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/gdbserver
+%{_mandir}/man1/gdbserver.1*
 
 %files lib
 %defattr(644,root,root,755)

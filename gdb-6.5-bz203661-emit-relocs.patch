@@ -1,8 +1,8 @@
-Index: gdb-6.5/gdb/symfile.c
+Index: gdb-6.8.50.20090802/gdb/symfile.c
 ===================================================================
---- gdb-6.5.orig/gdb/symfile.c	2006-08-24 02:56:02.000000000 -0300
-+++ gdb-6.5/gdb/symfile.c	2006-08-24 02:56:36.000000000 -0300
-@@ -3739,6 +3739,12 @@ symfile_dummy_outputs (bfd *abfd, asecti
+--- gdb-6.8.50.20090802.orig/gdb/symfile.c	2009-08-03 12:29:58.000000000 +0200
++++ gdb-6.8.50.20090802/gdb/symfile.c	2009-08-03 12:40:58.000000000 +0200
+@@ -4012,6 +4012,12 @@ symfile_dummy_outputs (bfd *abfd, asecti
  bfd_byte *
  symfile_relocate_debug_section (bfd *abfd, asection *sectp, bfd_byte *buf)
  {
@@ -12,6 +12,6 @@ Index: gdb-6.5/gdb/symfile.c
 +  if ((abfd->flags & EXEC_P) != 0)
 +    return NULL;
 +
-   /* We're only interested in debugging sections with relocation
+   /* We're only interested in sections with relocation
       information.  */
    if ((sectp->flags & SEC_RELOC) == 0)

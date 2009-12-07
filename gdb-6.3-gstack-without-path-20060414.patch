@@ -24,7 +24,7 @@ Index: gdb-6.3/gdb/gstack.sh
  if $GDB -nx --quiet --batch --readnever > /dev/null 2>&1; then
      readnever=--readnever
 @@ -39,7 +39,7 @@ fi
- $GDB --quiet $readnever -nx /proc/$1/exe $1 <<EOF 2>&1 | 
+ set pagination no
  $backtrace
  EOF
 -sed -n \

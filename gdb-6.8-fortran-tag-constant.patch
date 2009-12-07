@@ -1,8 +1,8 @@
-Index: gdb-6.8.50.20090228/gdb/dwarf2read.c
+Index: gdb-6.8.50.20090811/gdb/dwarf2read.c
 ===================================================================
---- gdb-6.8.50.20090228.orig/gdb/dwarf2read.c	2009-03-02 01:07:36.000000000 +0100
-+++ gdb-6.8.50.20090228/gdb/dwarf2read.c	2009-03-02 01:07:50.000000000 +0100
-@@ -1996,6 +1996,7 @@ scan_partial_symbols (struct partial_die
+--- gdb-6.8.50.20090811.orig/gdb/dwarf2read.c	2009-08-13 10:14:45.000000000 +0200
++++ gdb-6.8.50.20090811/gdb/dwarf2read.c	2009-08-13 10:22:36.000000000 +0200
+@@ -2480,6 +2480,7 @@ scan_partial_symbols (struct partial_die
  	      add_partial_subprogram (pdi, lowpc, highpc, need_pc, cu);
  	      break;
  	    case DW_TAG_variable:
@@ -10,7 +10,7 @@ Index: gdb-6.8.50.20090228/gdb/dwarf2read.c
  	    case DW_TAG_typedef:
  	    case DW_TAG_union_type:
  	      if (!pdi->is_declaration)
-@@ -2211,6 +2212,7 @@ add_partial_symbol (struct partial_die_i
+@@ -2675,6 +2676,7 @@ add_partial_symbol (struct partial_die_i
  	}
        break;
      case DW_TAG_variable:
@@ -18,7 +18,15 @@ Index: gdb-6.8.50.20090228/gdb/dwarf2read.c
        if (pdi->is_external)
  	{
  	  /* Global Variable.
-@@ -4213,7 +4215,8 @@ dwarf2_add_field (struct field_info *fip
+@@ -2805,6 +2807,7 @@ die_needs_namespace (struct die_info *di
+       return 1;
+ 
+     case DW_TAG_variable:
++    case DW_TAG_constant:
+       {
+ 	struct attribute *attr;
+ 	attr = dwarf2_attr (die, DW_AT_specification, cu);
+@@ -4741,7 +4744,8 @@ dwarf2_add_field (struct field_info *fip
  	  fip->non_public_fields = 1;
  	}
      }
@@ -28,7 +36,7 @@ Index: gdb-6.8.50.20090228/gdb/dwarf2read.c
      {
        /* C++ static member.  */
  
-@@ -4703,7 +4706,8 @@ read_structure_type (struct die_info *di
+@@ -5233,7 +5237,8 @@ read_structure_type (struct die_info *di
        while (child_die && child_die->tag)
  	{
  	  if (child_die->tag == DW_TAG_member
@@ -38,7 +46,7 @@ Index: gdb-6.8.50.20090228/gdb/dwarf2read.c
  	    {
  	      /* NOTE: carlton/2002-11-05: A C++ static data member
  		 should be a DW_TAG_member that is a declaration, but
-@@ -4822,6 +4826,7 @@ process_structure_scope (struct die_info
+@@ -5352,6 +5357,7 @@ process_structure_scope (struct die_info
      {
        if (child_die->tag == DW_TAG_member
  	  || child_die->tag == DW_TAG_variable
@@ -46,15 +54,15 @@ Index: gdb-6.8.50.20090228/gdb/dwarf2read.c
  	  || child_die->tag == DW_TAG_inheritance)
  	{
  	  /* Do nothing.  */
-@@ -6455,6 +6460,7 @@ load_partial_dies (bfd *abfd, gdb_byte *
+@@ -6980,6 +6986,7 @@ load_partial_dies (bfd *abfd, gdb_byte *
  	  && abbrev->tag != DW_TAG_subprogram
  	  && abbrev->tag != DW_TAG_lexical_block
  	  && abbrev->tag != DW_TAG_variable
 +	  && abbrev->tag != DW_TAG_constant
  	  && abbrev->tag != DW_TAG_namespace
+ 	  && abbrev->tag != DW_TAG_module
  	  && abbrev->tag != DW_TAG_member)
- 	{
-@@ -6562,6 +6568,7 @@ load_partial_dies (bfd *abfd, gdb_byte *
+@@ -7088,6 +7095,7 @@ load_partial_dies (bfd *abfd, gdb_byte *
        if (load_all
  	  || abbrev->tag == DW_TAG_subprogram
  	  || abbrev->tag == DW_TAG_variable
@@ -62,7 +70,7 @@ Index: gdb-6.8.50.20090228/gdb/dwarf2read.c
  	  || abbrev->tag == DW_TAG_namespace
  	  || part_die->is_declaration)
  	{
-@@ -8341,6 +8348,11 @@ new_symbol (struct die_info *die, struct
+@@ -8901,6 +8909,11 @@ new_symbol (struct die_info *die, struct
  	  /* Do not add the symbol to any lists.  It will be found via
  	     BLOCK_FUNCTION from the blockvector.  */
  	  break;

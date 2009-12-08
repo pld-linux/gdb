@@ -1,7 +1,7 @@
-Index: gdb-6.8.91.20090925/gdb/corelow.c
+Index: gdb-7.0/gdb/corelow.c
 ===================================================================
---- gdb-6.8.91.20090925.orig/gdb/corelow.c	2009-07-31 17:25:21.000000000 +0200
-+++ gdb-6.8.91.20090925/gdb/corelow.c	2009-09-25 09:39:09.000000000 +0200
+--- gdb-7.0.orig/gdb/corelow.c	2009-07-31 17:25:21.000000000 +0200
++++ gdb-7.0/gdb/corelow.c	2009-10-23 00:17:29.000000000 +0200
 @@ -45,6 +45,10 @@
  #include "exceptions.h"
  #include "solib.h"
@@ -91,11 +91,11 @@ Index: gdb-6.8.91.20090925/gdb/corelow.c
 +			   NULL, NULL, NULL,
 +			   &setlist, &showlist);
  }
-Index: gdb-6.8.91.20090925/gdb/doc/gdb.texinfo
+Index: gdb-7.0/gdb/doc/gdb.texinfo
 ===================================================================
---- gdb-6.8.91.20090925.orig/gdb/doc/gdb.texinfo	2009-09-25 09:29:58.000000000 +0200
-+++ gdb-6.8.91.20090925/gdb/doc/gdb.texinfo	2009-09-25 09:29:58.000000000 +0200
-@@ -13895,6 +13895,27 @@ information files.
+--- gdb-7.0.orig/gdb/doc/gdb.texinfo	2009-10-23 00:12:39.000000000 +0200
++++ gdb-7.0/gdb/doc/gdb.texinfo	2009-10-23 00:17:29.000000000 +0200
+@@ -13896,6 +13896,27 @@ information files.
  
  @end table
  
@@ -123,10 +123,10 @@ Index: gdb-6.8.91.20090925/gdb/doc/gdb.texinfo
  @cindex @code{.gnu_debuglink} sections
  @cindex debug link sections
  A debug link is a special section of the executable file named
-Index: gdb-6.8.91.20090925/gdb/solib-svr4.c
+Index: gdb-7.0/gdb/solib-svr4.c
 ===================================================================
---- gdb-6.8.91.20090925.orig/gdb/solib-svr4.c	2009-09-25 09:29:57.000000000 +0200
-+++ gdb-6.8.91.20090925/gdb/solib-svr4.c	2009-09-25 09:43:14.000000000 +0200
+--- gdb-7.0.orig/gdb/solib-svr4.c	2009-10-23 00:12:38.000000000 +0200
++++ gdb-7.0/gdb/solib-svr4.c	2009-10-23 00:17:29.000000000 +0200
 @@ -1101,9 +1101,49 @@ svr4_current_sos (void)
  		     safe_strerror (errcode));
  	  else
@@ -180,10 +180,10 @@ Index: gdb-6.8.91.20090925/gdb/solib-svr4.c
  	    }
  	  xfree (buffer);
  
-Index: gdb-6.8.91.20090925/gdb/symfile.c
+Index: gdb-7.0/gdb/symfile.c
 ===================================================================
---- gdb-6.8.91.20090925.orig/gdb/symfile.c	2009-09-25 09:29:57.000000000 +0200
-+++ gdb-6.8.91.20090925/gdb/symfile.c	2009-09-25 09:29:58.000000000 +0200
+--- gdb-7.0.orig/gdb/symfile.c	2009-10-23 00:12:38.000000000 +0200
++++ gdb-7.0/gdb/symfile.c	2009-10-23 00:43:28.000000000 +0200
 @@ -56,6 +56,7 @@
  #include "elf-bfd.h"
  #include "solib.h"
@@ -618,7 +618,7 @@ Index: gdb-6.8.91.20090925/gdb/symfile.c
  
    if (found == NULL)
      warning (_("File \"%s\" has no build-id, file skipped"), filename);
-@@ -1234,8 +1626,9 @@ build_id_verify (const char *filename, s
+@@ -1234,14 +1626,16 @@ build_id_verify (const char *filename, s
    return retval;
  }
  
@@ -628,48 +628,77 @@ Index: gdb-6.8.91.20090925/gdb/symfile.c
 +build_id_to_filename (struct build_id *build_id, char **link_return,
 +		      int add_debug_suffix)
  {
-   char *link, *s, *retval = NULL;
-   gdb_byte *data = build_id->data;
-@@ -1243,7 +1636,9 @@ build_id_to_debug_filename (struct build
+   char *link, *debugdir, *retval = NULL;
++  char *link_all = NULL;
  
    /* DEBUG_FILE_DIRECTORY/.build-id/ab/cdef */
-   link = xmalloc (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
--		  + 2 * size + (sizeof ".debug" - 1) + 1);
-+		  + 2 * size
-+		  + (add_debug_suffix ? sizeof ".debug" - 1 : 0)
-+		  + 1);
-   s = link + sprintf (link, "%s/.build-id/", debug_file_directory);
-   if (size > 0)
-     {
-@@ -1254,12 +1649,14 @@ build_id_to_debug_filename (struct build
-     *s++ = '/';
-   while (size-- > 0)
-     s += sprintf (s, "%02x", (unsigned) *data++);
--  strcpy (s, ".debug");
-+  if (add_debug_suffix)
-+    strcpy (s, ".debug");
-+  else
-+    *s = 0;
+-  link = alloca (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
+-		 + 2 * build_id->size + (sizeof ".debug" - 1) + 1);
++  link = xmalloc (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
++		  + 2 * build_id->size + (sizeof ".debug" - 1) + 1);
  
-   /* lrealpath() is expensive even for the usually non-existent files.  */
-   if (access (link, F_OK) == 0)
-     retval = lrealpath (link);
--  xfree (link);
+   /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
+      cause "/.build-id/..." lookups.  */
+@@ -1272,7 +1666,10 @@ build_id_to_debug_filename (struct build
+ 	*s++ = '/';
+       while (size-- > 0)
+ 	s += sprintf (s, "%02x", (unsigned) *data++);
+-      strcpy (s, ".debug");
++      if (add_debug_suffix)
++	strcpy (s, ".debug");
++      else
++	*s = 0;
  
-   if (retval != NULL && !build_id_verify (retval, build_id))
-     {
-@@ -1267,9 +1664,150 @@ build_id_to_debug_filename (struct build
-       retval = NULL;
+       /* lrealpath() is expensive even for the usually non-existent files.  */
+       if (access (link, F_OK) == 0)
+@@ -1285,15 +1682,185 @@ build_id_to_debug_filename (struct build
+ 	}
+ 
+       if (retval != NULL)
+-	break;
++	{
++	  /* LINK_ALL is not used below in this non-NULL RETVAL case.  */
++	  break;
++	}
++
++	if (link_all == NULL)
++	  link_all = xstrdup (link);
++	else
++	  {
++	    size_t len_orig = strlen (link_all);
++
++	    link_all = xrealloc (link_all, len_orig + 1 + strlen (link) + 1);
++
++	    /* Use whitespace instead of DIRNAME_SEPARATOR to be compatible with
++	       its possible use as an argument for installation command.  */
++	    link_all[len_orig] = ' ';
++
++	    strcpy (&link_all[len_orig + 1], link);
++	  }
+ 
+       debugdir = debugdir_end;
      }
+   while (*debugdir != 0);
  
 +  if (link_return != NULL)
-+    *link_return = link;
-+  else
-+    xfree (link);
++    {
++      if (retval != NULL)
++       {
++         *link_return = link;
++         link = NULL;
++       }
++      else
++       {
++         *link_return = link_all;
++         link_all = NULL;
++       }
++    }
++  xfree (link);
++  xfree (link_all);
 +
-   return retval;
- }
- 
++  return retval;
++}
++
 +/* This MISSING_FILEPAIR_HASH tracker is used only for the duplicite messages
 +     Try to install the hash file ...
 +   avoidance.  */
@@ -692,9 +721,9 @@ Index: gdb-6.8.91.20090925/gdb/symfile.c
 +
 +  retval = obstack_alloc (&missing_filepair_obstack, size);
 +  memset (retval, 0, size);
-+  return retval;
-+}
-+
+   return retval;
+ }
+ 
 +static hashval_t
 +missing_filepair_hash_func (const struct missing_filepair *elem)
 +{
@@ -809,20 +838,7 @@ Index: gdb-6.8.91.20090925/gdb/symfile.c
  static char *
  get_debug_link_info (struct objfile *objfile, unsigned long *crc32_out)
  {
-@@ -1352,32 +1890,36 @@ static char *
- find_separate_debug_file (struct objfile *objfile)
- {
-   asection *sect;
--  char *basename;
--  char *dir;
--  char *debugfile;
-+  char *basename = NULL;
-+  char *dir = NULL;
-+  char *debugfile = NULL;
-   char *name_copy;
--  char *canon_name;
-+  char *canon_name = NULL;
-   bfd_size_type debuglink_size;
+@@ -1384,13 +1951,14 @@ find_separate_debug_file (struct objfile
    unsigned long crc32;
    int i;
    struct build_id *build_id;
@@ -839,123 +855,34 @@ Index: gdb-6.8.91.20090925/gdb/symfile.c
        xfree (build_id);
        /* Prevent looping on a stripped .debug file.  */
        if (build_id_name != NULL && strcmp (build_id_name, objfile->name) == 0)
-         {
--	  warning (_("\"%s\": separate debug info file has no debug info"),
-+	  warning (_("\"%s\": The separate debug info file has no debug info"),
- 		   build_id_name);
+@@ -1400,7 +1968,10 @@ find_separate_debug_file (struct objfile
  	  xfree (build_id_name);
  	}
        else if (build_id_name != NULL)
 -        return build_id_name;
-+        {
++	{
 +	  xfree (build_id_filename);
 +	  return build_id_name;
 +	}
      }
  
    basename = get_debug_link_info (objfile, &crc32);
-@@ -1385,7 +1927,7 @@ find_separate_debug_file (struct objfile
-   if (basename == NULL)
-     /* There's no separate debug info, hence there's no way we could
-        load it => no warning.  */
--    return NULL;
-+    goto cleanup_return_debugfile;
- 
-   dir = xstrdup (objfile->name);
- 
-@@ -1407,24 +1949,19 @@ find_separate_debug_file (struct objfile
-   if (canon_name && strlen (canon_name) > i)
-     i = strlen (canon_name);
- 
--  debugfile = alloca (strlen (debug_file_directory) + 1
--                      + i
--                      + strlen (DEBUG_SUBDIRECTORY)
--                      + strlen ("/")
--                      + strlen (basename)
--                      + 1);
-+  debugfile = xmalloc (strlen (debug_file_directory) + 1
-+		       + i
-+		       + strlen (DEBUG_SUBDIRECTORY)
-+		       + strlen ("/")
-+		       + strlen (basename)
-+		       + 1);
- 
-   /* First try in the same directory as the original file.  */
-   strcpy (debugfile, dir);
-   strcat (debugfile, basename);
- 
-   if (separate_debug_file_exists (debugfile, crc32, objfile->name))
--    {
--      xfree (basename);
--      xfree (dir);
--      xfree (canon_name);
--      return xstrdup (debugfile);
--    }
-+    goto cleanup_return_debugfile;
- 
-   /* Then try in the subdirectory named DEBUG_SUBDIRECTORY.  */
-   strcpy (debugfile, dir);
-@@ -1433,12 +1970,7 @@ find_separate_debug_file (struct objfile
-   strcat (debugfile, basename);
- 
-   if (separate_debug_file_exists (debugfile, crc32, objfile->name))
--    {
--      xfree (basename);
--      xfree (dir);
--      xfree (canon_name);
--      return xstrdup (debugfile);
--    }
-+    goto cleanup_return_debugfile;
- 
-   /* Then try in the global debugfile directory.  */
-   strcpy (debugfile, debug_file_directory);
-@@ -1447,12 +1979,7 @@ find_separate_debug_file (struct objfile
-   strcat (debugfile, basename);
- 
-   if (separate_debug_file_exists (debugfile, crc32, objfile->name))
--    {
--      xfree (basename);
--      xfree (dir);
--      xfree (canon_name);
--      return xstrdup (debugfile);
--    }
-+    goto cleanup_return_debugfile;
- 
-   /* If the file is in the sysroot, try using its base path in the
-      global debugfile directory.  */
-@@ -1466,20 +1993,18 @@ find_separate_debug_file (struct objfile
-       strcat (debugfile, basename);
- 
-       if (separate_debug_file_exists (debugfile, crc32, objfile->name))
--	{
--	  xfree (canon_name);
--	  xfree (basename);
--	  xfree (dir);
--	  return xstrdup (debugfile);
--	}
-+	goto cleanup_return_debugfile;
-     }
+@@ -1501,8 +2072,10 @@ find_separate_debug_file (struct objfile
    
--  if (canon_name)
--    xfree (canon_name);
-+  debugfile = NULL;
+   xfree (debugfile);
+   debugfile = NULL;
 +  debug_print_missing (objfile->name, build_id_filename);
  
-+cleanup_return_debugfile:
+ cleanup_return_debugfile:
 +  xfree (build_id_filename);
-+  xfree (canon_name);
+   xfree (canon_name);
    xfree (basename);
    xfree (dir);
--  return NULL;
-+  return debugfile;
- }
- 
- 
-@@ -4229,4 +4754,16 @@ the global debug-file directory prepende
+@@ -4256,4 +4829,16 @@ each global debug-file-directory compone
  				     NULL,
  				     show_debug_file_directory,
  				     &setlist, &showlist);
-+ 
++
 +   add_setshow_zinteger_cmd ("build-id-verbose", no_class, &build_id_verbose,
 + 			    _("\
 + Set debugging level of the build-id locator."), _("\
@@ -965,13 +892,13 @@ Index: gdb-6.8.91.20090925/gdb/symfile.c
 + 			    NULL,
 + 			    show_build_id_verbose,
 + 			    &setlist, &showlist);
-+ 
++
 +   observer_attach_executable_changed (debug_print_executable_changed);
  }
-Index: gdb-6.8.91.20090925/gdb/symfile.h
+Index: gdb-7.0/gdb/symfile.h
 ===================================================================
---- gdb-6.8.91.20090925.orig/gdb/symfile.h	2009-09-25 09:29:57.000000000 +0200
-+++ gdb-6.8.91.20090925/gdb/symfile.h	2009-09-25 09:29:58.000000000 +0200
+--- gdb-7.0.orig/gdb/symfile.h	2009-10-23 00:12:38.000000000 +0200
++++ gdb-7.0/gdb/symfile.h	2009-10-23 00:17:29.000000000 +0200
 @@ -381,6 +381,13 @@ extern int symfile_map_offsets_to_segmen
  struct symfile_segment_data *get_symfile_segment_data (bfd *abfd);
  void free_symfile_segment_data (struct symfile_segment_data *data);
@@ -986,10 +913,10 @@ Index: gdb-6.8.91.20090925/gdb/symfile.h
  /* From dwarf2read.c */
  
  extern int dwarf2_has_info (struct objfile *);
-Index: gdb-6.8.91.20090925/gdb/testsuite/lib/gdb.exp
+Index: gdb-7.0/gdb/testsuite/lib/gdb.exp
 ===================================================================
---- gdb-6.8.91.20090925.orig/gdb/testsuite/lib/gdb.exp	2009-09-25 09:29:57.000000000 +0200
-+++ gdb-6.8.91.20090925/gdb/testsuite/lib/gdb.exp	2009-09-25 09:29:58.000000000 +0200
+--- gdb-7.0.orig/gdb/testsuite/lib/gdb.exp	2009-10-23 00:12:38.000000000 +0200
++++ gdb-7.0/gdb/testsuite/lib/gdb.exp	2009-10-23 00:17:29.000000000 +0200
 @@ -1248,6 +1248,16 @@ proc default_gdb_start { } {
  	    warning "Couldn't set the width to 0."
  	}
@@ -1007,10 +934,10 @@ Index: gdb-6.8.91.20090925/gdb/testsuite/lib/gdb.exp
      return 0;
  }
  
-Index: gdb-6.8.91.20090925/gdb/testsuite/lib/mi-support.exp
+Index: gdb-7.0/gdb/testsuite/lib/mi-support.exp
 ===================================================================
---- gdb-6.8.91.20090925.orig/gdb/testsuite/lib/mi-support.exp	2009-09-15 20:51:26.000000000 +0200
-+++ gdb-6.8.91.20090925/gdb/testsuite/lib/mi-support.exp	2009-09-25 09:29:58.000000000 +0200
+--- gdb-7.0.orig/gdb/testsuite/lib/mi-support.exp	2009-09-15 20:51:26.000000000 +0200
++++ gdb-7.0/gdb/testsuite/lib/mi-support.exp	2009-10-23 00:17:29.000000000 +0200
 @@ -221,6 +221,16 @@ proc default_mi_gdb_start { args } {
  	    }
      	}
@@ -1028,10 +955,10 @@ Index: gdb-6.8.91.20090925/gdb/testsuite/lib/mi-support.exp
  
      detect_async
  
-Index: gdb-6.8.91.20090925/gdb/objfiles.h
+Index: gdb-7.0/gdb/objfiles.h
 ===================================================================
---- gdb-6.8.91.20090925.orig/gdb/objfiles.h	2009-09-25 09:29:57.000000000 +0200
-+++ gdb-6.8.91.20090925/gdb/objfiles.h	2009-09-25 09:38:27.000000000 +0200
+--- gdb-7.0.orig/gdb/objfiles.h	2009-10-23 00:12:38.000000000 +0200
++++ gdb-7.0/gdb/objfiles.h	2009-10-23 00:17:29.000000000 +0200
 @@ -428,6 +428,10 @@ struct objfile
  
  #define OBJF_MAIN (1 << 7)

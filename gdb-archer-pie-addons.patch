@@ -1,0 +1,290 @@
+--- a/gdb/dwarf2read.c
++++ b/gdb/dwarf2read.c
+@@ -5754,7 +5754,12 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
+ {
+   struct attribute *attr;
+   struct symbol *sym;
+-  CORE_ADDR base = (CORE_ADDR) 0;
++  struct objfile *objfile = cu->objfile;
++  CORE_ADDR baseaddr = ANOFFSET (objfile->section_offsets,
++				 SECT_OFF_TEXT (objfile));
++  /* This is used only for DW_AT_data_member_location entries.  */
++  CORE_ADDR base = 0;
++  int base_p = 0;
+ 
+   attr = dwarf2_attr (die, DW_AT_location, cu);
+   if (attr)
+@@ -5763,6 +5768,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
+       if (attr_form_is_block (attr))
+ 	{
+ 	  base = decode_locdesc (DW_BLOCK (attr), cu);
++	  base_p = 1;
+ 	}
+       else if (attr_form_is_section_offset (attr))
+ 	{
+@@ -5824,12 +5830,15 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
+ 	      else
+ 		dwarf2_complex_location_expr_complaint ();
+ 
+-	      SYMBOL_VALUE_ADDRESS (sym) = base + byte_offset;
++	      if (!base_p)
++		dwarf2_invalid_attrib_class_complaint
++		  ("DW_AT_data_member_location", "common block member");
++	      SYMBOL_VALUE_ADDRESS (sym) = base + byte_offset + baseaddr;
+ 	      add_symbol_to_list (sym, &global_symbols);
+ 	    }
+ 
+ 	  if (SYMBOL_CLASS (sym) == LOC_STATIC)
+-	    SET_FIELD_PHYSADDR (*field, SYMBOL_VALUE_ADDRESS (sym));
++	    SET_FIELD_PHYSADDR (*field, SYMBOL_VALUE_ADDRESS (sym) - baseaddr);
+ 	  else
+ 	    SET_FIELD_PHYSNAME (*field, SYMBOL_LINKAGE_NAME (sym));
+ 	  FIELD_TYPE (*field) = SYMBOL_TYPE (sym);
+@@ -5843,7 +5852,7 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
+ 
+       sym = new_symbol (die, type, cu);
+       /* SYMBOL_VALUE_ADDRESS never gets used as all its fields are static.  */
+-      SYMBOL_VALUE_ADDRESS (sym) = base;
++      SYMBOL_VALUE_ADDRESS (sym) = base + baseaddr;
+ 
+       set_die_type (die, type, cu);
+     }
+--- a/gdb/exec.c
++++ b/gdb/exec.c
+@@ -32,6 +32,7 @@
+ #include "exec.h"
+ #include "observer.h"
+ #include "arch-utils.h"
++#include "solib.h"
+ 
+ #include <fcntl.h>
+ #include "readline/readline.h"
+@@ -220,6 +221,10 @@ exec_file_attach (char *filename, int from_tty)
+       char *scratch_pathname;
+       int scratch_chan;
+       struct target_section *sections = NULL, *sections_end = NULL;
++      struct target_section *p;
++      int addr_bit;
++      CORE_ADDR mask = CORE_ADDR_MAX;
++      CORE_ADDR displacement;
+ 
+       scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, filename,
+ 		   write_files ? O_RDWR | O_BINARY : O_RDONLY | O_BINARY,
+@@ -288,12 +293,23 @@ exec_file_attach (char *filename, int from_tty)
+ 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
+ 	}
+ 
++      set_gdbarch_from_file (exec_bfd);
++
++      addr_bit = gdbarch_addr_bit (target_gdbarch);
++      if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
++	mask = ((CORE_ADDR) 1 << addr_bit) - 1;
++
++      displacement = solib_exec_displacement ();
++      for (p = sections; p < sections_end; p++)
++	{
++	  p->addr = (p->addr + displacement) & mask;
++	  p->endaddr = (p->endaddr + displacement) & mask;
++	}
++
+       exec_bfd_mtime = bfd_get_mtime (exec_bfd);
+ 
+       validate_files ();
+ 
+-      set_gdbarch_from_file (exec_bfd);
+-
+       /* Add the executable's sections to the current address spaces'
+ 	 list of sections.  */
+       add_target_sections (sections, sections_end);
+--- a/gdb/gdbtypes.h
++++ b/gdb/gdbtypes.h
+@@ -966,6 +966,7 @@ extern void allocate_cplus_struct_type (struct type *);
+ #define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind)
+ #define FIELD_BITPOS(thisfld) ((thisfld).loc.bitpos)
+ #define FIELD_STATIC_PHYSNAME(thisfld) ((thisfld).loc.physname)
++/* This address is unrelocated by the objfile's ANOFFSET.  */
+ #define FIELD_STATIC_PHYSADDR(thisfld) ((thisfld).loc.physaddr)
+ #define FIELD_DWARF_BLOCK(thisfld) ((thisfld).loc.dwarf_block)
+ #define SET_FIELD_BITPOS(thisfld, bitpos)			\
+@@ -974,6 +975,7 @@ extern void allocate_cplus_struct_type (struct type *);
+ #define SET_FIELD_PHYSNAME(thisfld, name)			\
+   (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_PHYSNAME,		\
+    FIELD_STATIC_PHYSNAME (thisfld) = (name))
++/* This address is unrelocated by the objfile's ANOFFSET.  */
+ #define SET_FIELD_PHYSADDR(thisfld, addr)			\
+   (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_PHYSADDR,		\
+    FIELD_STATIC_PHYSADDR (thisfld) = (addr))
+@@ -989,6 +991,7 @@ extern void allocate_cplus_struct_type (struct type *);
+ #define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND (TYPE_FIELD (thistype, n))
+ #define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS (TYPE_FIELD (thistype, n))
+ #define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_STATIC_PHYSNAME (TYPE_FIELD (thistype, n))
++/* This address is unrelocated by the objfile's ANOFFSET.  */
+ #define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_STATIC_PHYSADDR (TYPE_FIELD (thistype, n))
+ #define TYPE_FIELD_DWARF_BLOCK(thistype, n) FIELD_DWARF_BLOCK (TYPE_FIELD (thistype, n))
+ #define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL(TYPE_FIELD(thistype,n))
+--- a/gdb/jv-lang.c
++++ b/gdb/jv-lang.c
+@@ -416,7 +416,8 @@ java_link_class_type (struct gdbarch *gdbarch,
+ 
+   fields = NULL;
+   nfields--;			/* First set up dummy "class" field. */
+-  SET_FIELD_PHYSADDR (TYPE_FIELD (type, nfields), value_address (clas));
++  SET_FIELD_PHYSADDR (TYPE_FIELD (type, nfields), value_address (clas)
++    - (TYPE_OBJFILE (type) == NULL ? 0 : ANOFFSET (TYPE_OBJFILE (type)->section_offsets, SECT_OFF_TEXT (TYPE_OBJFILE (type)))));
+   TYPE_FIELD_NAME (type, nfields) = "class";
+   TYPE_FIELD_TYPE (type, nfields) = value_type (clas);
+   SET_TYPE_FIELD_PRIVATE (type, nfields);
+@@ -462,7 +463,8 @@ java_link_class_type (struct gdbarch *gdbarch,
+ 	  SET_TYPE_FIELD_PROTECTED (type, i);
+ 	}
+       if (accflags & 0x0008)	/* ACC_STATIC */
+-	SET_FIELD_PHYSADDR (TYPE_FIELD (type, i), boffset);
++	SET_FIELD_PHYSADDR (TYPE_FIELD (type, i), boffset
++	  - (TYPE_OBJFILE (type) == NULL ? 0 : ANOFFSET (TYPE_OBJFILE (type)->section_offsets, SECT_OFF_TEXT (TYPE_OBJFILE (type)))));
+       else
+ 	TYPE_FIELD_BITPOS (type, i) = 8 * boffset;
+       if (accflags & 0x8000)	/* FIELD_UNRESOLVED_FLAG */
+--- a/gdb/solib-svr4.c
++++ b/gdb/solib-svr4.c
+@@ -1621,7 +1621,10 @@ svr4_exec_displacement (void)
+   if (target_auxv_search (&current_target, AT_ENTRY, &entry_point) == 1)
+     return entry_point - exec_entry_point (exec_bfd, &current_target);
+ 
+-  return svr4_static_exec_displacement ();
++  if (!ptid_equal (inferior_ptid, null_ptid))
++    return svr4_static_exec_displacement ();
++
++  return 0;
+ }
+ 
+ /* Relocate the main executable.  This function should be called upon
+@@ -1632,7 +1635,7 @@ svr4_exec_displacement (void)
+ static void
+ svr4_relocate_main_executable (void)
+ {
+-  CORE_ADDR displacement = svr4_exec_displacement ();
++  CORE_ADDR displacement = solib_exec_displacement ();
+ 
+   /* Even if DISPLACEMENT is 0 still try to relocate it as this is a new
+      difference of in-memory vs. in-file addresses and we could already
+@@ -1975,6 +1978,7 @@ _initialize_svr4_solib (void)
+   svr4_so_ops.free_so = svr4_free_so;
+   svr4_so_ops.clear_solib = svr4_clear_solib;
+   svr4_so_ops.solib_create_inferior_hook = svr4_solib_create_inferior_hook;
++  svr4_so_ops.exec_displacement = svr4_exec_displacement;
+   svr4_so_ops.special_symbol_handling = svr4_special_symbol_handling;
+   svr4_so_ops.current_sos = svr4_current_sos;
+   svr4_so_ops.open_symbol_file_object = open_symbol_file_object;
+--- a/gdb/solib.c
++++ b/gdb/solib.c
+@@ -1014,6 +1014,19 @@ solib_create_inferior_hook (int from_tty)
+   ops->solib_create_inferior_hook (from_tty);
+ }
+ 
++/* Query the difference of in-memory VMA addresses vs. exec_bfd VMAs.  */
++
++CORE_ADDR
++solib_exec_displacement (void)
++{
++  struct target_so_ops *ops = solib_ops (target_gdbarch);
++
++  if (ops->exec_displacement != NULL)
++    return (*ops->exec_displacement) ();
++  else
++    return 0;
++}
++
+ /* GLOBAL FUNCTION
+ 
+    in_solib_dynsym_resolve_code -- check to see if an address is in
+--- a/gdb/solib.h
++++ b/gdb/solib.h
+@@ -43,6 +43,8 @@ extern int solib_read_symbols (struct so_list *, int);
+ 
+ extern void solib_create_inferior_hook (int from_tty);
+ 
++extern CORE_ADDR solib_exec_displacement (void);
++
+ /* If ADDR lies in a shared library, return its name.  */
+ 
+ extern char *solib_name_from_address (CORE_ADDR);
+--- a/gdb/solist.h
++++ b/gdb/solist.h
+@@ -89,6 +89,9 @@ struct target_so_ops
+     /* Target dependent code to run after child process fork.  */
+     void (*solib_create_inferior_hook) (int from_tty);
+ 
++    /* Query the difference of in-memory VMA addresses vs. exec_bfd VMAs.  */
++    CORE_ADDR (*exec_displacement) (void);
++
+     /* Do additional symbol handling, lookup, etc. after symbols
+        for a shared object have been loaded.  */
+     void (*special_symbol_handling) (void);
+--- a/gdb/symfile.c
++++ b/gdb/symfile.c
+@@ -873,15 +873,36 @@ syms_from_objfile (struct objfile *objfile,
+      if an error occurs during symbol reading.  */
+   old_chain = make_cleanup_free_objfile (objfile);
+ 
+-  /* If ADDRS and OFFSETS are both NULL, put together a dummy address
+-     list.  We now establish the convention that an addr of zero means
+-     no load address was specified. */
++  /* If ADDRS and OFFSETS are both NULL, put together a dummy offset list.  */
++
+   if (! addrs && ! offsets)
+     {
+-      local_addr
+-	= alloc_section_addr_info (bfd_count_sections (objfile->obfd));
+-      make_cleanup (xfree, local_addr);
+-      addrs = local_addr;
++      /* Relocateble files have an exception in default_symfile_offsets which
++	 applies only for ADDRS.  But calling solib_exec_displacement is more
++	 suitable for OFFSETS.  Fortunately we never need the both
++	 functionalities simultaneously and in other cases zeroed ADDRS and
++	 zeroed OFFSETS are equivalent.  */
++
++      if ((bfd_get_file_flags (objfile->obfd) & (EXEC_P | DYNAMIC)) == 0)
++	{
++	  local_addr
++		 = alloc_section_addr_info (bfd_count_sections (objfile->obfd));
++	  make_cleanup (xfree, local_addr);
++	  addrs = local_addr;
++	}
++      else
++	{
++	  CORE_ADDR displacement = 0;
++	  int i;
++
++	  if (mainline)
++	    displacement = solib_exec_displacement ();
++
++	  num_offsets = bfd_count_sections (objfile->obfd);
++	  offsets = alloca (SIZEOF_N_SECTION_OFFSETS (num_offsets));
++	  for (i = 0; i < num_offsets; i++)
++	    offsets->offsets[i] = displacement;
++	}
+     }
+ 
+   /* Now either addrs or offsets is non-zero.  */
+--- a/gdb/value.c
++++ b/gdb/value.c
+@@ -1890,7 +1890,8 @@ value_static_field (struct type *type, int fieldno)
+   if (TYPE_FIELD_LOC_KIND (type, fieldno) == FIELD_LOC_KIND_PHYSADDR)
+     {
+       retval = value_at (TYPE_FIELD_TYPE (type, fieldno),
+-			 TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));
++			 TYPE_FIELD_STATIC_PHYSADDR (type, fieldno)
++			   + (TYPE_OBJFILE (type) == NULL ? 0 : ANOFFSET (TYPE_OBJFILE (type)->section_offsets, SECT_OFF_TEXT (TYPE_OBJFILE (type)))));
+     }
+   else
+     {
+@@ -1920,7 +1921,8 @@ value_static_field (struct type *type, int fieldno)
+  	}
+       if (retval && VALUE_LVAL (retval) == lval_memory)
+ 	SET_FIELD_PHYSADDR (TYPE_FIELD (type, fieldno),
+-			    value_address (retval));
++			    value_address (retval)
++			      - (TYPE_OBJFILE (type) == NULL ? 0 : ANOFFSET (TYPE_OBJFILE (type)->section_offsets, SECT_OFF_TEXT (TYPE_OBJFILE (type)))));
+     }
+   return retval;
+ }

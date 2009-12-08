@@ -2,7 +2,7 @@ http://sourceware.org/gdb/wiki/ProjectArcher
 http://sourceware.org/gdb/wiki/ArcherBranchManagement
 
 GIT snapshot:
-commit 7cb860f03e2437c97239334ebe240d06f45723e0
+commit 16276c1aad1366b92e687c72cab30192280e1906
 
 branch `archer' - the merge of branches:
 archer-tromey-call-frame-cfa
@@ -19,12 +19,12 @@ archer-pmuldoon-next-over-throw
 
 
 diff --git a/gdb/Makefile.in b/gdb/Makefile.in
-index f5e1dde..73ee55c 100644
+index 7d53205..319fac4 100644
 --- a/gdb/Makefile.in
 +++ b/gdb/Makefile.in
 @@ -169,6 +169,10 @@ TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
  # Did the user give us a --with-gdb-datadir option?
- GDB_DATADIR_PATH = @GDB_DATADIR_PATH@
+ GDB_DATADIR = @GDB_DATADIR@
  
 +# The argument to --with-pythondir.  If not given, this is
 +# GDB_DATADIR_PATH/python.
@@ -194,10 +194,10 @@ index f5e1dde..73ee55c 100644
  # Dependency tracking.  Most of this is conditional on GNU Make being
  # found by configure; if GNU Make is not found, we fall back to a
 diff --git a/gdb/NEWS b/gdb/NEWS
-index 4fc6dcd..6744b23 100644
+index 8d32c34..f7ea21b 100644
 --- a/gdb/NEWS
 +++ b/gdb/NEWS
-@@ -462,6 +462,13 @@ x86/x86_64 Darwin		i[34567]86-*-darwin*
+@@ -476,6 +476,13 @@ x86/x86_64 Darwin		i[34567]86-*-darwin*
  
  x86_64 MinGW			x86_64-*-mingw*
  
@@ -290,7 +290,7 @@ index 9b5d2c6..61676a9 100644
    ada_dump_subexp_body,
    ada_evaluate_subexp
 diff --git a/gdb/amd64-linux-nat.c b/gdb/amd64-linux-nat.c
-index 7d8461c..a6d35d7 100644
+index 7d8461c..fc4b3e0 100644
 --- a/gdb/amd64-linux-nat.c
 +++ b/gdb/amd64-linux-nat.c
 @@ -270,6 +270,8 @@ amd64_linux_dr_get (ptid_t ptid, int regnum)
@@ -340,7 +340,7 @@ index 7d8461c..a6d35d7 100644
    return amd64_linux_dr_get (inferior_ptid, DR_STATUS);
  }
  
-+/* Unset VALUE bits in DR_STATUS in all LWPs of LWP_LIST.  */
++/* Unset MASK bits in DR_STATUS in all LWPs of LWP_LIST.  */
 +
 +static void
 +amd64_linux_dr_unset_status (unsigned long mask)
@@ -463,7 +463,7 @@ index 53e7371..d373f8a 100644
 +
  #endif /* BLOCK_H */
 diff --git a/gdb/breakpoint.c b/gdb/breakpoint.c
-index 811cdfb..b0bf314 100644
+index 811cdfb..0f35101 100644
 --- a/gdb/breakpoint.c
 +++ b/gdb/breakpoint.c
 @@ -61,6 +61,7 @@
@@ -684,14 +684,14 @@ index 811cdfb..b0bf314 100644
 +
 +  /* Find BC_L which is a leftmost element which may affect BUF content.  It is
 +     safe to report lower value but a failure to report higher one.  */
-+
+ 
+-  ALL_BP_LOCATIONS (b)
 +  bc_l = 0;
 +  bc_r = bp_location_count;
 +  while (bc_l + 1 < bc_r)
 +    {
 +      struct bp_location *b;
- 
--  ALL_BP_LOCATIONS (b)
++
 +      bc = (bc_l + bc_r) / 2;
 +      b = bp_location[bc];
 +
@@ -1553,7 +1553,7 @@ index 811cdfb..b0bf314 100644
  /* If SHOULD_INSERT is false, do not insert any breakpoint locations
     into the inferior, only remove already-inserted locations that no
     longer should be inserted.  Functions that delete a breakpoint or
-@@ -7777,49 +7951,66 @@ static void
+@@ -7777,49 +7951,78 @@ static void
  update_global_location_list (int should_insert)
  {
    struct breakpoint *b;
@@ -1625,11 +1625,11 @@ index 811cdfb..b0bf314 100644
      {
 -      /* Tells if 'loc' is found amoung the new locations.  If not, we
 +      struct bp_location *old_loc = *old_locp;
++      struct bp_location **loc2p;
 +
 +      /* Tells if 'old_loc' is found amoung the new locations.  If not, we
  	 have to free it.  */
--      int found_object = 0;
-+      int found_object;
+       int found_object = 0;
        /* Tells if the location should remain inserted in the target.  */
        int keep_in_target = 0;
        int removed = 0;
@@ -1643,13 +1643,24 @@ index 811cdfb..b0bf314 100644
 +      /* Skip LOCP entries which will definitely never be needed.  Stop either
 +	 at or being the one matching OLD_LOC.  */
 +      while (locp < bp_location + bp_location_count
-+	     && bp_location_compare (*locp, old_loc) < 0)
++	     && (*locp)->address < old_loc->address)
 +	locp++;
-+      found_object = locp < bp_location + bp_location_count && *locp == old_loc;
++
++      for (loc2p = locp;
++	   (loc2p < bp_location + bp_location_count
++	    && (*loc2p)->address == old_loc->address);
++	   loc2p++)
++	{
++	  if (*loc2p == old_loc)
++	    {
++	      found_object = 1;
++	      break;
++	    }
++	}
  
        /* If this location is no longer present, and inserted, look if there's
  	 maybe a new location at the same address.  If so, mark that one 
-@@ -7827,11 +8018,11 @@ update_global_location_list (int should_insert)
+@@ -7827,11 +8030,11 @@ update_global_location_list (int should_insert)
  	 don't have a time window where a breakpoint at certain location is not
  	 inserted.  */
  
@@ -1663,7 +1674,7 @@ index 811cdfb..b0bf314 100644
  	    {
  	      /* The location is still present in the location list, and still
  		 should be inserted.  Don't do anything.  */
-@@ -7842,37 +8033,46 @@ update_global_location_list (int should_insert)
+@@ -7842,37 +8045,46 @@ update_global_location_list (int should_insert)
  	      /* The location is either no longer present, or got disabled.
  		 See if there's another location at the same address, in which 
  		 case we don't need to remove this one from the target.  */
@@ -1685,24 +1696,24 @@ index 811cdfb..b0bf314 100644
 +
 +	      if (breakpoint_address_is_meaningful (old_loc->owner))
 +		{
-+		  struct bp_location **loc2p;
-+
 +		  for (loc2p = locp;
-+		       loc2p < bp_location + bp_location_count
-+		       && (*loc2p)->address == old_loc->address;
++		       (loc2p < bp_location + bp_location_count
++			&& (*loc2p)->address == old_loc->address);
 +		       loc2p++)
 +		    {
 +		      struct bp_location *loc2 = *loc2p;
 +
-+		      /* For the sake of should_be_inserted.
-+			 Duplicates check below will fix up this later.  */
-+		      loc2->duplicate = 0;
-+		      if (loc2 != old_loc && should_be_inserted (loc2))
-+			{		  
-+			  loc2->inserted = 1;
-+			  loc2->target_info = old_loc->target_info;
-+			  keep_in_target = 1;
-+			  break;
++			{
++			  /* For the sake of should_be_inserted.
++			     Duplicates check below will fix up this later.  */
++			  loc2->duplicate = 0;
++			  if (loc2 != old_loc && should_be_inserted (loc2))
++			    {
++			      loc2->inserted = 1;
++			      loc2->target_info = old_loc->target_info;
++			      keep_in_target = 1;
++			      break;
++			    }
 +			}
 +		    }
 +		}
@@ -1728,7 +1739,7 @@ index 811cdfb..b0bf314 100644
  		}
  	      removed = 1;
  	    }
-@@ -7894,19 +8094,59 @@ update_global_location_list (int should_insert)
+@@ -7894,19 +8106,59 @@ update_global_location_list (int should_insert)
  		 longer need to keep this breakpoint.  This is just a
  		 heuristic, but if it's wrong, we'll report unexpected SIGTRAP,
  		 which is usability issue, but not a correctness problem.  */
@@ -1794,7 +1805,7 @@ index 811cdfb..b0bf314 100644
      }
  
    if (breakpoints_always_inserted_mode () && should_insert
-@@ -8083,6 +8323,7 @@ delete_command (char *arg, int from_tty)
+@@ -8083,6 +8335,7 @@ delete_command (char *arg, int from_tty)
  	    && b->type != bp_thread_event
  	    && b->type != bp_overlay_event
  	    && b->type != bp_longjmp_master
@@ -1802,7 +1813,7 @@ index 811cdfb..b0bf314 100644
  	    && b->number >= 0)
  	  {
  	    breaks_to_delete = 1;
-@@ -8102,6 +8343,7 @@ delete_command (char *arg, int from_tty)
+@@ -8102,6 +8355,7 @@ delete_command (char *arg, int from_tty)
  		&& b->type != bp_jit_event
  		&& b->type != bp_overlay_event
  		&& b->type != bp_longjmp_master
@@ -1810,7 +1821,7 @@ index 811cdfb..b0bf314 100644
  		&& b->number >= 0)
  	      delete_breakpoint (b);
  	  }
-@@ -8404,6 +8646,7 @@ breakpoint_re_set_one (void *bint)
+@@ -8404,6 +8658,7 @@ breakpoint_re_set_one (void *bint)
  	 reset later by breakpoint_re_set.  */
      case bp_overlay_event:
      case bp_longjmp_master:
@@ -1818,7 +1829,7 @@ index 811cdfb..b0bf314 100644
        delete_breakpoint (b);
        break;
  
-@@ -8427,6 +8670,8 @@ breakpoint_re_set_one (void *bint)
+@@ -8427,6 +8682,8 @@ breakpoint_re_set_one (void *bint)
      case bp_longjmp:
      case bp_longjmp_resume:
      case bp_jit_event:
@@ -1827,7 +1838,7 @@ index 811cdfb..b0bf314 100644
        break;
      }
  
-@@ -8462,6 +8707,7 @@ breakpoint_re_set (void)
+@@ -8462,6 +8719,7 @@ breakpoint_re_set (void)
    create_longjmp_master_breakpoint ("_longjmp");
    create_longjmp_master_breakpoint ("siglongjmp");
    create_longjmp_master_breakpoint ("_siglongjmp");
@@ -1835,7 +1846,7 @@ index 811cdfb..b0bf314 100644
  }
  
  /* Reset the thread number of this breakpoint:
-@@ -9327,6 +9573,22 @@ all_tracepoints ()
+@@ -9327,6 +9585,22 @@ all_tracepoints ()
    return tp_vec;
  }
  
@@ -1858,7 +1869,7 @@ index 811cdfb..b0bf314 100644
  
  /* This help string is used for the break, hbreak, tbreak and thbreak commands.
     It is defined as a macro to prevent duplication.
-@@ -9850,4 +10112,5 @@ inferior in all-stop mode, gdb behaves as if always-inserted mode is off."),
+@@ -9850,4 +10124,5 @@ inferior in all-stop mode, gdb behaves as if always-inserted mode is off."),
    automatic_hardware_breakpoints = 1;
  
    observer_attach_about_to_proceed (breakpoint_about_to_proceed);
@@ -2900,7 +2911,7 @@ index 0000000..49ac420
 +#define TARGET_REGION_SIZE_OK_FOR_HW_WATCHPOINT(SIZE) 1
 +
 diff --git a/gdb/configure b/gdb/configure
-index 99acc2f..a2ea1ae 100755
+index 46e7bfe..ea667f0 100755
 --- a/gdb/configure
 +++ b/gdb/configure
 @@ -676,6 +676,8 @@ REPORT_BUGS_TO
@@ -3015,7 +3026,7 @@ index 99acc2f..a2ea1ae 100755
  
    # Flags needed to compile Python code (taken from python-config --cflags).
 diff --git a/gdb/configure.ac b/gdb/configure.ac
-index b31d9b7..a1969bc 100644
+index 0e42182..e7f97cf 100644
 --- a/gdb/configure.ac
 +++ b/gdb/configure.ac
 @@ -107,6 +107,51 @@ AS_HELP_STRING([--with-relocated-sources=PATH], [automatically relocate this pat
@@ -3102,7 +3113,7 @@ index 62800b8..97d587b 100644
  			{ $$ = $1.comp;
  			  if ($2) $$ = fill_comp (DEMANGLE_COMPONENT_LOCAL_NAME, $$, $2); }
 diff --git a/gdb/cp-namespace.c b/gdb/cp-namespace.c
-index d2d8f2e..af0ba28 100644
+index d2d8f2e..db26a01 100644
 --- a/gdb/cp-namespace.c
 +++ b/gdb/cp-namespace.c
 @@ -36,14 +36,17 @@ static struct using_direct *cp_copy_usings (struct using_direct *using,
@@ -3282,7 +3293,7 @@ index d2d8f2e..af0ba28 100644
        if (sym != NULL)
  	return sym;
      }
-@@ -320,25 +377,87 @@ lookup_namespace_scope (const char *name,
+@@ -320,25 +377,98 @@ lookup_namespace_scope (const char *name,
    namespace = alloca (scope_len + 1);
    strncpy (namespace, scope, scope_len);
    namespace[scope_len] = '\0';
@@ -3319,6 +3330,16 @@ index d2d8f2e..af0ba28 100644
 +    }
 +}
 +
++/* Used for cleanups to reset the "searched" flag incase
++   of an error.  */
++
++static void
++reset_directive_searched (void *data)
++{
++  struct using_direct *direct = data;
++  direct->searched = 0;
++}
++
 +/* Search for NAME by applying all import statements belonging
 +   to BLOCK which are applicable in SCOPE. If DECLARATION_ONLY the search
 +   is restricted to using declarations.
@@ -3351,11 +3372,11 @@ index d2d8f2e..af0ba28 100644
 -			    const struct block *block,
 -			    const domain_enum domain)
 +cp_lookup_symbol_imports (const char *scope,
-+                            const char *name,
-+                            const struct block *block,
-+                            const domain_enum domain,
-+                            int declaration_only,
-+                            int search_parents)
++                          const char *name,
++                          const struct block *block,
++                          const domain_enum domain,
++                          int declaration_only,
++                          int search_parents)
  {
 -  const struct using_direct *current;
 -  struct symbol *sym;
@@ -3363,6 +3384,7 @@ index d2d8f2e..af0ba28 100644
 +  struct symbol *sym = NULL;
 +  int directive_match;
 +  int current_line;
++  struct cleanup *searched_cleanup;
 +
 +  if(!declaration_only)
 +    /* First, try to find the symbol in the given namespace.  */
@@ -3382,7 +3404,7 @@ index d2d8f2e..af0ba28 100644
       names to the namespace we're searching in, see if we can find a
       match by applying them.  */
  
-@@ -346,39 +465,74 @@ cp_lookup_symbol_namespace (const char *namespace,
+@@ -346,39 +476,78 @@ cp_lookup_symbol_namespace (const char *namespace,
         current != NULL;
         current = current->next)
      {
@@ -3405,6 +3427,8 @@ index d2d8f2e..af0ba28 100644
 -					    block,
 -					    domain);
 +	  current->searched = 1;
++	  searched_cleanup = make_cleanup (reset_directive_searched, current);
++
 +	  /* If there is an import of a single declaration, compare the imported
 +	     declaration with the sought out name. If there is a match pass
 +	     current->import_src as NAMESPACE to direct the search towards the
@@ -3413,23 +3437,25 @@ index d2d8f2e..af0ba28 100644
 +	    {
 +	    if (strcmp (name, current->declaration) == 0)
 +	      {
-+	        sym = cp_lookup_symbol_in_namespace (current->import_src,
-+	                                          name,
-+	                                          block,
-+	                                          domain);
++	      sym = cp_lookup_symbol_in_namespace (current->import_src,
++	                                           name,
++	                                           block,
++	                                           domain);
 +	      }
++
++	    current->searched = 0;
++	    if (sym)
++	      return sym;
++
++	    continue;
 +	    }
 +	   
 +	  if (declaration_only)
-+            {
-+              current->searched = 0;
-+              if (sym)
-+                {
-+                  return sym;
-+                } else {
-+                  continue;
-+                }
-+            }
++	    {
++	    current->searched = 0;
++	    discard_cleanups (searched_cleanup);
++	    continue;
++	    }
 +
 +	  if (strcmp (name, current->alias) == 0)
 +	    /* If the import is creating an alias and the alias matches the
@@ -3437,26 +3463,25 @@ index d2d8f2e..af0ba28 100644
 +	       search towards the aliased namespace */
 +	    {
 +	    sym = cp_lookup_symbol_in_namespace (scope,
-+	                                      current->import_src,
-+	                                      block,
-+	                                      domain);
++	                                         current->import_src,
++	                                         block,
++	                                         domain);
 +	    } else if (strcmp ("", current->alias) == 0){
 +	    /* If this import statement creates no alias, pass current->inner as
 +	       NAMESPACE to direct the search towards the imported namespace. */
 +	      sym = cp_lookup_symbol_imports (current->import_src,
-+		                                name,
-+		                                block,
-+		                                domain,
-+		                                0,
-+		                                0);
++	                                      name,
++	                                      block,
++	                                      domain,
++	                                      0,
++	                                      0);
 +	    }
 +
 +	  current->searched = 0;
++	  discard_cleanups (searched_cleanup);
++
  	  if (sym != NULL)
--	    return sym;
-+	    {
-+	      return sym;
-+	    }
+ 	    return sym;
  	}
      }
  
@@ -3485,7 +3510,7 @@ index d2d8f2e..af0ba28 100644
  }
  
  /* Look up NAME in BLOCK's static block and in global blocks.  If
-@@ -388,17 +542,15 @@ cp_lookup_symbol_namespace (const char *namespace,
+@@ -388,17 +557,15 @@ cp_lookup_symbol_namespace (const char *namespace,
  
  static struct symbol *
  lookup_symbol_file (const char *name,
@@ -3504,7 +3529,7 @@ index d2d8f2e..af0ba28 100644
    if (anonymous_namespace)
      {
        /* Symbols defined in anonymous namespaces have external linkage
-@@ -408,12 +560,11 @@ lookup_symbol_file (const char *name,
+@@ -408,12 +575,11 @@ lookup_symbol_file (const char *name,
        const struct block *global_block = block_global_block (block);
        
        if (global_block != NULL)
@@ -3519,7 +3544,7 @@ index d2d8f2e..af0ba28 100644
      }
  
    if (sym != NULL)
-@@ -434,6 +585,7 @@ lookup_symbol_file (const char *name,
+@@ -434,6 +600,7 @@ lookup_symbol_file (const char *name,
        sym = lookup_possible_namespace_symbol (name);
        if (sym != NULL)
  	return sym;
@@ -3527,7 +3552,7 @@ index d2d8f2e..af0ba28 100644
      }
  
    return NULL;
-@@ -461,9 +613,8 @@ cp_lookup_nested_type (struct type *parent_type,
+@@ -461,9 +628,8 @@ cp_lookup_nested_type (struct type *parent_type,
  	   lookup_symbol_namespace works when looking them up.  */
  
  	const char *parent_name = TYPE_TAG_NAME (parent_type);
@@ -3538,7 +3563,7 @@ index d2d8f2e..af0ba28 100644
  							 block,
  							 VAR_DOMAIN);
  	if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
-@@ -709,7 +860,7 @@ check_one_possible_namespace_symbol (const char *name, int len,
+@@ -709,7 +875,7 @@ check_one_possible_namespace_symbol (const char *name, int len,
  
    memcpy (name_copy, name, len);
    name_copy[len] = '\0';
@@ -3547,7 +3572,7 @@ index d2d8f2e..af0ba28 100644
  
    if (sym == NULL)
      {
-@@ -749,7 +900,7 @@ lookup_possible_namespace_symbol (const char *name)
+@@ -749,7 +915,7 @@ lookup_possible_namespace_symbol (const char *name)
        struct symbol *sym;
  
        sym = lookup_block_symbol (get_possible_namespace_block (objfile),
@@ -3832,7 +3857,7 @@ index 7cb016d..bb9e35a 100644
    default_symfile_offsets, /* sym_offsets: parse user's offsets to
  			      internal form */
 diff --git a/gdb/doc/gdb.texinfo b/gdb/doc/gdb.texinfo
-index f16b6e2..fe328c7 100644
+index 1f98fa5..9e24482 100644
 --- a/gdb/doc/gdb.texinfo
 +++ b/gdb/doc/gdb.texinfo
 @@ -959,8 +959,10 @@ Connect to process ID @var{number}, as with the @code{attach} command.
@@ -3865,7 +3890,7 @@ index f16b6e2..fe328c7 100644
  @c resolve the situation of these eventually
  @item -tui
  @cindex @code{--tui}
-@@ -18650,7 +18662,7 @@ command:
+@@ -18660,7 +18672,7 @@ command:
  @table @code
  @kindex source
  @cindex execute commands from a file
@@ -3874,7 +3899,7 @@ index f16b6e2..fe328c7 100644
  Execute the command file @var{filename}.
  @end table
  
-@@ -18667,6 +18679,11 @@ If @code{-v}, for verbose mode, is given then @value{GDBN} displays
+@@ -18677,6 +18689,11 @@ If @code{-v}, for verbose mode, is given then @value{GDBN} displays
  each command as it is executed.  The option must be given before
  @var{filename}, and is interpreted as part of the filename anywhere else.
  
@@ -3886,7 +3911,7 @@ index f16b6e2..fe328c7 100644
  Commands that would ask for confirmation if used interactively proceed
  without asking when used in a command file.  Many @value{GDBN} commands that
  normally print messages to say what they are doing omit the messages
-@@ -18928,8 +18945,6 @@ containing @code{end}.  For example:
+@@ -18938,8 +18955,6 @@ containing @code{end}.  For example:
  
  @smallexample
  (@value{GDBP}) python
@@ -3895,7 +3920,7 @@ index f16b6e2..fe328c7 100644
  >print 23
  >end
  23
-@@ -18942,6 +18957,14 @@ in a Python script.  This can be controlled using @code{maint set
+@@ -18952,6 +18967,14 @@ in a Python script.  This can be controlled using @code{maint set
  python print-stack}: if @code{on}, the default, then Python stack
  printing is enabled; if @code{off}, then Python stack printing is
  disabled.
@@ -3910,7 +3935,7 @@ index f16b6e2..fe328c7 100644
  @end table
  
  @node Python API
-@@ -18949,6 +18972,14 @@ disabled.
+@@ -18959,6 +18982,14 @@ disabled.
  @cindex python api
  @cindex programming in python
  
@@ -3925,7 +3950,7 @@ index f16b6e2..fe328c7 100644
  @cindex python stdout
  @cindex python pagination
  At startup, @value{GDBN} overrides Python's @code{sys.stdout} and
-@@ -18961,13 +18992,17 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
+@@ -18971,13 +19002,17 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
  * Basic Python::                Basic Python Functions.
  * Exception Handling::
  * Auto-loading::                Automatically loading Python code.
@@ -3944,7 +3969,7 @@ index f16b6e2..fe328c7 100644
  * Frames In Python::            Acessing inferior stack frames from Python.
  @end menu
  
-@@ -18994,6 +19029,12 @@ command as having originated from the user invoking it interactively.
+@@ -19004,6 +19039,12 @@ command as having originated from the user invoking it interactively.
  It must be a boolean value.  If omitted, it defaults to @code{False}.
  @end defun
  
@@ -3957,7 +3982,7 @@ index f16b6e2..fe328c7 100644
  @findex gdb.parameter
  @defun parameter parameter
  Return the value of a @value{GDBN} parameter.  @var{parameter} is a
-@@ -19010,6 +19051,7 @@ a Python value of the appropriate type, and returned.
+@@ -19020,6 +19061,7 @@ a Python value of the appropriate type, and returned.
  @defun history number
  Return a value from @value{GDBN}'s value history (@pxref{Value
  History}).  @var{number} indicates which history element to return.
@@ -3965,7 +3990,7 @@ index f16b6e2..fe328c7 100644
  If @var{number} is negative, then @value{GDBN} will take its absolute value
  and count backward from the last element (i.e., the most recent element) to
  find the value to return.  If @var{number} is zero, then @value{GDBN} will
-@@ -19021,6 +19063,28 @@ If no exception is raised, the return value is always an instance of
+@@ -19031,6 +19073,28 @@ If no exception is raised, the return value is always an instance of
  @code{gdb.Value} (@pxref{Values From Inferior}).
  @end defun
  
@@ -3994,7 +4019,7 @@ index f16b6e2..fe328c7 100644
  @findex gdb.write
  @defun write string
  Print a string to @value{GDBN}'s paginated standard output stream.
-@@ -19035,6 +19099,11 @@ Flush @value{GDBN}'s paginated standard output stream.  Flushing
+@@ -19045,6 +19109,11 @@ Flush @value{GDBN}'s paginated standard output stream.  Flushing
  function.
  @end defun
  
@@ -4006,7 +4031,7 @@ index f16b6e2..fe328c7 100644
  @node Exception Handling
  @subsubsection Exception Handling
  @cindex python exceptions
-@@ -19171,6 +19240,13 @@ The type of this @code{gdb.Value}.  The value of this attribute is a
+@@ -19181,6 +19250,13 @@ The type of this @code{gdb.Value}.  The value of this attribute is a
  The following methods are provided:
  
  @table @code
@@ -4020,7 +4045,7 @@ index f16b6e2..fe328c7 100644
  @defmethod Value dereference
  For pointer data types, this method returns a new @code{gdb.Value} object
  whose contents is the object pointed to by the pointer.  For example, if
-@@ -19242,6 +19318,9 @@ module:
+@@ -19252,6 +19328,9 @@ module:
  This function looks up a type by name.  @var{name} is the name of the
  type to look up.  It must be a string.
  
@@ -4030,7 +4055,7 @@ index f16b6e2..fe328c7 100644
  Ordinarily, this function will return an instance of @code{gdb.Type}.
  If the named type cannot be found, it will throw an exception.
  @end defun
-@@ -19294,6 +19373,12 @@ This is @code{True} if the field is artificial, usually meaning that
+@@ -19304,6 +19383,12 @@ This is @code{True} if the field is artificial, usually meaning that
  it was provided by the compiler and not the user.  This attribute is
  always provided, and is @code{False} if the field is not artificial.
  
@@ -4043,7 +4068,7 @@ index f16b6e2..fe328c7 100644
  @item bitsize
  If the field is packed, or is a bitfield, then this will have a
  non-zero value, which is the size of the field in bits.  Otherwise,
-@@ -19346,7 +19431,7 @@ If the type does not have a target, this method will throw an
+@@ -19356,7 +19441,7 @@ If the type does not have a target, this method will throw an
  exception.
  @end defmethod
  
@@ -4052,7 +4077,7 @@ index f16b6e2..fe328c7 100644
  If this @code{gdb.Type} is an instantiation of a template, this will
  return a new @code{gdb.Type} which represents the type of the
  @var{n}th template argument.
-@@ -19354,7 +19439,8 @@ return a new @code{gdb.Type} which represents the type of the
+@@ -19364,7 +19449,8 @@ return a new @code{gdb.Type} which represents the type of the
  If this @code{gdb.Type} is not a template type, this will throw an
  exception.  Ordinarily, only C@t{++} code will have template types.
  
@@ -4062,7 +4087,7 @@ index f16b6e2..fe328c7 100644
  @end defmethod
  @end table
  
-@@ -19708,6 +19794,121 @@ import gdb.libstdcxx.v6
+@@ -19718,6 +19804,121 @@ import gdb.libstdcxx.v6
  gdb.libstdcxx.v6.register_printers (gdb.current_objfile ())
  @end smallexample
  
@@ -4184,7 +4209,7 @@ index f16b6e2..fe328c7 100644
  @node Commands In Python
  @subsubsection Commands In Python
  
-@@ -19960,6 +20161,135 @@ registration of the command with @value{GDBN}.  Depending on how the
+@@ -19970,6 +20171,135 @@ registration of the command with @value{GDBN}.  Depending on how the
  Python code is read into @value{GDBN}, you may need to import the
  @code{gdb} module explicitly.
  
@@ -4320,7 +4345,7 @@ index f16b6e2..fe328c7 100644
  @node Functions In Python
  @subsubsection Writing new convenience functions
  
-@@ -20064,6 +20394,82 @@ which is used to format the value.  @xref{Pretty Printing}, for more
+@@ -20074,6 +20404,82 @@ which is used to format the value.  @xref{Pretty Printing}, for more
  information.
  @end defivar
  
@@ -4403,7 +4428,7 @@ index f16b6e2..fe328c7 100644
  @node Frames In Python
  @subsubsection Acessing inferior stack frames from Python.
  
-@@ -20128,6 +20534,14 @@ function to a string.
+@@ -20138,6 +20544,14 @@ function to a string.
  Returns the frame's resume address.
  @end defmethod
  
@@ -4418,7 +4443,7 @@ index f16b6e2..fe328c7 100644
  @defmethod Frame older
  Return the frame that called this frame.
  @end defmethod
-@@ -20136,10 +20550,18 @@ Return the frame that called this frame.
+@@ -20146,10 +20560,18 @@ Return the frame that called this frame.
  Return the frame called by this frame.
  @end defmethod
  
@@ -4963,7 +4988,7 @@ index 0bfcfca..01018d6 100644
  
  #endif /* dwarf2loc.h */
 diff --git a/gdb/dwarf2read.c b/gdb/dwarf2read.c
-index 4cce36b..c2f5f23 100644
+index 4cce36b..fb0a693 100644
 --- a/gdb/dwarf2read.c
 +++ b/gdb/dwarf2read.c
 @@ -48,6 +48,12 @@
@@ -5701,7 +5726,7 @@ index 4cce36b..c2f5f23 100644
        if (die->child != NULL && (die->tag == DW_TAG_imported_declaration
  				 || cu->language != language_fortran))
  	complaint (&symfile_complaints, _("Tag '%s' has unexpected children"),
-@@ -3310,41 +3583,68 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3310,41 +3583,71 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
  /* Return the fully qualified name of DIE, based on its DW_AT_name.
     If scope qualifiers are appropriate they will be added.  The result
     will be allocated on the objfile_obstack, or NULL if the DIE does
@@ -5776,14 +5801,17 @@ index 4cce36b..c2f5f23 100644
    return name;
  }
  
-+/* read the given die's decl_line number. Return -1 if in case of an error */
-+static const int dwarf2_read_decl_line (struct die_info *die, struct dwarf2_cu *cu){
++/* Read the given DIE's DW_AT_decl_line number.  Return -1 if in case of an
++   error.  */
++
++static int
++dwarf2_read_decl_line (struct die_info *die, struct dwarf2_cu *cu)
++{
 +  struct attribute *line_attr;
 +
 +  line_attr = dwarf2_attr (die, DW_AT_decl_line, cu);
-+  if (line_attr){
-+    return  DW_UNSND (line_attr);
-+  }
++  if (line_attr)
++    return DW_UNSND (line_attr);
 +
 +  return -1;
 +}
@@ -5791,7 +5819,7 @@ index 4cce36b..c2f5f23 100644
  /* Read the import statement specified by the given die and record it.  */
  
  static void
-@@ -3354,9 +3654,15 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3354,9 +3657,15 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
    struct die_info *imported_die;
    const char *imported_name;
    const char *imported_name_prefix;
@@ -5809,7 +5837,7 @@ index 4cce36b..c2f5f23 100644
    import_attr = dwarf2_attr (die, DW_AT_import, cu);
    if (import_attr == NULL)
      {
-@@ -3404,17 +3710,27 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3404,17 +3713,27 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
        return;
      }
  
@@ -5843,7 +5871,7 @@ index 4cce36b..c2f5f23 100644
        canonical_name = alloca (strlen (imported_name_prefix) + 2 + strlen (imported_name) + 1);
        strcpy (canonical_name, imported_name_prefix);
        strcat (canonical_name, "::");
-@@ -3425,8 +3741,14 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3425,8 +3744,14 @@ read_import_statement (struct die_info *die, struct dwarf2_cu *cu)
        canonical_name = alloca (strlen (imported_name) + 1);
        strcpy (canonical_name, imported_name);
      }
@@ -5860,7 +5888,7 @@ index 4cce36b..c2f5f23 100644
  }
  
  static void
-@@ -3695,6 +4017,14 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3695,6 +4020,14 @@ inherit_abstract_dies (struct die_info *die, struct dwarf2_cu *cu)
    struct attribute *attr;
  
    attr = dwarf2_attr (die, DW_AT_abstract_origin, cu);
@@ -5875,7 +5903,7 @@ index 4cce36b..c2f5f23 100644
    if (!attr)
      return;
  
-@@ -3793,6 +4123,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3793,6 +4126,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
    char *name;
    CORE_ADDR baseaddr;
    struct block *block;
@@ -5883,7 +5911,7 @@ index 4cce36b..c2f5f23 100644
    int inlined_func = (die->tag == DW_TAG_inlined_subroutine);
  
    if (inlined_func)
-@@ -3811,13 +4142,23 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3811,13 +4145,23 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
  
    baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
  
@@ -5910,7 +5938,7 @@ index 4cce36b..c2f5f23 100644
    lowpc += baseaddr;
    highpc += baseaddr;
  
-@@ -3844,14 +4185,19 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3844,14 +4188,19 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
  
    cu->list_in_scope = &local_symbols;
  
@@ -5937,7 +5965,7 @@ index 4cce36b..c2f5f23 100644
      }
  
    inherit_abstract_dies (die, cu);
-@@ -3867,6 +4213,13 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3867,6 +4216,13 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
  			determine_prefix (die, cu),
  			processing_has_namespace_info);
  
@@ -5951,7 +5979,7 @@ index 4cce36b..c2f5f23 100644
    /* If we have address ranges, record them.  */
    dwarf2_record_block_ranges (die, block, baseaddr, cu);
    
-@@ -3903,7 +4256,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3903,7 +4259,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
       as multiple lexical blocks?  Handling children in a sane way would
       be nasty.  Might be easier to properly extend generic blocks to 
       describe ranges.  */
@@ -5960,7 +5988,7 @@ index 4cce36b..c2f5f23 100644
      return;
    lowpc += baseaddr;
    highpc += baseaddr;
-@@ -3920,7 +4273,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
+@@ -3920,7 +4276,7 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
      }
    new = pop_context ();
  
@@ -5969,7 +5997,7 @@ index 4cce36b..c2f5f23 100644
      {
        struct block *block
          = finish_block (0, &local_symbols, new->old_blocks, new->start_addr,
-@@ -4075,7 +4428,8 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
+@@ -4075,7 +4431,8 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
     discontinuous, i.e. derived from DW_AT_ranges information.  */
  static int
  dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
@@ -5979,7 +6007,7 @@ index 4cce36b..c2f5f23 100644
  {
    struct attribute *attr;
    CORE_ADDR low = 0;
-@@ -4103,7 +4457,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
+@@ -4103,7 +4460,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
  	{
  	  /* Value of the DW_AT_ranges attribute is the offset in the
  	     .debug_ranges section.  */
@@ -5988,7 +6016,7 @@ index 4cce36b..c2f5f23 100644
  	    return 0;
  	  /* Found discontinuous range of addresses.  */
  	  ret = -1;
-@@ -4142,7 +4496,7 @@ dwarf2_get_subprogram_pc_bounds (struct die_info *die,
+@@ -4142,7 +4499,7 @@ dwarf2_get_subprogram_pc_bounds (struct die_info *die,
    CORE_ADDR low, high;
    struct die_info *child = die->child;
  
@@ -5997,7 +6025,7 @@ index 4cce36b..c2f5f23 100644
      {
        *lowpc = min (*lowpc, low);
        *highpc = max (*highpc, high);
-@@ -4179,7 +4533,7 @@ get_scope_pc_bounds (struct die_info *die,
+@@ -4179,7 +4536,7 @@ get_scope_pc_bounds (struct die_info *die,
    CORE_ADDR best_high = (CORE_ADDR) 0;
    CORE_ADDR current_low, current_high;
  
@@ -6006,7 +6034,7 @@ index 4cce36b..c2f5f23 100644
      {
        best_low = current_low;
        best_high = current_high;
-@@ -4474,7 +4828,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
+@@ -4474,7 +4831,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
  	return;
  
        /* Get physical name.  */
@@ -6015,7 +6043,7 @@ index 4cce36b..c2f5f23 100644
  
        /* The name is already allocated along with this objfile, so we don't
  	 need to duplicate it for the type.  */
-@@ -4617,7 +4971,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
+@@ -4617,7 +4974,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
      return;
  
    /* Get the mangled name.  */
@@ -6024,7 +6052,7 @@ index 4cce36b..c2f5f23 100644
  
    /* Look up member function name in fieldlist.  */
    for (i = 0; i < fip->nfnfields; i++)
-@@ -4661,7 +5015,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
+@@ -4661,7 +5018,7 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
    /* The name is already allocated along with this objfile, so we don't
       need to duplicate it for the type.  */
    fnp->physname = physname ? physname : "";
@@ -6033,7 +6061,7 @@ index 4cce36b..c2f5f23 100644
    this_type = read_type_die (die, cu);
    if (this_type && TYPE_CODE (this_type) == TYPE_CODE_FUNC)
      {
-@@ -4721,18 +5075,18 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
+@@ -4721,18 +5078,18 @@ dwarf2_add_member_fn (struct field_info *fip, struct die_info *die,
      {
        /* Support the .debug_loc offsets */
        if (attr_form_is_block (attr))
@@ -6059,7 +6087,7 @@ index 4cce36b..c2f5f23 100644
     }
  }
  
-@@ -4845,7 +5199,7 @@ quirk_gcc_member_function_pointer (struct die_info *die, struct dwarf2_cu *cu)
+@@ -4845,7 +5202,7 @@ quirk_gcc_member_function_pointer (struct die_info *die, struct dwarf2_cu *cu)
      return NULL;
  
    domain_type = TYPE_TARGET_TYPE (TYPE_FIELD_TYPE (pfn_type, 0));
@@ -6068,7 +6096,7 @@ index 4cce36b..c2f5f23 100644
    smash_to_method_type (type, domain_type, TYPE_TARGET_TYPE (pfn_type),
  			TYPE_FIELDS (pfn_type), TYPE_NFIELDS (pfn_type),
  			TYPE_VARARGS (pfn_type));
-@@ -4898,7 +5252,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -4898,7 +5255,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
        return set_die_type (die, type, cu);
      }
  
@@ -6077,7 +6105,7 @@ index 4cce36b..c2f5f23 100644
    INIT_CPLUS_SPECIFIC (type);
  
    name = dwarf2_name (die, cu);
-@@ -4907,14 +5261,18 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -4907,14 +5264,18 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
        if (cu->language == language_cplus
  	  || cu->language == language_java)
  	{
@@ -6099,7 +6127,7 @@ index 4cce36b..c2f5f23 100644
  	}
      }
  
-@@ -5124,7 +5482,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5124,7 +5485,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
        return set_die_type (die, type, cu);
      }
  
@@ -6108,7 +6136,7 @@ index 4cce36b..c2f5f23 100644
  
    TYPE_CODE (type) = TYPE_CODE_ENUM;
    name = dwarf2_full_name (die, cu);
-@@ -5152,51 +5510,6 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5152,51 +5513,6 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
    return set_die_type (die, type, cu);
  }
  
@@ -6160,7 +6188,7 @@ index 4cce36b..c2f5f23 100644
  /* Given a pointer to a die which begins an enumeration, process all
     the dies that define the members of the enumeration, and create the
     symbol for the enumeration type.
-@@ -5274,6 +5587,29 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5274,6 +5590,29 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
    new_symbol (die, this_type, cu);
  }
  
@@ -6190,7 +6218,7 @@ index 4cce36b..c2f5f23 100644
  /* Extract all information from a DW_TAG_array_type DIE and put it in
     the DIE's type field.  For now, this only handles one dimensional
     arrays.  */
-@@ -5287,7 +5623,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5287,7 +5626,7 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
    struct type *element_type, *range_type, *index_type;
    struct type **range_types = NULL;
    struct attribute *attr;
@@ -6199,7 +6227,7 @@ index 4cce36b..c2f5f23 100644
    struct cleanup *back_to;
    char *name;
  
-@@ -5334,16 +5670,11 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5334,16 +5673,11 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
    type = element_type;
  
    if (read_array_order (die, cu) == DW_ORD_col_major)
@@ -6221,7 +6249,7 @@ index 4cce36b..c2f5f23 100644
  
    /* Understand Dwarf2 support for vector types (like they occur on
       the PowerPC w/ AltiVec).  Gcc just adds another attribute to the
-@@ -5410,12 +5741,14 @@ read_set_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5410,12 +5744,14 @@ read_set_type (struct die_info *die, struct dwarf2_cu *cu)
    return set_die_type (die, set_type, cu);
  }
  
@@ -6238,7 +6266,7 @@ index 4cce36b..c2f5f23 100644
    struct attribute *attr;
    struct symbol *sym;
    CORE_ADDR base = (CORE_ADDR) 0;
-@@ -5425,25 +5758,55 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5425,25 +5761,55 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
      {
        /* Support the .debug_loc offsets */
        if (attr_form_is_block (attr))
@@ -6301,7 +6329,7 @@ index 4cce36b..c2f5f23 100644
  	  attr = dwarf2_attr (child_die, DW_AT_data_member_location, cu);
  	  if (attr)
  	    {
-@@ -5461,8 +5824,25 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5461,8 +5827,25 @@ read_common_block (struct die_info *die, struct dwarf2_cu *cu)
  	      SYMBOL_VALUE_ADDRESS (sym) = base + byte_offset;
  	      add_symbol_to_list (sym, &global_symbols);
  	    }
@@ -6327,7 +6355,7 @@ index 4cce36b..c2f5f23 100644
      }
  }
  
-@@ -5530,7 +5910,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5530,7 +5913,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
        if (is_anonymous)
  	{
  	  const char *previous_prefix = determine_prefix (die, cu);
@@ -6336,7 +6364,7 @@ index 4cce36b..c2f5f23 100644
  	}
      }
  
-@@ -5546,20 +5926,155 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5546,20 +5929,155 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
      }
  }
  
@@ -6376,18 +6404,18 @@ index 4cce36b..c2f5f23 100644
 +
 +  if (die_is_declaration (die, cu))
 +    return NULL;
- 
--  /* FIXME: Support the separate Fortran module namespaces.  */
++
 +  module_name = dwarf2_name (die, cu);
 +  if (!module_name)
 +    complaint (&symfile_complaints, _("DW_TAG_module has no name, offset 0x%x"),
 +               die->offset);
 +  type = init_type (TYPE_CODE_MODULE, 0, 0, module_name, objfile);
- 
++
 +  /* Create a context for reading the module variables.  */
-+
+ 
+-  /* FIXME: Support the separate Fortran module namespaces.  */
 +  new = push_context (0, 0);
-+
+ 
 +  save_file_symbols = file_symbols;
 +  file_symbols = NULL;
 +  save_global_symbols = global_symbols;
@@ -6495,7 +6523,7 @@ index 4cce36b..c2f5f23 100644
  }
  
  /* Return the name of the namespace represented by DIE.  Set
-@@ -5724,29 +6239,113 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5724,29 +6242,113 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
    struct gdbarch *gdbarch = get_objfile_arch (objfile);
    struct type *type, *range_type, *index_type, *char_type;
    struct attribute *attr;
@@ -6623,7 +6651,7 @@ index 4cce36b..c2f5f23 100644
    char_type = language_string_char_type (cu->language_defn, gdbarch);
    type = create_string_type (NULL, char_type, range_type);
  
-@@ -5841,7 +6440,6 @@ static struct type *
+@@ -5841,7 +6443,6 @@ static struct type *
  read_typedef (struct die_info *die, struct dwarf2_cu *cu)
  {
    struct objfile *objfile = cu->objfile;
@@ -6631,7 +6659,7 @@ index 4cce36b..c2f5f23 100644
    const char *name = NULL;
    struct type *this_type;
  
-@@ -5949,8 +6547,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5949,8 +6550,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
    struct type *base_type;
    struct type *range_type;
    struct attribute *attr;
@@ -6641,7 +6669,7 @@ index 4cce36b..c2f5f23 100644
    char *name;
    
    base_type = die_type (die, cu);
-@@ -5963,42 +6560,89 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -5963,42 +6563,89 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
  		     0, NULL, cu->objfile);
      }
  
@@ -6760,7 +6788,7 @@ index 4cce36b..c2f5f23 100644
  
    name = dwarf2_name (die, cu);
    if (name)
-@@ -6469,6 +7113,7 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
+@@ -6469,6 +7116,7 @@ load_partial_dies (bfd *abfd, gdb_byte *buffer, gdb_byte *info_ptr,
  	  && abbrev->tag != DW_TAG_lexical_block
  	  && abbrev->tag != DW_TAG_variable
  	  && abbrev->tag != DW_TAG_namespace
@@ -6768,7 +6796,7 @@ index 4cce36b..c2f5f23 100644
  	  && abbrev->tag != DW_TAG_member)
  	{
  	  /* Otherwise we skip to the next sibling, if any.  */
-@@ -6689,9 +7334,6 @@ read_partial_die (struct partial_die_info *part_die,
+@@ -6689,9 +7337,6 @@ read_partial_die (struct partial_die_info *part_die,
  	  if (part_die->dirname == NULL)
  	    part_die->dirname = DW_STRING (&attr);
  	  break;
@@ -6778,7 +6806,7 @@ index 4cce36b..c2f5f23 100644
  	case DW_AT_low_pc:
  	  has_low_pc_attr = 1;
  	  part_die->lowpc = DW_ADDR (&attr);
-@@ -6923,7 +7565,8 @@ fixup_partial_die (struct partial_die_info *part_die,
+@@ -6923,7 +7568,8 @@ fixup_partial_die (struct partial_die_info *part_die,
    /* If we found a reference attribute and the DIE has no name, try
       to find a name in the referred to DIE.  */
  
@@ -6788,7 +6816,7 @@ index 4cce36b..c2f5f23 100644
      {
        struct partial_die_info *spec_die;
  
-@@ -8265,10 +8908,12 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
+@@ -8265,10 +8911,12 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
       (i.e. when the value of a register or memory location is
       referenced, or a thread-local block, etc.).  Then again, it might
       not be worthwhile.  I'm assuming that it isn't unless performance
@@ -6803,7 +6831,7 @@ index 4cce36b..c2f5f23 100644
  }
  
  /* Given a pointer to a DWARF information entry, figure out if we need
-@@ -8290,21 +8935,30 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+@@ -8290,21 +8938,30 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
  
    baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
  
@@ -6841,7 +6869,7 @@ index 4cce36b..c2f5f23 100644
  
        /* Default assumptions.
           Use the passed type or decode it from the die.  */
-@@ -8402,9 +9056,28 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+@@ -8402,9 +9059,28 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
  	  if (attr)
  	    {
  	      var_decode_location (attr, sym, cu);
@@ -6871,7 +6899,7 @@ index 4cce36b..c2f5f23 100644
  	      else
  		add_symbol_to_list (sym, cu->list_in_scope);
  	    }
-@@ -8534,7 +9207,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+@@ -8534,7 +9210,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
  	  add_symbol_to_list (sym, cu->list_in_scope);
  	  break;
  	case DW_TAG_enumerator:
@@ -6880,7 +6908,7 @@ index 4cce36b..c2f5f23 100644
  	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
  	  if (attr)
  	    {
-@@ -8558,6 +9231,16 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+@@ -8558,6 +9234,16 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
  	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
  	  add_symbol_to_list (sym, &global_symbols);
  	  break;
@@ -6897,7 +6925,7 @@ index 4cce36b..c2f5f23 100644
  	default:
  	  /* Not a tag we recognize.  Hopefully we aren't processing
  	     trash data, but since we must specifically ignore things
-@@ -8571,8 +9254,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+@@ -8571,8 +9257,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
        /* For the benefit of old versions of GCC, check for anonymous
  	 namespaces based on the demangled name.  */
        if (!processing_has_namespace_info
@@ -6907,7 +6935,7 @@ index 4cce36b..c2f5f23 100644
  	cp_scan_for_anonymous_namespaces (sym);
      }
    return (sym);
-@@ -8823,12 +9505,18 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
+@@ -8823,12 +9508,18 @@ read_type_die (struct die_info *die, struct dwarf2_cu *cu)
      case DW_TAG_namespace:
        this_type = read_namespace_type (die, cu);
        break;
@@ -6926,7 +6954,7 @@ index 4cce36b..c2f5f23 100644
    return this_type;
  }
  
-@@ -8910,10 +9598,100 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
+@@ -8910,10 +9601,100 @@ determine_prefix (struct die_info *die, struct dwarf2_cu *cu)
  	     So it does not need a prefix.  */
  	  return "";
        default:
@@ -7028,7 +7056,7 @@ index 4cce36b..c2f5f23 100644
  /* Return a newly-allocated string formed by concatenating PREFIX and
     SUFFIX with appropriate separator.  If PREFIX or SUFFIX is NULL or empty, then
     simply copy the SUFFIX or PREFIX, respectively.  If OBS is non-null,
-@@ -8963,17 +9741,111 @@ sibling_die (struct die_info *die)
+@@ -8963,17 +9744,111 @@ sibling_die (struct die_info *die)
    return die->sibling;
  }
  
@@ -7146,7 +7174,7 @@ index 4cce36b..c2f5f23 100644
  }
  
  /* Get name of a die, return NULL if not found.  */
-@@ -10200,11 +11072,11 @@ dwarf2_get_ref_die_offset (struct attribute *attr)
+@@ -10200,11 +11075,11 @@ dwarf2_get_ref_die_offset (struct attribute *attr)
    return 0;
  }
  
@@ -7161,7 +7189,7 @@ index 4cce36b..c2f5f23 100644
  {
    if (attr->form == DW_FORM_sdata)
      return DW_SND (attr);
-@@ -11009,8 +11881,6 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
+@@ -11009,8 +11884,6 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
  {
    gdb_byte *mac_ptr, *mac_end;
    struct macro_source_file *current_file = 0;
@@ -7170,7 +7198,7 @@ index 4cce36b..c2f5f23 100644
  
    if (dwarf2_per_objfile->macinfo.buffer == NULL)
      {
-@@ -11018,29 +11888,19 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
+@@ -11018,29 +11891,19 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
        return;
      }
  
@@ -7205,7 +7233,7 @@ index 4cce36b..c2f5f23 100644
          }
  
        macinfo_type = read_1_byte (abfd, mac_ptr);
-@@ -11051,92 +11911,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
+@@ -11051,92 +11914,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
            /* A zero macinfo type indicates the end of the macro
               information.  */
          case 0:
@@ -7299,7 +7327,7 @@ index 4cce36b..c2f5f23 100644
  
          case DW_MACINFO_define:
          case DW_MACINFO_undef:
-@@ -11151,31 +11926,19 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
+@@ -11151,31 +11929,19 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
              mac_ptr += bytes_read;
  
              if (! current_file)
@@ -7342,7 +7370,7 @@ index 4cce36b..c2f5f23 100644
            }
            break;
  
-@@ -11189,22 +11952,9 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
+@@ -11189,22 +11955,9 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
              file = read_unsigned_leb128 (abfd, mac_ptr, &bytes_read);
              mac_ptr += bytes_read;
  
@@ -7368,7 +7396,7 @@ index 4cce36b..c2f5f23 100644
            }
            break;
  
-@@ -11258,7 +12008,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
+@@ -11258,7 +12011,7 @@ dwarf_decode_macros (struct line_header *lh, unsigned int offset,
            }
            break;
          }
@@ -7377,7 +7405,7 @@ index 4cce36b..c2f5f23 100644
  }
  
  /* Check if the attribute's form is a DW_FORM_block*
-@@ -11318,6 +12068,34 @@ attr_form_is_constant (struct attribute *attr)
+@@ -11318,6 +12071,34 @@ attr_form_is_constant (struct attribute *attr)
      }
  }
  
@@ -7412,7 +7440,7 @@ index 4cce36b..c2f5f23 100644
  static void
  dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
  			     struct dwarf2_cu *cu)
-@@ -11347,35 +12125,25 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
+@@ -11347,35 +12128,25 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
        SYMBOL_COMPUTED_OPS (sym) = &dwarf2_loclist_funcs;
        SYMBOL_LOCATION_BATON (sym) = baton;
      }
@@ -7463,7 +7491,7 @@ index 4cce36b..c2f5f23 100644
      }
  }
  
-@@ -11663,6 +12431,31 @@ offset_and_type_eq (const void *item_lhs, const void *item_rhs)
+@@ -11663,6 +12434,31 @@ offset_and_type_eq (const void *item_lhs, const void *item_rhs)
    return ofs_lhs->offset == ofs_rhs->offset;
  }
  
@@ -7495,7 +7523,7 @@ index 4cce36b..c2f5f23 100644
  /* Set the type associated with DIE to TYPE.  Save it in CU's hash
     table if necessary.  For convenience, return TYPE.  */
  
-@@ -11671,6 +12464,8 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
+@@ -11671,6 +12467,8 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
  {
    struct dwarf2_offset_and_type **slot, ofs;
  
@@ -7504,7 +7532,7 @@ index 4cce36b..c2f5f23 100644
    if (cu->type_hash == NULL)
      {
        gdb_assert (cu->per_cu != NULL);
-@@ -11813,23 +12608,13 @@ show_dwarf2_cmd (char *args, int from_tty)
+@@ -11813,23 +12611,13 @@ show_dwarf2_cmd (char *args, int from_tty)
    cmd_show_list (show_dwarf2_cmdlist, from_tty, "");
  }
  
@@ -7532,7 +7560,7 @@ index 4cce36b..c2f5f23 100644
  }
  
  /* munmap debug sections for OBJFILE, if necessary.  */
-@@ -11838,15 +12623,15 @@ static void
+@@ -11838,15 +12626,15 @@ static void
  dwarf2_per_objfile_free (struct objfile *objfile, void *d)
  {
    struct dwarf2_per_objfile *data = d;
@@ -7557,7 +7585,7 @@ index 4cce36b..c2f5f23 100644
  }
  
  void _initialize_dwarf2_read (void);
-@@ -11854,6 +12639,7 @@ void _initialize_dwarf2_read (void);
+@@ -11854,6 +12642,7 @@ void _initialize_dwarf2_read (void);
  void
  _initialize_dwarf2_read (void)
  {
@@ -10995,7 +11023,7 @@ index 0f9d44e..c910e88 100644
    /* We didn't find it; print the raw data.  */
    if (vbit)
 diff --git a/gdb/i386-linux-nat.c b/gdb/i386-linux-nat.c
-index fe848ff..170e6cd 100644
+index fe848ff..905dcc3 100644
 --- a/gdb/i386-linux-nat.c
 +++ b/gdb/i386-linux-nat.c
 @@ -586,6 +586,8 @@ i386_linux_store_inferior_registers (struct target_ops *ops,
@@ -11054,7 +11082,7 @@ index fe848ff..170e6cd 100644
    return i386_linux_dr_get (inferior_ptid, DR_STATUS);
  }
  
-+/* Unset VALUE bits in DR_STATUS in all LWPs of LWP_LIST.  */
++/* Unset MASK bits in DR_STATUS in all LWPs of LWP_LIST.  */
 +
 +static void
 +i386_linux_dr_unset_status (unsigned long mask)
@@ -11100,7 +11128,7 @@ index fe848ff..170e6cd 100644
  
    /* Override the default ptrace resume method.  */
 diff --git a/gdb/i386-nat.c b/gdb/i386-nat.c
-index ab1bd8a..ee330b8 100644
+index 325b4df..631ccd6 100644
 --- a/gdb/i386-nat.c
 +++ b/gdb/i386-nat.c
 @@ -137,8 +137,11 @@ struct i386_dr_low_type i386_dr_low;
@@ -11157,7 +11185,7 @@ index ab1bd8a..ee330b8 100644
  /* Return non-zero if we can watch a memory region that starts at
     address ADDR and whose length is LEN bytes.  */
  
-@@ -575,28 +598,7 @@ static int
+@@ -578,28 +601,7 @@ static int
  i386_stopped_by_watchpoint (void)
  {
    CORE_ADDR addr = 0;
@@ -11187,7 +11215,7 @@ index ab1bd8a..ee330b8 100644
  }
  
  /* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
-@@ -690,6 +692,7 @@ i386_use_watchpoints (struct target_ops *t)
+@@ -693,6 +695,7 @@ i386_use_watchpoints (struct target_ops *t)
    t->to_stopped_data_address = i386_stopped_data_address;
    t->to_insert_watchpoint = i386_insert_watchpoint;
    t->to_remove_watchpoint = i386_remove_watchpoint;
@@ -11235,6 +11263,39 @@ index f49b9f6..cd31958 100644
 +    void (*detach) (void);
      int debug_register_length;
    };
+ 
+diff --git a/gdb/infcall.c b/gdb/infcall.c
+index c9d98cf..277399a 100644
+--- a/gdb/infcall.c
++++ b/gdb/infcall.c
+@@ -441,6 +441,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
+   struct gdbarch *gdbarch;
+   struct breakpoint *terminate_bp = NULL;
+   struct minimal_symbol *tm;
++  struct cleanup *terminate_bp_cleanup = NULL;
+   ptid_t call_thread_ptid;
+   struct gdb_exception e;
+   const char *name;
+@@ -772,7 +773,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
+ 
+   /* Register a clean-up for unwind_on_terminating_exception_breakpoint.  */
+   if (terminate_bp)
+-    make_cleanup_delete_breakpoint (terminate_bp);
++    terminate_bp_cleanup = make_cleanup_delete_breakpoint (terminate_bp);
+ 
+   /* - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP - SNIP -
+      If you're looking to implement asynchronous dummy-frames, then
+@@ -987,6 +988,11 @@ When the function is done executing, GDB will silently stop."),
+       internal_error (__FILE__, __LINE__, _("... should not be here"));
+     }
+ 
++  /* If we get here and the std::terminate() breakpoint has been set,
++     it has to be cleaned manually.  */
++  if (terminate_bp)
++    do_cleanups (terminate_bp_cleanup);
++
+   /* If we get here the called FUNCTION ran to completion,
+      and the dummy frame has already been popped.  */
  
 diff --git a/gdb/infcmd.c b/gdb/infcmd.c
 index 9e98290..fab1892 100644
@@ -11349,7 +11410,7 @@ index f1b5d17..31add7d 100644
  
  extern void notice_new_inferior (ptid_t, int, int);
 diff --git a/gdb/infrun.c b/gdb/infrun.c
-index 1a83a25..2ee2164 100644
+index ff7c6b9..9d29b15 100644
 --- a/gdb/infrun.c
 +++ b/gdb/infrun.c
 @@ -45,6 +45,8 @@
@@ -11392,7 +11453,26 @@ index 1a83a25..2ee2164 100644
        /* This causes the eventpoints and symbol table to be reset.
           Must do this now, before trying to determine whether to
           stop.  */
-@@ -3468,23 +3480,33 @@ process_event_stop_test:
+@@ -2845,6 +2857,9 @@ targets should add new threads to the thread list themselves in non-stop mode.")
+     {
+       struct regcache *regcache = get_thread_regcache (ecs->ptid);
+       struct gdbarch *gdbarch = get_regcache_arch (regcache);
++      struct cleanup *old_chain = save_inferior_ptid ();
++
++      inferior_ptid = ecs->ptid;
+ 
+       fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = %s\n",
+                           paddress (gdbarch, stop_pc));
+@@ -2861,6 +2876,8 @@ targets should add new threads to the thread list themselves in non-stop mode.")
+             fprintf_unfiltered (gdb_stdlog,
+                                 "infrun: (no data address available)\n");
+ 	}
++
++      do_cleanups (old_chain);
+     }
+ 
+   if (stepping_past_singlestep_breakpoint)
+@@ -3468,23 +3485,33 @@ process_event_stop_test:
  
  	ecs->event_thread->stepping_over_breakpoint = 1;
  
@@ -11438,7 +11518,7 @@ index 1a83a25..2ee2164 100644
  	keep_going (ecs);
  	return;
  
-@@ -3496,6 +3518,53 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
+@@ -3496,6 +3523,53 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
  	gdb_assert (ecs->event_thread->step_resume_breakpoint != NULL);
  	delete_step_resume_breakpoint (ecs->event_thread);
  
@@ -11492,7 +11572,7 @@ index 1a83a25..2ee2164 100644
  	ecs->event_thread->stop_step = 1;
  	print_stop_reason (END_STEPPING_RANGE, 0);
  	stop_stepping (ecs);
-@@ -4500,6 +4569,96 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
+@@ -4500,6 +4574,96 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
      set_momentary_breakpoint_at_pc (gdbarch, pc, bp_longjmp_resume);
  }
  
@@ -11589,7 +11669,7 @@ index 1a83a25..2ee2164 100644
  static void
  stop_stepping (struct execution_control_state *ecs)
  {
-@@ -4568,6 +4727,8 @@ keep_going (struct execution_control_state *ecs)
+@@ -4568,6 +4732,8 @@ keep_going (struct execution_control_state *ecs)
  	    }
  	  if (e.reason < 0)
  	    {
@@ -12165,10 +12245,22 @@ index a84003f..924c1c5 100644
    default_symfile_offsets,	/* sym_offsets: dummy FIXME til implem sym reloc */
    default_symfile_segments,	/* sym_segments: Get segment information from
 diff --git a/gdb/objfiles.c b/gdb/objfiles.c
-index 8dcca70..4b25a5a 100644
+index 8dcca70..e5442ca 100644
 --- a/gdb/objfiles.c
 +++ b/gdb/objfiles.c
-@@ -731,6 +731,20 @@ have_partial_symbols (void)
+@@ -634,6 +634,11 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
+     }
+   }
+ 
++  /* Alread QUICK_ADDRMAP tiself assumes all sections have the same offset.  */
++  if (objfile->quick_addrmap)
++    addrmap_relocate (objfile->quick_addrmap,
++		      ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
++
+   {
+     struct partial_symbol **psym;
+ 
+@@ -731,6 +736,20 @@ have_partial_symbols (void)
      if (objfile_has_partial_symbols (ofp))
        return 1;
    }
@@ -18014,7 +18106,7 @@ index 49c0437..84a476e 100644
 +  return 1;
 +}
 diff --git a/gdb/python/py-value.c b/gdb/python/py-value.c
-index 58bcee3..b2e7b7d 100644
+index 0146593..b82fcb6 100644
 --- a/gdb/python/py-value.c
 +++ b/gdb/python/py-value.c
 @@ -25,6 +25,7 @@
@@ -20070,7 +20162,7 @@ index e5d14fd..37fab72 100644
    current_target.to_stopped_data_address = debug_to_stopped_data_address;
    current_target.to_watchpoint_addr_within_range = debug_to_watchpoint_addr_within_range;
 diff --git a/gdb/target.h b/gdb/target.h
-index b1cb852..adff946 100644
+index b1cb852..3c06eba 100644
 --- a/gdb/target.h
 +++ b/gdb/target.h
 @@ -395,6 +395,7 @@ struct target_ops
@@ -20081,7 +20173,16 @@ index b1cb852..adff946 100644
      int (*to_stopped_by_watchpoint) (void);
      int to_have_steppable_watchpoint;
      int to_have_continuable_watchpoint;
-@@ -1166,6 +1167,15 @@ extern char *normal_pid_to_str (ptid_t ptid);
+@@ -1124,7 +1125,7 @@ extern char *normal_pid_to_str (ptid_t ptid);
+ /* Hardware watchpoint interfaces.  */
+ 
+ /* Returns non-zero if we were stopped by a hardware watchpoint (memory read or
+-   write).  */
++   write).  Only the INFERIOR_PTID task is being queried.  */
+ 
+ #define target_stopped_by_watchpoint \
+    (*current_target.to_stopped_by_watchpoint)
+@@ -1166,14 +1167,26 @@ extern char *normal_pid_to_str (ptid_t ptid);
  #define	target_remove_watchpoint(addr, len, type)	\
       (*current_target.to_remove_watchpoint) (addr, len, type)
  
@@ -20097,7 +20198,20 @@ index b1cb852..adff946 100644
  #define target_insert_hw_breakpoint(gdbarch, bp_tgt) \
       (*current_target.to_insert_hw_breakpoint) (gdbarch, bp_tgt)
  
-@@ -1203,6 +1213,20 @@ extern int target_search_memory (CORE_ADDR start_addr,
+ #define target_remove_hw_breakpoint(gdbarch, bp_tgt) \
+      (*current_target.to_remove_hw_breakpoint) (gdbarch, bp_tgt)
+ 
+-#define target_stopped_data_address(target, x) \
+-    (*target.to_stopped_data_address) (target, x)
++/* Return non-zero if target knows the data address which triggered this
++   target_stopped_by_watchpoint, in such case place it to *ADDR_P.  Only the
++   INFERIOR_PTID task is being queried.  */
++#define target_stopped_data_address(target, addr_p) \
++    (*target.to_stopped_data_address) (target, addr_p)
+ 
+ #define target_watchpoint_addr_within_range(target, addr, start, length) \
+   (*target.to_watchpoint_addr_within_range) (target, addr, start, length)
+@@ -1203,6 +1216,20 @@ extern int target_search_memory (CORE_ADDR start_addr,
                                   ULONGEST pattern_len,
                                   CORE_ADDR *found_addrp);
  
@@ -20118,7 +20232,7 @@ index b1cb852..adff946 100644
  /* Command logging facility.  */
  
  #define target_log_command(p)						\
-@@ -1322,6 +1346,14 @@ extern struct target_ops *find_target_beneath (struct target_ops *);
+@@ -1322,6 +1349,14 @@ extern struct target_ops *find_target_beneath (struct target_ops *);
  
  extern char *target_get_osdata (const char *type);
  
@@ -23174,6 +23288,162 @@ index 0000000..5543757
 +
 +setup_kfail "gdb/10541" "*-*-*"
 +gdb_test "print G::GF::FE::ex" "= 9999"
+diff --git a/gdb/testsuite/gdb.cp/namespace-stress-declarations.cc b/gdb/testsuite/gdb.cp/namespace-stress-declarations.cc
+new file mode 100644
+index 0000000..173e49b
+--- /dev/null
++++ b/gdb/testsuite/gdb.cp/namespace-stress-declarations.cc
+@@ -0,0 +1,93 @@
++int a;
++int b;
++int c;
++int d;
++int e;
++int f;
++int g;
++int h;
++int i;
++int j;
++int k;
++int l;
++int m;
++int n;
++int o;
++int p;
++int q;
++int r;
++int s;
++int t;
++int u;
++int v;
++int w;
++int x;
++int y;
++int z;
++
++namespace A
++{
++  int xyz;
++
++  using ::a;
++  using ::b;
++  using ::c;
++  using ::d;
++  using ::e;
++  using ::f;
++  using ::g;
++  using ::h;
++  using ::i;
++  using ::j;
++  using ::k;
++  using ::l;
++  using ::m;
++  using ::n;
++  using ::o;
++  using ::p;
++  using ::q;
++  using ::r;
++  using ::s;
++  using ::t;
++  using ::u;
++  using ::v;
++  using ::w;
++  using ::x;
++  using ::y;
++  using ::z;
++
++}
++
++using A::a;
++using A::b;
++using A::c;
++using A::d;
++using A::e;
++using A::f;
++using A::g;
++using A::h;
++using A::i;
++using A::j;
++using A::k;
++using A::l;
++using A::m;
++using A::n;
++using A::o;
++using A::p;
++using A::q;
++using A::r;
++using A::s;
++using A::t;
++using A::u;
++using A::v;
++using A::w;
++using A::x;
++using A::y;
++using A::z;
++
++using namespace A;
++
++int main ()
++{
++  return 0;
++}
+\ No newline at end of file
+diff --git a/gdb/testsuite/gdb.cp/namespace-stress-declarations.exp b/gdb/testsuite/gdb.cp/namespace-stress-declarations.exp
+new file mode 100644
+index 0000000..f22a14e
+--- /dev/null
++++ b/gdb/testsuite/gdb.cp/namespace-stress-declarations.exp
+@@ -0,0 +1,50 @@
++# Copyright 2008 Free Software Foundation, Inc.
++
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++if $tracelevel then {
++    strace $tracelevel
++}
++
++set prms_id 0
++set bug_id 0
++
++set testfile namespace-stress-declarations
++set srcfile ${testfile}.cc
++set binfile ${objdir}/${subdir}/${testfile}
++if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug c++}] != "" } {
++    untested "Couldn't compile test program"
++    return -1
++}
++
++if [get_compiler_info ${binfile}] {
++    return -1;
++}
++
++# Get things started.
++
++gdb_exit
++gdb_start
++gdb_reinitialize_dir $srcdir/$subdir
++gdb_load ${binfile}
++
++if ![runto_main] then {
++    perror "couldn't run to breakpoint main"
++    continue
++}
++
++############################################
++# Test that the search can fail efficiently 
++
++gdb_test "print fakex" "No symbol \"fakex\" in current context."
 diff --git a/gdb/testsuite/gdb.cp/namespace-stress.cc b/gdb/testsuite/gdb.cp/namespace-stress.cc
 new file mode 100644
 index 0000000..f34083e
@@ -25369,10 +25639,10 @@ index 495ae45..d08d7a4 100644
  		set command "next"
 diff --git a/gdb/testsuite/gdb.java/jnpe.exp b/gdb/testsuite/gdb.java/jnpe.exp
 new file mode 100644
-index 0000000..74d4d58
+index 0000000..e71391e
 --- /dev/null
 +++ b/gdb/testsuite/gdb.java/jnpe.exp
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,77 @@
 +# Copyright 2009 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
@@ -25395,10 +25665,10 @@ index 0000000..74d4d58
 +load_lib "java.exp"
 +
 +set testfile "jnpe"
-+set srcfile ${srcdir}/$subdir/${testfile}.java
++set srcfile ${testfile}.java
 +set binfile ${objdir}/${subdir}/${testfile}
-+if  { [compile_java_from_source ${srcfile} ${binfile} "-g"] != "" } {
-+    untested "Couldn't compile ${srcfile}"
++if  { [compile_java_from_source ${srcdir}/$subdir/${srcfile} ${binfile} "-g"] != "" } {
++    untested "Couldn't compile ${srcdir}/$subdir/${srcfile}"
 +    return -1
 +}
 +
@@ -25416,7 +25686,7 @@ index 0000000..74d4d58
 +gdb_test "break $testfile.java:$line" ""
 +
 +gdb_test "run" \
-+  "Current language.*java" \
++  "// break here.*" \
 +  "run java next-over-throw"
 +
 +# See whether we have the needed unwinder hooks.
@@ -25425,9 +25695,10 @@ index 0000000..74d4d58
 +    -re "= .*_Unwind_DebugHook.*\r\n$gdb_prompt $" {
 +	pass "check for unwinder hook in java"
 +    }
-+    -re "No symbol .* in current context.\r\n$gdb_prompt $" {
++    -re "No symbol .* in current context.?\r\n$gdb_prompt $" {
 +	# Pass the test so we don't get bogus fails in the results.
-+	pass "check for unwinder hook in java"
++	setup_xfail *-*-*
++	fail "check for unwinder hook in java"
 +	set ok 0
 +    }
 +}
@@ -25440,14 +25711,18 @@ index 0000000..74d4d58
 +  "SIGSEGV.*fault" \
 +  "disable SIGSEGV for next-over-NPE"
 +
-+# We sometimes stop at line 37, not line 35.  This seems to be a gcj
-+# oddity -- another next will solve it.
++# The line where we stop differ according to gcj; check just we did not already
++# execute the catch point.
++
 +gdb_test "next" \
-+  "3\[57\].*" \
++  "" \
 +  "next over NPE"
++
++gdb_breakpoint [gdb_get_line_number "catch point"]
++gdb_continue_to_breakpoint "catch point" ".*// catch point.*"
 diff --git a/gdb/testsuite/gdb.java/jnpe.java b/gdb/testsuite/gdb.java/jnpe.java
 new file mode 100644
-index 0000000..ffca3ab
+index 0000000..3524830
 --- /dev/null
 +++ b/gdb/testsuite/gdb.java/jnpe.java
 @@ -0,0 +1,38 @@
@@ -25485,7 +25760,7 @@ index 0000000..ffca3ab
 +      }
 +    catch (NullPointerException n)
 +      {
-+	System.out.println ("success");
++	System.out.println ("success"); // catch point
 +      }
 +  }
 +}
@@ -27292,10 +27567,10 @@ index 0000000..14f42d6
 +}
 diff --git a/gdb/testsuite/gdb.threads/watchthreads-reorder.exp b/gdb/testsuite/gdb.threads/watchthreads-reorder.exp
 new file mode 100644
-index 0000000..8f65364
+index 0000000..5ad1a4e
 --- /dev/null
 +++ b/gdb/testsuite/gdb.threads/watchthreads-reorder.exp
-@@ -0,0 +1,101 @@
+@@ -0,0 +1,105 @@
 +# This testcase is part of GDB, the GNU debugger.
 +
 +# Copyright 2009 Free Software Foundation, Inc.
@@ -27392,6 +27667,10 @@ index 0000000..8f65364
 +    gdb_test "continue" \
 +	     "Hardware read watchpoint \[0-9\]+: thread\[12\]_rwatch\r\n\r\nValue = 0\r\n0x\[0-9a-f\]+ in thread\[12\]_func .*" \
 +	     "continue b"
++
++    # While the debug output itself is not checked in this testcase one bug was
++    # found in the DEBUG_INFRUN code path.
++    gdb_test "set debug infrun 1"
 +
 +    gdb_continue_to_breakpoint "break-at-exit" ".*break-at-exit.*"
 +
@@ -27803,7 +28082,7 @@ index a9c875d..12f6f07 100644
  }
  
 diff --git a/gdb/valops.c b/gdb/valops.c
-index b64cb21..b7d31cc 100644
+index 012ea6a..9b4d2a8 100644
 --- a/gdb/valops.c
 +++ b/gdb/valops.c
 @@ -38,6 +38,7 @@
@@ -27917,7 +28196,7 @@ index b64cb21..b7d31cc 100644
  	}
      }
    else if (VALUE_LVAL (val) == lval_register)
-@@ -1070,7 +1133,18 @@ address_of_variable (struct symbol *var, struct block *b)
+@@ -1072,7 +1135,18 @@ address_of_variable (struct symbol *var, struct block *b)
    if ((VALUE_LVAL (val) == lval_memory && value_lazy (val))
        || TYPE_CODE (type) == TYPE_CODE_FUNC)
      {
@@ -27937,7 +28216,7 @@ index b64cb21..b7d31cc 100644
        return value_from_pointer (lookup_pointer_type (type), addr);
      }
  
-@@ -1176,6 +1250,7 @@ struct value *
+@@ -1178,6 +1252,7 @@ struct value *
  value_coerce_array (struct value *arg1)
  {
    struct type *type = check_typedef (value_type (arg1));
@@ -27945,7 +28224,7 @@ index b64cb21..b7d31cc 100644
  
    /* If the user tries to do something requiring a pointer with an
       array that has not yet been pushed to the target, then this would
-@@ -1185,8 +1260,12 @@ value_coerce_array (struct value *arg1)
+@@ -1187,8 +1262,12 @@ value_coerce_array (struct value *arg1)
    if (VALUE_LVAL (arg1) != lval_memory)
      error (_("Attempt to take address of value not located in memory."));
  
@@ -27959,7 +28238,7 @@ index b64cb21..b7d31cc 100644
  }
  
  /* Given a value which is a function, return a value which is a pointer
-@@ -2069,12 +2148,25 @@ find_overload_match (struct type **arg_types, int nargs,
+@@ -2071,12 +2150,25 @@ find_overload_match (struct type **arg_types, int nargs,
    if (method)
      {
        gdb_assert (obj);
@@ -27990,7 +28269,7 @@ index b64cb21..b7d31cc 100644
  
        fns_ptr = value_find_oload_method_list (&temp, name, 
  					      0, &num_fns, 
-@@ -2094,16 +2186,29 @@ find_overload_match (struct type **arg_types, int nargs,
+@@ -2096,16 +2188,29 @@ find_overload_match (struct type **arg_types, int nargs,
      }
    else
      {
@@ -28028,7 +28307,7 @@ index b64cb21..b7d31cc 100644
        if (func_name == NULL)
          {
  	  *symp = fsym;
-@@ -2534,8 +2639,8 @@ check_field (struct type *type, const char *name)
+@@ -2536,8 +2641,8 @@ check_field (struct type *type, const char *name)
     the comment before value_struct_elt_for_reference.  */
  
  struct value *
@@ -28039,7 +28318,7 @@ index b64cb21..b7d31cc 100644
  		     enum noside noside)
  {
    switch (TYPE_CODE (curtype))
-@@ -2543,7 +2648,7 @@ value_aggregate_elt (struct type *curtype,
+@@ -2545,7 +2650,7 @@ value_aggregate_elt (struct type *curtype,
      case TYPE_CODE_STRUCT:
      case TYPE_CODE_UNION:
        return value_struct_elt_for_reference (curtype, 0, curtype, 
@@ -28048,7 +28327,7 @@ index b64cb21..b7d31cc 100644
  					     want_address, noside);
      case TYPE_CODE_NAMESPACE:
        return value_namespace_elt (curtype, name, 
-@@ -2554,6 +2659,56 @@ value_aggregate_elt (struct type *curtype,
+@@ -2556,6 +2661,56 @@ value_aggregate_elt (struct type *curtype,
      }
  }
  
@@ -28105,7 +28384,7 @@ index b64cb21..b7d31cc 100644
  /* C++: Given an aggregate type CURTYPE, and a member name NAME,
     return the address of this member as a "pointer to member" type.
     If INTYPE is non-null, then it will be the type of the member we
-@@ -2631,23 +2786,46 @@ value_struct_elt_for_reference (struct type *domain, int offset,
+@@ -2633,23 +2788,46 @@ value_struct_elt_for_reference (struct type *domain, int offset,
  	}
        if (t_field_name && strcmp (t_field_name, name) == 0)
  	{
@@ -28162,7 +28441,7 @@ index b64cb21..b7d31cc 100644
  
  	  if (TYPE_FN_FIELD_STATIC_P (f, j))
  	    {
-@@ -2761,7 +2939,7 @@ value_maybe_namespace_elt (const struct type *curtype,
+@@ -2763,7 +2941,7 @@ value_maybe_namespace_elt (const struct type *curtype,
    struct symbol *sym;
    struct value *result;
  
@@ -28171,7 +28450,7 @@ index b64cb21..b7d31cc 100644
  				    get_selected_block (0), 
  				    VAR_DOMAIN);
  
-@@ -2905,7 +3083,7 @@ value_of_local (const char *name, int complain)
+@@ -2907,7 +3085,7 @@ value_of_local (const char *name, int complain)
  
    /* Calling lookup_block_symbol is necessary to get the LOC_REGISTER
       symbol instead of the LOC_ARG one (if both exist).  */
@@ -28180,7 +28459,7 @@ index b64cb21..b7d31cc 100644
    if (sym == NULL)
      {
        if (complain)
-@@ -2959,8 +3137,6 @@ value_slice (struct value *array, int lowbound, int length)
+@@ -2961,8 +3139,6 @@ value_slice (struct value *array, int lowbound, int length)
        || lowbound + length - 1 > upperbound)
      error (_("slice out of range"));
  

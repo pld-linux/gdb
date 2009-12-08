@@ -1,0 +1,627 @@
+### ./gdb/ChangeLog	6 Oct 2009 16:32:30 -0000	1.10874.2.46
+### ./gdb/ChangeLog	22 Oct 2009 20:31:36 -0000	1.10874.2.52
+## -1,3 +1,33 @@
++2009-10-22  Paul Pluzhnikov  <ppluzhnikov@google.com>
++
++	PR gdb/10819
++	* dwarf2-frame.c (find_cie): Don't call bsearch on empty cie_table.
++	* objfiles.c (find_pc_section): Likewise.
++	(update_section_map): Don't allocate empty table.
++	
++2009-10-19  Don Lee  <don.lee@sunplusct.com>
++
++	* score-tdep.c: Delete some simulator dependent codes.
++	* score-tdep.h: Delete some simulator dependent macro definitions.
++
++2008-10-16  Steven G. Kargl  <kargl@gcc.gnu.org>  (tiny patch)
++
++	* amd64fbsd-nat.c (amd64fbsd_supply_pcb): Conditionally compile in
++	support for pcb->pcb_{fs,ds,es,gs} on FreeBSD older than 8.0.
++
++2009-10-08  Paul Pluzhnikov  <ppluzhnikov@google.com>
++
++	PR gdb/10457
++	* elfread.c (elf_symtab_read): Don't use alloca in a loop.
++	
++2009-10-06  Joel Brobecker  <brobecker@adacore.com>
++
++	* version.in: Set version to 7.0.0.20091006-cvs.
++
++2009-10-06  Joel Brobecker  <brobecker@adacore.com>
++
++	GDB 7.0 released.
++
+ 2009-10-06  Joel Brobecker  <brobecker@adacore.com>
+ 
+ 	* NEWS: Change "Changes since GDB 6.8" into "Changes in GDB 7.0".
+--- ./gdb/amd64fbsd-nat.c	3 Jan 2009 05:57:50 -0000	1.22
++++ ./gdb/amd64fbsd-nat.c	17 Oct 2009 04:19:19 -0000	1.22.4.1
+@@ -95,6 +95,7 @@ static int amd64fbsd32_r_reg_offset[I386
+ 
+ #include <sys/types.h>
+ #include <machine/pcb.h>
++#include <osreldate.h>
+ 
+ #include "bsd-kvm.h"
+ 
+@@ -123,10 +124,12 @@ amd64fbsd_supply_pcb (struct regcache *r
+   regcache_raw_supply (regcache, 13, &pcb->pcb_r13);
+   regcache_raw_supply (regcache, 14, &pcb->pcb_r14);
+   regcache_raw_supply (regcache, 15, &pcb->pcb_r15);
++#if (__FreeBSD_version <  800075)
+   regcache_raw_supply (regcache, AMD64_DS_REGNUM, &pcb->pcb_ds);
+   regcache_raw_supply (regcache, AMD64_ES_REGNUM, &pcb->pcb_es);
+   regcache_raw_supply (regcache, AMD64_FS_REGNUM, &pcb->pcb_fs);
+   regcache_raw_supply (regcache, AMD64_GS_REGNUM, &pcb->pcb_gs);
++#endif
+ 
+   return 1;
+ }
+--- ./gdb/dwarf2-frame.c	15 Sep 2009 16:20:53 -0000	1.99
++++ ./gdb/dwarf2-frame.c	22 Oct 2009 20:31:36 -0000	1.99.2.1
+@@ -1525,6 +1525,14 @@ find_cie (struct dwarf2_cie_table *cie_t
+ {
+   struct dwarf2_cie **p_cie;
+ 
++  /* The C standard (ISO/IEC 9899:TC2) requires the BASE argument to
++     bsearch be non-NULL.  */
++  if (cie_table->entries == NULL)
++    {
++      gdb_assert (cie_table->num_entries == 0);
++      return NULL;
++    }
++
+   p_cie = bsearch (&cie_pointer, cie_table->entries, cie_table->num_entries,
+                    sizeof (cie_table->entries[0]), bsearch_cie_cmp);
+   if (p_cie != NULL)
+--- ./gdb/elfread.c	30 Apr 2009 21:59:03 -0000	1.77
++++ ./gdb/elfread.c	8 Oct 2009 17:42:10 -0000	1.77.4.1
+@@ -535,7 +535,7 @@ elf_symtab_read (struct objfile *objfile
+ 
+ 	      if (len > 4 && strcmp (sym->name + len - 4, "@plt") == 0)
+ 		{
+-		  char *base_name = alloca (len - 4 + 1);
++		  char *base_name = xmalloc (len - 4 + 1);
+ 		  struct minimal_symbol *mtramp;
+ 
+ 		  memcpy (base_name, sym->name, len - 4);
+@@ -543,6 +543,7 @@ elf_symtab_read (struct objfile *objfile
+ 		  mtramp = record_minimal_symbol (base_name, symaddr,
+ 						  mst_solib_trampoline,
+ 						  sym->section, objfile);
++		  xfree (base_name);
+ 		  if (mtramp)
+ 		    {
+ 		      MSYMBOL_SIZE (mtramp) = MSYMBOL_SIZE (msym);
+--- ./gdb/objfiles.c	18 Sep 2009 17:39:36 -0000	1.96.2.1
++++ ./gdb/objfiles.c	22 Oct 2009 20:31:36 -0000	1.96.2.2
+@@ -1045,6 +1045,14 @@ update_section_map (struct obj_section *
+     if (insert_section_p (objfile->obfd, s->the_bfd_section))
+       alloc_size += 1;
+ 
++  /* This happens on detach/attach (e.g. in gdb.base/attach.exp).  */
++  if (alloc_size == 0)
++    {
++      *pmap = NULL;
++      *pmap_size = 0;
++      return;
++    }
++
+   map = xmalloc (alloc_size * sizeof (*map));
+ 
+   i = 0;
+@@ -1105,6 +1113,14 @@ find_pc_section (CORE_ADDR pc)
+       objfiles_changed_p = 0;
+     }
+ 
++  /* The C standard (ISO/IEC 9899:TC2) requires the BASE argument to
++     bsearch be non-NULL.  */
++  if (sections == NULL)
++    {
++      gdb_assert (num_sections == 0);
++      return NULL;
++    }
++
+   sp = (struct obj_section **) bsearch (&pc, sections, num_sections,
+ 					sizeof (*sections), bsearch_cmp);
+   if (sp != NULL)
+--- ./gdb/score-tdep.c	6 Aug 2009 10:28:38 -0000	1.21
++++ ./gdb/score-tdep.c	19 Oct 2009 09:02:18 -0000	1.21.2.1
+@@ -56,58 +56,6 @@ struct score_frame_cache
+ 
+ static int target_mach = bfd_mach_score7;
+ 
+-#if WITH_SIM
+-int
+-score_target_can_use_watch (int type, int cnt, int othertype)
+-{
+-  if (strcmp (current_target.to_shortname, "sim") == 0)
+-      return soc_gh_can_use_watch (type, cnt);
+-  return (*current_target.to_can_use_hw_breakpoint) (type, cnt, othertype);
+-}
+-
+-int
+-score_stopped_by_watch (void)
+-{
+-  if (strcmp (current_target.to_shortname, "sim") == 0)
+-      return soc_gh_stopped_by_watch ();
+-  return (*current_target.to_stopped_by_watchpoint) ();
+-}
+-
+-int
+-score_target_insert_watchpoint (CORE_ADDR addr, int len, int type)
+-{
+-  if (strcmp (current_target.to_shortname, "sim") == 0)
+-      return soc_gh_add_watch (addr, len, type);
+-  return (*current_target.to_insert_watchpoint) (addr, len, type); 
+-}
+-
+-int
+-score_target_remove_watchpoint (CORE_ADDR addr, int len, int type)
+-{
+-  if (strcmp (current_target.to_shortname, "sim") == 0)
+-      return soc_gh_del_watch (addr, len, type);
+-  return (*current_target.to_remove_watchpoint) (addr, len, type); 
+-}
+-
+-int
+-score_target_insert_hw_breakpoint (struct gdbarch *gdbarch,
+-				   struct bp_target_info * bp_tgt)
+-{
+-  if (strcmp (current_target.to_shortname, "sim") == 0)
+-      return soc_gh_add_hardbp (bp_tgt->placed_address);
+-  return (*current_target.to_insert_hw_breakpoint) (gdbarch, bp_tgt);
+-}
+-
+-int
+-score_target_remove_hw_breakpoint (struct gdbarch *gdbarch,
+-				   struct bp_target_info * bp_tgt)
+-{
+-  if (strcmp (current_target.to_shortname, "sim") == 0)
+-      return soc_gh_del_hardbp (bp_tgt->placed_address);
+-  return (*current_target.to_remove_hw_breakpoint) (gdbarch, bp_tgt); 
+-}
+-#endif
+-
+ static struct type *
+ score_register_type (struct gdbarch *gdbarch, int regnum)
+ {
+--- ./gdb/score-tdep.h	6 Aug 2009 10:28:38 -0000	1.6
++++ ./gdb/score-tdep.h	19 Oct 2009 09:02:18 -0000	1.6.2.1
+@@ -85,68 +85,4 @@ struct pt_regs {
+ 
+ typedef struct pt_regs elf_gregset_t;
+ 
+-#ifdef WITH_SIM
+-
+-#include <breakpoint.h>
+-
+-int soc_gh_can_use_watch(int type, int cnt);
+-int soc_gh_add_watch(unsigned int addr, int len, int type);
+-int soc_gh_del_watch(unsigned int addr, int len, int type);
+-int soc_gh_stopped_by_watch(void);
+-int soc_gh_add_hardbp(unsigned int addr); 
+-int soc_gh_del_hardbp(unsigned int addr); 
+-
+-int score_target_can_use_watch(int type, int cnt, int ot);
+-int score_stopped_by_watch(void);
+-int score_target_insert_watchpoint (CORE_ADDR addr, int len, int type);
+-int score_target_remove_watchpoint (CORE_ADDR addr, int len, int type);
+-int score_target_insert_hw_breakpoint (struct gdbarch *gdbarch, struct bp_target_info * bp_tgt);
+-int score_target_remove_hw_breakpoint (struct gdbarch *gdbarch, struct bp_target_info * bp_tgt);
+-
+-#define TARGET_HAS_HARDWARE_WATCHPOINTS
+-
+-#ifdef TARGET_CAN_USE_HARDWARE_WATCHPOINT
+-#undef TARGET_CAN_USE_HARDWARE_WATCHPOINT
+-
+-#define TARGET_CAN_USE_HARDWARE_WATCHPOINT(type, cnt, ot) \
+-    score_target_can_use_watch(type, cnt, ot)
+-#endif
+-
+-#ifdef STOPPED_BY_WATCHPOINT
+-#undef STOPPED_BY_WATCHPOINT
+-
+-#define STOPPED_BY_WATCHPOINT(w) \
+-    score_stopped_by_watch()
+-#endif
+-
+-#ifdef target_insert_watchpoint
+-#undef target_insert_watchpoint
+-
+-#define target_insert_watchpoint(addr, len, type) \
+-    score_target_insert_watchpoint (addr, len, type)
+-#endif
+-
+-#ifdef target_remove_watchpoint
+-#undef target_remove_watchpoint
+-
+-#define target_remove_watchpoint(addr, len, type) \
+-    score_target_remove_watchpoint (addr, len, type)
+-#endif
+-
+-#ifdef target_insert_hw_breakpoint
+-#undef target_insert_hw_breakpoint
+-
+-#define target_insert_hw_breakpoint(gdbarch, bp_tgt) \
+-    score_target_insert_hw_breakpoint (gdbarch, bp_tgt)
+-#endif
+-
+-#ifdef target_remove_hw_breakpoint
+-#undef target_remove_hw_breakpoint
+-
+-#define target_remove_hw_breakpoint(gdbarch, bp_tgt) \
+-    score_target_remove_hw_breakpoint (gdbarch, bp_tgt)
+-#endif
+-
+-#endif /* WITH_SIM */
+-
+ #endif /* SCORE_TDEP_H */
+### ./gdb/version.in	6 Oct 2009 16:25:13 -0000	1.2997.2.26
+### ./gdb/version.in	30 Oct 2009 00:00:33 -0000	1.2997.2.51
+## -1 +1 @@
+-7.0
++7.0.0.20091030-cvs
+
+
+
+http://sourceware.org/ml/gdb-patches/2009-11/msg00594.html
+http://sourceware.org/ml/gdb-cvs/2009-11/msg00233.html
+Subject: [patch] testsuite: bigcore.exp fuzzy PASS message fix
+
+Hi,
+
+seen needlessly fuzzy results:
+	-PASS: gdb.base/bigcore.exp: extract next heap (stop at 50)
+	-PASS: gdb.base/bigcore.exp: extract prev heap (stop at 50)
+	+PASS: gdb.base/bigcore.exp: extract next heap
+	+PASS: gdb.base/bigcore.exp: extract prev heap
+
+but the .exp file just is not patient enough:
+	-Total of 4292375328 (0xffd87320) bytes bytes 53 chunks
+	+Total of 4292422432 (0xffd92b20) bytes bytes 41 chunks
+
+Increased to 200.  Tested on {x86_64,x86_64-m32}-fedora12-linux-gnu.
+
+
+Thanks,
+Jan
+
+
+gdb/testsuite/
+2009-11-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/bigcore.exp (extract_heap): Set $lim limit to 200.
+
+--- a/gdb/testsuite/gdb.base/bigcore.exp
++++ b/gdb/testsuite/gdb.base/bigcore.exp
+@@ -96,7 +96,7 @@ proc extract_heap { dir } {
+ 	}
+ 	-re " = \\(struct list \\*\\) (0x\[0-9a-f\]*).*$gdb_prompt $" {
+ 	    set heap [concat $heap $expect_out(1,string)]
+-	    if { $lim >= 50 } {
++	    if { $lim >= 200 } {
+ 		pass "$test (stop at $lim)"
+ 	    } else {
+ 		incr lim
+
+
+
+http://sourceware.org/ml/gdb-patches/2009-11/msg00593.html
+http://sourceware.org/ml/gdb-cvs/2009-12/msg00013.html
+Subject: [patch] testcase: Fix spurious structs.exp FAILs
+
+Hi,
+
+There were some rare unreproducible fuzzy FAILs seen on i386 (32-bit) inferiors:
+
+ return foo2
+ The location at which to store the function's return value is unknown.
+ If you continue, the return value that you specified will be ignored.
+ Make fun2 return now? (y or n) y
+ #0  main () at /rpmbuild/BUILD/gdb-7.0/gdb/testsuite/gdb.base/structs.c:435
+ 435          L2  = fun2();     
+ (gdb) next
+ 436          L3  = fun3();     
+ (gdb) PASS: gdb.base/structs.exp: return foo<n>; return 2 structs-tf-td
+ p/c L2
+-$4 = {a = -16 '\360', b = 0 '\000'}
+-(gdb) PASS: gdb.base/structs.exp: value foo<n> returned; return 2 structs-tf-td
++$4 = {a = 44 ',', b = 0 '\000'}
++(gdb) FAIL: gdb.base/structs.exp: value foo<n> returned; return 2 structs-tf-td
+
+Apparently
+	a = 44 ',',
+does not match
+	a = \[^,\}\]*,
+which is needed for cases where L2 (L*) remains uninitialized with random
+content.
+
+Alternative patch would just use regex `.*' and the whole new `chartest' and
+`anychar_re' parts can be dropped.
+
+Formerly 9s, now 11s, without the $first optimization it would cost 47s.
+
+Testcase has been run on {x86_64,x86_64-m32}-fedora12-linux-gnu.
+
+
+Thanks,
+Jan
+
+
+gdb/testsuite/
+2009-11-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix spurious false FAILs.
+	* gdb.base/structs.c (chartest): New.
+	(main): Fill-in chartest.
+	* gdb.base/structs.exp (anychar_re, first): New.
+	(start_structs_test): Import global anychar_re and first.
+	New gdb_test call "set print elements 300; ${testfile}"
+	(start_structs_test <$first>): New block.
+	(any): Import global anychar_re.  New variable ac.  Use ${ac}.
+
+--- a/gdb/testsuite/gdb.base/structs.c
++++ b/gdb/testsuite/gdb.base/structs.c
+@@ -396,6 +396,8 @@ zed ()
+   L18.r = 'Z';
+ }
+ 
++static struct { char c; } chartest[256];
++
+ int main()
+ {
+ #ifdef usestubs
+@@ -404,6 +406,10 @@ int main()
+ #endif
+   int i;
+ 
++  for (i = 0; i < 256; i++)
++    chartest[i].c = i;
++  chartest[0].c = 0;  /* chartest-done */
++
+   Fun1(foo1);	
+   Fun2(foo2);	
+   Fun3(foo3);	
+--- a/gdb/testsuite/gdb.base/structs.exp
++++ b/gdb/testsuite/gdb.base/structs.exp
+@@ -36,6 +36,9 @@ set testfile "structs"
+ set srcfile ${testfile}.c
+ set binfile ${objdir}/${subdir}/${testfile}
+ 
++# Regex matching any value of `char' type like: a = 65 'A'
++set anychar_re {-?[0-9]{1,3} '(.|\\([0-7]{3}|[a-z]|\\|'))'}
++
+ # Create and source the file that provides information about the
+ # compiler used to compile the test case.
+ 
+@@ -48,6 +51,7 @@ if [get_compiler_info ${binfile}] {
+ # the last TYPES field).  Run the compmiled program up to "main".
+ # Also updates the global "testfile" to reflect the most recent build.
+ 
++set first 1
+ proc start_structs_test { types } {
+     global testfile
+     global srcfile
+@@ -56,6 +60,8 @@ proc start_structs_test { types } {
+     global subdir
+     global srcdir
+     global gdb_prompt
++    global anychar_re
++    global first
+ 
+     # Create the additional flags
+     set flags "debug"
+@@ -91,6 +97,8 @@ proc start_structs_test { types } {
+ 	    "set print address off; ${testfile}"
+     gdb_test "set width 0" "" \
+ 	    "set width 0; ${testfile}"
++    gdb_test "set print elements 300" "" \
++	    "set print elements 300; ${testfile}"
+ 
+     # Advance to main
+     if { ![runto_main] } then {
+@@ -100,6 +108,16 @@ proc start_structs_test { types } {
+     # Get the debug format
+     get_debug_format
+ 
++    # Limit the slow $anychar_re{256} matching for better performance.
++    if $first {
++	set first 0
++
++	# Verify $anychar_re can match all the values of `char' type.
++	gdb_breakpoint [gdb_get_line_number "chartest-done"]
++	gdb_continue_to_breakpoint "chartest-done" ".*chartest-done.*"
++	gdb_test "p chartest" "= {({c = ${anychar_re}}, ){255}{c = ${anychar_re}}}"
++    }
++
+     # check that at the struct containing all the relevant types is correct
+     set foo_t "type = struct struct[llength ${types}] \{"
+     for {set n 0} {$n<[llength ${types}]} {incr n} {
+@@ -161,26 +179,28 @@ proc zed { n } {
+ }
+ 
+ proc any { n } {
+-    return [lindex {
+-	"{}"
+-	"{a = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*, o = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*, o = \[^,\}\]*, p = \[^,\}\]*}"
+-	"{a = \[^,\}\]*, b = \[^,\}\]*, c = \[^,\}\]*, d = \[^,\}\]*, e = \[^,\}\]*, f = \[^,\}\]*, g = \[^,\}\]*, h = \[^,\}\]*, i = \[^,\}\]*, j = \[^,\}\]*, k = \[^,\}\]*, l = \[^,\}\]*, m = \[^,\}\]*, n = \[^,\}\]*, o = \[^,\}\]*, p = \[^,\}\]*, q = \[^,\}\]*}"
+-    } $n]
++    global anychar_re
++    set ac $anychar_re
++    return [lindex [list \
++	"{}" \
++	"{a = ${ac}}" \
++	"{a = ${ac}, b = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}, n = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}, n = ${ac}, o = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}, n = ${ac}, o = ${ac}, p = ${ac}}" \
++	"{a = ${ac}, b = ${ac}, c = ${ac}, d = ${ac}, e = ${ac}, f = ${ac}, g = ${ac}, h = ${ac}, i = ${ac}, j = ${ac}, k = ${ac}, l = ${ac}, m = ${ac}, n = ${ac}, o = ${ac}, p = ${ac}, q = ${ac}}" \
++    ] $n]
+ }
+ 
+ # Given N (0..25), return the corresponding alphabetic letter in lower
+
+
+
+http://sourceware.org/ml/gdb-patches/2009-11/msg00573.html
+http://sourceware.org/ml/gdb-cvs/2009-11/msg00232.html
+Subject: [patch] testsuite fuzzy results fixup: foll-fork.exp
+
+Hi,
+
+one occasional timeout:
+
+ (gdb) PASS: gdb.base/foll-fork.exp: default show parent follow, no catchpoints
+ next 2
+-callee: 9949
+ 25       if (pid == 0) /* set breakpoint here */
+-(gdb) PASS: gdb.base/foll-fork.exp: default parent follow, no catchpoints
++(gdb) callee: 18747
++FAIL: gdb.base/foll-fork.exp: (timeout) default parent follow, no catchpoints
+
+Dropped the strings as there is no "callee" string expectation in
+foll-fork.exp.
+
+
+and with glibc-debuginfo installed one gets:
+
+(gdb) break 39
+Reading in symbols for ../nptl/sysdeps/unix/sysv/linux/fork.c...done.
+Breakpoint 12 at 0x3ad22a4876: file ../nptl/sysdeps/unix/sysv/linux/fork.c, line 39.
+(gdb) FAIL: gdb.base/foll-fork.exp: unpatch child, breakpoint at exit call
++
+Breakpoint 12, __libc_fork () at ../nptl/sysdeps/unix/sysv/linux/fork.c:158
+158           fresetlockfiles ();
+(gdb) FAIL: gdb.base/foll-fork.exp: unpatch child, unpatched parent breakpoints from child (unknown output)
+
+
+Thanks,
+Jan
+
+
+gdb/testsuite/
+2009-11-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/foll-fork.exp (unpatch child, breakpoint at exit call):
+	Force $srcfile file.
+	* gdb.base/foll-fork.c (callee): Comment out the printf call.
+
+--- a/gdb/testsuite/gdb.base/foll-fork.c
++++ b/gdb/testsuite/gdb.base/foll-fork.c
+@@ -9,7 +9,8 @@ void callee (i)
+   int  i;
+ #endif
+ {
+-  printf("callee: %d\n", i);
++  /* Any output corrupts GDB CLI expect strings.
++     printf("callee: %d\n", i);  */
+ }
+ 
+ #ifdef PROTOTYPES
+--- a/gdb/testsuite/gdb.base/foll-fork.exp
++++ b/gdb/testsuite/gdb.base/foll-fork.exp
+@@ -240,7 +240,8 @@ proc catch_fork_unpatch_child {} {
+    # Delete all breakpoints and catchpoints.
+    delete_breakpoints
+ 
+-   gdb_test "break $bp_exit" \
++   # Force $srcfile as the current GDB source can be in glibc sourcetree.
++   gdb_test "break $srcfile:$bp_exit" \
+        "Breakpoint .*file .*$srcfile, line .*" \
+        "unpatch child, breakpoint at exit call"
+ 
+
+
+
+http://sourceware.org/ml/gdb-patches/2009-11/msg00388.html
+http://sourceware.org/ml/gdb-cvs/2009-11/msg00156.html
+Subject: [patch] Fix crash on reading stabs
+
+Hi,
+
+there is a crash on reading stabs fpc binary:
+	https://bugzilla.redhat.com/show_bug.cgi?id=537837
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000000000069db3d in read_dbx_symtab (objfile=0x1daf5f0) at dbxread.c:1369
+1369              if ((namestring[0] == '-' && namestring[1] == 'l')
+
+(gdb) p/x nlist.n_strx
+$7 = 0xfffffff8
+(gdb) p sizeof(nlist.n_strx)
+$10 = 8
+
+Below the patch context is:
+    namestring = (nlist->n_strx + file_string_table_offset
+                  + DBX_STRINGTAB (objfile));
+
+so IMO the `(unsigned)' cast is excessive as it does not match the expression
+below.  Such cast is there since the GDB "Initial revision" (1999).
+
+`n_strx' type:
+struct internal_nlist
+{
+  unsigned long n_strx;                 /* Index into string table of name.  */
+...
+};
+
+Regression tested on {x86_64,x86_64-m32,i686}-fedora12-linux-gnu which does not
+mean anything with the default DWARF debug info.  It was hanging for stabs so
+tried just a large part of gdb.base/*.exp on x86_64-m32 - `unix/-gstabs+/-m32'.
+
+If it isn't obviously approved please feel free to drop it as one should not
+use STABS in the first place.
+
+
+Regards,
+Jan
+
+
+gdb/
+2009-11-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dbxread.c (set_namestring): Remove cast to unsigned.  Check N_STRX
+	overflow.
+
+--- a/gdb/dbxread.c
++++ b/gdb/dbxread.c
+@@ -965,8 +965,9 @@ set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
+ {
+   char *namestring;
+ 
+-  if (((unsigned) nlist->n_strx + file_string_table_offset)
+-      >= DBX_STRINGTAB_SIZE (objfile))
++  if (nlist->n_strx + file_string_table_offset
++      >= DBX_STRINGTAB_SIZE (objfile)
++      || nlist->n_strx + file_string_table_offset < nlist->n_strx)
+     {
+       complaint (&symfile_complaints, _("bad string table offset in symbol %d"),
+ 		 symnum);
+

@@ -1,0 +1,271 @@
+http://sourceware.org/ml/gdb-patches/2009-10/msg00508.html
+Subject: [patch 3/3] debug-file-directory with multiple components
+
+Hi,
+
+for various reasons `debug-file-directory' would be sometimes useful to have
+multiple components such as `solib-search-path' has.
+
+I found it useful myself during various separate debuginfo tests/scripts.
+
+It was requested for the ABRT bugreporting project at the preceding mail of:
+	https://fedorahosted.org/pipermail/crash-catcher/2009-October/000054.html
+
+It should be a backward compatible extension as DIRNAME_SEPARATOR should never
+be a valid part of a single DEBUG_FILE_DIRECTORY component.
+
+
+Thanks,
+Jan
+
+
+gdb/doc/
+2009-10-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (set debug-file-directory, show debug-file-directory)
+	(Auto-loading): Use plural and note one can use multiple components now.
+
+gdb/
+2009-10-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (build_id_to_debug_filename): New variable debugdir.  Move
+	variables size, s and data into a new inner block.  Change xmalloc for
+	alloca, use direct BUILDID->SIZE there now.  Loop for the
+	DEBUG_FILE_DIRECTORY components.
+	(find_separate_debug_file): New variable debugdir and debugdir_end.
+	Loop for the DEBUG_FILE_DIRECTORY components.
+	(_initialize_symfile): For "debug-file-directory" use plural and note
+	one can use multiple components now.
+
+gdb/testsuite/
+2009-10-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/sepdebug.exp: New test_different_dir call for multiple-dirs.
+
+--- a/gdb/doc/gdb.texinfo
++++ b/gdb/doc/gdb.texinfo
+@@ -14066,13 +14066,14 @@ name @value{GDBN} is currently using.
+ @table @code
+ 
+ @kindex set debug-file-directory
+-@item set debug-file-directory @var{directory}
+-Set the directory which @value{GDBN} searches for separate debugging
+-information files to @var{directory}.
++@item set debug-file-directory @var{directories}
++Set the directories which @value{GDBN} searches for separate debugging
++information files to @var{directory}.  Multiple directory components can be set
++concatenating them by a directory separator.
+ 
+ @kindex show debug-file-directory
+ @item show debug-file-directory
+-Show the directory @value{GDBN} searches for separate debugging
++Show the directories @value{GDBN} searches for separate debugging
+ information files.
+ 
+ @end table
+@@ -19336,8 +19337,8 @@ readable, @value{GDBN} will evaluate it as a Python script.
+ 
+ If this file does not exist, and if the parameter
+ @code{debug-file-directory} is set (@pxref{Separate Debug Files}),
+-then @value{GDBN} will use the file named
+-@file{@var{debug-file-directory}/@var{real-name}}, where
++then @value{GDBN} will use for its each separated directory component
++@code{component} the file named @file{@code{component}/@var{real-name}}, where
+ @var{real-name} is the object file's real name, as described above.
+ 
+ Finally, if this file does not exist, then @value{GDBN} will look for
+--- a/gdb/symfile.c
++++ b/gdb/symfile.c
+@@ -1218,35 +1218,59 @@ build_id_verify (const char *filename, struct build_id *check)
+ static char *
+ build_id_to_debug_filename (struct build_id *build_id)
+ {
+-  char *link, *s, *retval = NULL;
+-  gdb_byte *data = build_id->data;
+-  size_t size = build_id->size;
++  char *link, *debugdir, *retval = NULL;
+ 
+   /* DEBUG_FILE_DIRECTORY/.build-id/ab/cdef */
+-  link = xmalloc (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
+-		  + 2 * size + (sizeof ".debug" - 1) + 1);
+-  s = link + sprintf (link, "%s/.build-id/", debug_file_directory);
+-  if (size > 0)
+-    {
+-      size--;
+-      s += sprintf (s, "%02x", (unsigned) *data++);
+-    }
+-  if (size > 0)
+-    *s++ = '/';
+-  while (size-- > 0)
+-    s += sprintf (s, "%02x", (unsigned) *data++);
+-  strcpy (s, ".debug");
+-
+-  /* lrealpath() is expensive even for the usually non-existent files.  */
+-  if (access (link, F_OK) == 0)
+-    retval = lrealpath (link);
+-  xfree (link);
+-
+-  if (retval != NULL && !build_id_verify (retval, build_id))
++  link = alloca (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
++		 + 2 * build_id->size + (sizeof ".debug" - 1) + 1);
++
++  /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
++     cause "/.build-id/..." lookups.  */
++
++  debugdir = debug_file_directory;
++  do
+     {
+-      xfree (retval);
+-      retval = NULL;
++      char *s, *debugdir_end;
++      gdb_byte *data = build_id->data;
++      size_t size = build_id->size;
++
++      while (*debugdir == DIRNAME_SEPARATOR)
++	debugdir++;
++
++      debugdir_end = strchr (debugdir, DIRNAME_SEPARATOR);
++      if (debugdir_end == NULL)
++	debugdir_end = &debugdir[strlen (debugdir)];
++
++      memcpy (link, debugdir, debugdir_end - debugdir);
++      s = &link[debugdir_end - debugdir];
++      s += sprintf (s, "/.build-id/");
++      if (size > 0)
++	{
++	  size--;
++	  s += sprintf (s, "%02x", (unsigned) *data++);
++	}
++      if (size > 0)
++	*s++ = '/';
++      while (size-- > 0)
++	s += sprintf (s, "%02x", (unsigned) *data++);
++      strcpy (s, ".debug");
++
++      /* lrealpath() is expensive even for the usually non-existent files.  */
++      if (access (link, F_OK) == 0)
++	retval = lrealpath (link);
++
++      if (retval != NULL && !build_id_verify (retval, build_id))
++	{
++	  xfree (retval);
++	  retval = NULL;
++	}
++
++      if (retval != NULL)
++	break;
++
++      debugdir = debugdir_end;
+     }
++  while (*debugdir != 0);
+ 
+   return retval;
+ }
+@@ -1333,7 +1357,7 @@ static char *
+ find_separate_debug_file (struct objfile *objfile)
+ {
+   asection *sect;
+-  char *basename, *name_copy;
++  char *basename, *name_copy, *debugdir;
+   char *dir = NULL;
+   char *debugfile = NULL;
+   char *canon_name = NULL;
+@@ -1410,29 +1434,51 @@ find_separate_debug_file (struct objfile *objfile)
+   if (separate_debug_file_exists (debugfile, crc32, objfile->name))
+     goto cleanup_return_debugfile;
+ 
+-  /* Then try in the global debugfile directory.  */
+-  strcpy (debugfile, debug_file_directory);
+-  strcat (debugfile, "/");
+-  strcat (debugfile, dir);
+-  strcat (debugfile, basename);
+-
+-  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
+-    goto cleanup_return_debugfile;
++  /* Then try in the global debugfile directories.
++ 
++     Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
++     cause "/..." lookups.  */
+ 
+-  /* If the file is in the sysroot, try using its base path in the
+-     global debugfile directory.  */
+-  if (canon_name
+-      && strncmp (canon_name, gdb_sysroot, strlen (gdb_sysroot)) == 0
+-      && IS_DIR_SEPARATOR (canon_name[strlen (gdb_sysroot)]))
++  debugdir = debug_file_directory;
++  do
+     {
+-      strcpy (debugfile, debug_file_directory);
+-      strcat (debugfile, canon_name + strlen (gdb_sysroot));
++      char *debugdir_end;
++
++      while (*debugdir == DIRNAME_SEPARATOR)
++	debugdir++;
++
++      debugdir_end = strchr (debugdir, DIRNAME_SEPARATOR);
++      if (debugdir_end == NULL)
++	debugdir_end = &debugdir[strlen (debugdir)];
++
++      memcpy (debugfile, debugdir, debugdir_end - debugdir);
++      debugfile[debugdir_end - debugdir] = 0;
+       strcat (debugfile, "/");
++      strcat (debugfile, dir);
+       strcat (debugfile, basename);
+ 
+       if (separate_debug_file_exists (debugfile, crc32, objfile->name))
+ 	goto cleanup_return_debugfile;
++
++      /* If the file is in the sysroot, try using its base path in the
++	 global debugfile directory.  */
++      if (canon_name
++	  && strncmp (canon_name, gdb_sysroot, strlen (gdb_sysroot)) == 0
++	  && IS_DIR_SEPARATOR (canon_name[strlen (gdb_sysroot)]))
++	{
++	  memcpy (debugfile, debugdir, debugdir_end - debugdir);
++	  debugfile[debugdir_end - debugdir] = 0;
++	  strcat (debugfile, canon_name + strlen (gdb_sysroot));
++	  strcat (debugfile, "/");
++	  strcat (debugfile, basename);
++
++	  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
++	    goto cleanup_return_debugfile;
++	}
++
++      debugdir = debugdir_end;
+     }
++  while (*debugdir != 0);
+   
+   xfree (debugfile);
+   debugfile = NULL;
+@@ -4173,12 +4219,12 @@ Usage: set extension-language .foo bar"),
+ 
+   add_setshow_optional_filename_cmd ("debug-file-directory", class_support,
+ 				     &debug_file_directory, _("\
+-Set the directory where separate debug symbols are searched for."), _("\
+-Show the directory where separate debug symbols are searched for."), _("\
++Set the directories where separate debug symbols are searched for."), _("\
++Show the directories where separate debug symbols are searched for."), _("\
+ Separate debug symbols are first searched for in the same\n\
+ directory as the binary, then in the `" DEBUG_SUBDIRECTORY "' subdirectory,\n\
+ and lastly at the path of the directory of the binary with\n\
+-the global debug-file directory prepended."),
++each global debug-file-directory component prepended."),
+ 				     NULL,
+ 				     show_debug_file_directory,
+ 				     &setlist, &showlist);
+--- a/gdb/testsuite/gdb.base/sepdebug.exp
++++ b/gdb/testsuite/gdb.base/sepdebug.exp
+@@ -995,6 +995,12 @@ if ![string compare $build_id_debug_filename ""] then {
+ 
+     test_different_dir build-id "${objdir}/${subdir}" $xfail
+ 
++    # Test also multiple directories can be specified.  Without the build-id
++    # reference GDB would find the separate debug info just at the same
++    # location as the executable file.
++
++    test_different_dir multiple-dirs "/doesnotexist:${objdir}/${subdir}" $xfail
++
+     # Spare debug files may confuse testsuite runs in the future.
+     remote_exec build "rm -f ${objdir}/${subdir}/${build_id_debug_filename}"
+ }
+

@@ -4,6 +4,7 @@
 # TODO
 # - python subpkg
 # - gdbtui is as big as gdb, but different md5, some kind of duplicate?
+# - change yum install msg to poldek one in buildid-locate-rpm.patch
 #
 # Conditional build:
 %bcond_without	python		# build without python support
@@ -22,12 +23,14 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	6.8.91
-Release:	1.%{snap}.%{rel}
+Version:	7.0
+Release:	0.5
 License:	GPL v3+
 Group:		Development/Debuggers
-Source0:	ftp://sourceware.org/pub/gdb/snapshots/branch/%{name}-%{version}.%{snap}.tar.bz2
-# Source0-md5:	729517cc8e6ca6e25cf4be343ffc4c3d
+# Source0:	ftp://sourceware.org/pub/gdb/snapshots/current/gdb-%{version}.%{snap}.tar.bz2
+# Source0:	gdb-%{version}.%{snap}.tar.bz2
+Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
+# Source0-md5:	3386a7b69c010785c920ffc1e9cb890a
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 # libstdc++ pretty printers from GCC SVN HEAD (4.5 experimental).
@@ -44,6 +47,10 @@ Patch1005:	%{name}-pretty-print-by-default.patch
 Patch1:		%{name}-6.3-rh-dummykfail-20041202.patch
 Patch2:		%{name}-6.3-rh-testversion-20041202.patch
 Patch3:		%{name}-6.3-rh-testlibunwind-20041202.patch
+
+# Backported post gdb-7.0 fixups.
+Patch232:	%{name}-7.0-upstream.patch
+
 Patch104:	%{name}-6.3-ppcdotsolib-20041022.patch
 Patch105:	%{name}-6.3-ppc64syscall-20040622.patch
 Patch106:	%{name}-6.3-framepczero-20040927.patch
@@ -52,9 +59,9 @@ Patch112:	%{name}-6.6-scheduler_locking-step-sw-watchpoints2.patch
 Patch260:	%{name}-6.6-scheduler_locking-step-is-default.patch
 Patch118:	%{name}-6.3-gstack-20050411.patch
 Patch122:	%{name}-6.3-test-pie-20050107.patch
-Patch124:	%{name}-6.3-pie-20050110.patch
+Patch124:	%{name}-archer-pie.patch
+Patch389:	%{name}-archer-pie-addons.patch
 Patch125:	%{name}-6.3-test-self-20050110.patch
-Patch128:	%{name}-6.3-nonthreaded-wp-20050117.patch
 Patch133:	%{name}-6.3-test-dtorfix-20050121.patch
 Patch136:	%{name}-6.3-test-movedir-20050125.patch
 Patch140:	%{name}-6.3-gcore-thread-20050204.patch
@@ -63,8 +70,6 @@ Patch259:	%{name}-6.3-step-thread-exit-20050211-test.patch
 Patch142:	%{name}-6.3-terminal-fix-20050214.patch
 Patch145:	%{name}-6.3-threaded-watchpoints2-20050225.patch
 Patch148:	%{name}-6.3-inheritance-20050324.patch
-Patch150:	%{name}-6.3-test-sepcrc-20050402.patch
-Patch151:	%{name}-6.3-sepcrc-20050402.patch
 Patch153:	%{name}-6.3-ia64-gcore-page0-20050421.patch
 Patch157:	%{name}-6.3-security-errata-20050610.patch
 Patch158:	%{name}-6.3-ia64-sigtramp-frame-20050708.patch
@@ -146,6 +151,15 @@ Patch360:	%{name}-6.8-bz457187-largefile-test.patch
 Patch375:	%{name}-readline-6.0.patch
 Patch376:	libstdc++-v3-python-common-prefix.patch
 Patch381:	%{name}-simultaneous-step-resume-breakpoint-test.patch
+Patch382:	%{name}-core-open-vdso-warning.patch
+Patch383:	%{name}-bz528668-symfile-sepcrc.patch
+Patch384:	%{name}-bz528668-symfile-cleanup.patch
+Patch385:	%{name}-bz528668-symfile-multi.patch
+Patch387:	%{name}-bz539590-gnu-ifunc.patch
+Patch388:	%{name}-bz538626-bp_location-accel-bp-cond.patch
+Patch390:	%{name}-readline-6.0-signal.patch
+Patch391:	%{name}-x86_64-i386-syscall-restart.patch
+
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -157,6 +171,7 @@ BuildRequires:	python-devel
 BuildRequires:	readline-devel >= 6.0
 BuildRequires:	rpm-pythonprov
 BuildRequires:	texinfo >= 4.4
+BuildRequires:	zlib-devel
 %{?with_python:Requires: python-libs}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -238,7 +253,7 @@ GDB in the form of a static library.
 GDB w postaci biblioteki statycznej.
 
 %prep
-%setup -q -n %{name}-%{version}.%{snap}
+%setup -q -n %{name}-%{version}
 
 # libstdc++ pretty printers.
 bzip2 -dc %{SOURCE4} | tar xf -
@@ -252,10 +267,22 @@ bzip2 -dc %{SOURCE4} | tar xf -
 rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 
+# Apply patches defined above.
+
+# Match the Fedora's version info.
 %patch2 -p1
+
+# backported fixes
+%patch232 -p1
+
 %patch349 -p1
+%patch383 -p1
+%patch384 -p1
+%patch385 -p1
+%patch124 -p1
 %patch1 -p1
 %patch3 -p1
+
 %patch104 -p1
 %patch105 -p1
 %patch106 -p1
@@ -264,7 +291,6 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch118 -p1
 %patch122 -p1
 %patch125 -p1
-%patch128 -p1
 %patch133 -p1
 %patch136 -p1
 %patch140 -p1
@@ -273,8 +299,6 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch142 -p1
 %patch145 -p1
 %patch148 -p1
-%patch150 -p1
-%patch151 -p1
 %patch153 -p1
 %patch157 -p1
 %patch158 -p1
@@ -352,11 +376,16 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch343 -p1
 %patch348 -p1
 %patch352 -p1
-%patch124 -p1
 %patch360 -p1
 %patch375 -p1
 %patch376 -p1
 %patch381 -p1
+%patch382 -p1
+%patch387 -p1
+%patch388 -p1
+%patch389 -p1
+%patch390 -p1
+%patch391 -p1
 
 mv $(basename %{SOURCE4} .tar.bz2) libstdcxxpython
 

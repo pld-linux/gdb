@@ -1,0 +1,151 @@
+http://sourceware.org/ml/gdb-patches/2009-10/msg00507.html
+Subject: [patch 1/3] print the .debug file name having CRC mismatch
+
+Hi,
+
+this patch is left as is from Andrew Cagney.
+
+
+Thanks,
+Jan
+
+
+gdb/
+2005-04-02  Andrew Cagney  <cagney@gnu.org>
+
+	* symfile.c (separate_debug_file_exists): When the CRCs mismatch
+	print a warning.
+	(find_separate_debug_file): Pass in the objfile's name.
+
+gdb/testsuite/
+2009-10-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/sepdebug.exp (CRC mismatch is reported): New test.
+	* gdb.base/sepdebug2.c: New file.
+
+--- a/gdb/symfile.c
++++ b/gdb/symfile.c
+@@ -1283,7 +1283,8 @@ get_debug_link_info (struct objfile *objfile, unsigned long *crc32_out)
+ }
+ 
+ static int
+-separate_debug_file_exists (const char *name, unsigned long crc)
++separate_debug_file_exists (const char *name, unsigned long crc,
++			    const char *parent_name)
+ {
+   unsigned long file_crc = 0;
+   bfd *abfd;
+@@ -1303,7 +1304,15 @@ separate_debug_file_exists (const char *name, unsigned long crc)
+ 
+   bfd_close (abfd);
+ 
+-  return crc == file_crc;
++  if (crc != file_crc)
++    {
++      warning (_("the debug information found in \"%s\""
++		 " does not match \"%s\" (CRC mismatch).\n"),
++	       name, parent_name);
++      return 0;
++    }
++
++  return 1;
+ }
+ 
+ char *debug_file_directory = NULL;
+@@ -1355,6 +1364,8 @@ find_separate_debug_file (struct objfile *objfile)
+   basename = get_debug_link_info (objfile, &crc32);
+ 
+   if (basename == NULL)
++    /* There's no separate debug info, hence there's no way we could
++       load it => no warning.  */
+     return NULL;
+ 
+   dir = xstrdup (objfile->name);
+@@ -1388,7 +1399,7 @@ find_separate_debug_file (struct objfile *objfile)
+   strcpy (debugfile, dir);
+   strcat (debugfile, basename);
+ 
+-  if (separate_debug_file_exists (debugfile, crc32))
++  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
+     {
+       xfree (basename);
+       xfree (dir);
+@@ -1402,7 +1413,7 @@ find_separate_debug_file (struct objfile *objfile)
+   strcat (debugfile, "/");
+   strcat (debugfile, basename);
+ 
+-  if (separate_debug_file_exists (debugfile, crc32))
++  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
+     {
+       xfree (basename);
+       xfree (dir);
+@@ -1416,7 +1427,7 @@ find_separate_debug_file (struct objfile *objfile)
+   strcat (debugfile, dir);
+   strcat (debugfile, basename);
+ 
+-  if (separate_debug_file_exists (debugfile, crc32))
++  if (separate_debug_file_exists (debugfile, crc32, objfile->name))
+     {
+       xfree (basename);
+       xfree (dir);
+@@ -1435,7 +1446,7 @@ find_separate_debug_file (struct objfile *objfile)
+       strcat (debugfile, "/");
+       strcat (debugfile, basename);
+ 
+-      if (separate_debug_file_exists (debugfile, crc32))
++      if (separate_debug_file_exists (debugfile, crc32, objfile->name))
+ 	{
+ 	  xfree (canon_name);
+ 	  xfree (basename);
+--- a/gdb/testsuite/gdb.base/sepdebug.exp
++++ b/gdb/testsuite/gdb.base/sepdebug.exp
+@@ -952,6 +952,23 @@ set debugfile "${objdir}/${subdir}/${testfile}.debug"
+ test_different_dir debuglink "${objdir}/${subdir}" 0
+ 
+ 
++# Test CRC mismatch is reported.
++
++if {[build_executable sepdebug.exp sepdebug2 sepdebug2.c debug] != -1
++    && ![gdb_gnu_strip_debug ${objdir}/${subdir}/sepdebug2]} {
++
++    remote_exec build "cp ${debugfile} ${objdir}/${subdir}/.debug/sepdebug2.debug"
++
++    gdb_exit
++    gdb_start
++    gdb_reinitialize_dir $srcdir/$subdir
++
++    set escapedobjdirsubdir [string_to_regexp ${objdir}/${subdir}]
++
++    gdb_test "file ${objdir}/${subdir}/sepdebug2" "warning: the debug information found in \"${escapedobjdirsubdir}/\\.debug/sepdebug2\\.debug\" does not match \"${escapedobjdirsubdir}/sepdebug2\" \\(CRC mismatch\\)\\..*\\(no debugging symbols found\\).*" "CRC mismatch is reported"
++}
++
++
+ # NT_GNU_BUILD_ID / .note.gnu.build-id test:
+ 
+ set build_id_debug_filename [build_id_debug_filename_get $binfile]
+--- /dev/null
++++ b/gdb/testsuite/gdb.base/sepdebug2.c
+@@ -0,0 +1,22 @@
++/* This testcase is part of GDB, the GNU debugger.
++
++   Copyright 2009 Free Software Foundation, Inc.
++
++   This program is free software; you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++int
++main (void)
++{
++  return 0;
++}
+

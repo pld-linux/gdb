@@ -1,0 +1,312 @@
+http://sourceware.org/ml/gdb-patches/2009-11/msg00596.html
+Subject: [gdb FYI-patch] callback-mode readline-6.0 regression
+
+Hi Chet,
+
+FSF GDB currently ships bundled with readline-5.2 which works fine.
+But using --with-system-readline and readline-6.0-patchlevel4 has
+a regression:
+
+readline-5.2: Run `gdb -nx -q' and type CTRL-C:
+(gdb) Quit
+(gdb) _
+
+readline-6.0: Run `gdb -nx -q' and type CTRL-C:
+(gdb) _
+ = nothing happens (it gets buffered and executed later)
+	(It does also FAIL on gdb.gdb/selftest.exp.)
+
+It is because GDB waits in its own poll() mainloop and readline uses via
+rl_callback_handler_install and rl_callback_handler_remove.  This way the
+readline internal variable _rl_interrupt_immediately remains 0 and CTRL-C gets
+only stored to _rl_caught_signal but not executed.
+
+Seen in rl_signal_handler even if _rl_interrupt_immediately is set and
+_rl_handle_signal is called then the signal is still stored to
+_rl_caught_signal.  In the _rl_interrupt_immediately case it should not be
+stored when it was already processed.
+
+rl_signal_handler does `_rl_interrupt_immediately = 0;' - while I am not aware
+of its meaning it breaks the nest-counting of other routines which do
+`_rl_interrupt_immediately++;' and `_rl_interrupt_immediately--;' possibly
+creating problematic `_rl_interrupt_immediately == -1'.
+
+`_rl_interrupt_immediately' is an internal variable, how it could be accessed
+by a readline application? (OK, maybe it should not be used.)
+
+Attaching a current GDB-side patch but it must access readline internal
+variable _rl_caught_signal and it is generally just a workaround.  Could you
+please include support for signals in this asynchronous mode in readline-6.1?
+I find it would be enough to make RL_CHECK_SIGNALS public?
+
+
+GDB: No regressions on {x86_64,x86_64-m32,i686}-fedora12-linux-gnu.
+But this is not a patch intended to be accepted.
+
+
+Thanks,
+Jan
+
+
+gdb/
+2009-11-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* config.in, configure: Regenerate.
+	* configure.ac (for readline_echoing_p): Move inside $LIBS change.
+	(for _rl_caught_signal): New.
+	* event-loop.c: Include readline/readline.h.
+	(gdb_do_one_event) [HAVE_READLINE_CAUGHT_SIGNAL]: New.
+
+gdb/testsuite/
+2009-11-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.gdb/selftest.exp (backtrace through signal handler): Move before
+	SIGINT pass, drop the timeout case.
+	(send SIGINT signal to child process): Use gdb_test.
+	(backtrace through readline handler): New.
+
+--- a/gdb/config.in
++++ b/gdb/config.in
+@@ -351,6 +351,9 @@
+ /* Define if Python interpreter is being linked in. */
+ #undef HAVE_PYTHON
+ 
++/* readline-6.0 workaround of blocked signals. */
++#undef HAVE_READLINE_CAUGHT_SIGNAL
++
+ /* Define to 1 if you have the `realpath' function. */
+ #undef HAVE_REALPATH
+ 
+--- a/gdb/configure.ac
++++ b/gdb/configure.ac
+@@ -539,17 +539,25 @@ if test "$with_system_readline" = yes; then
+   # readline-6.0 started to use the name `_rl_echoing_p'.
+   # `$(READLINE_DIR)/' of bundled readline would not resolve in configure.
+ 
+-  AC_MSG_CHECKING([for readline_echoing_p])
+   save_LIBS=$LIBS
+   LIBS="$LIBS $READLINE"
++  AC_MSG_CHECKING([for readline_echoing_p])
+   AC_LINK_IFELSE(AC_LANG_PROGRAM(,[[extern int readline_echoing_p;
+ 				    return readline_echoing_p;]]),
+ 		 [READLINE_ECHOING_P=yes],
+ 		 [READLINE_ECHOING_P=no
+ 		  AC_DEFINE([readline_echoing_p], [_rl_echoing_p],
+ 			    [readline-6.0 started to use different name.])])
+-  LIBS="$save_LIBS"
+   AC_MSG_RESULT([$READLINE_ECHOING_P])
++  AC_MSG_CHECKING([for _rl_caught_signal])
++  AC_LINK_IFELSE(AC_LANG_PROGRAM(,[[extern int volatile _rl_caught_signal;
++				    return _rl_caught_signal;]]),
++		 [READLINE_CAUGHT_SIGNAL=yes
++		  AC_DEFINE([HAVE_READLINE_CAUGHT_SIGNAL],,
++			    [readline-6.0 workaround of blocked signals.])],
++		 [READLINE_CAUGHT_SIGNAL=no])
++  AC_MSG_RESULT([$READLINE_CAUGHT_SIGNAL])
++  LIBS="$save_LIBS"
+ else
+   READLINE='$(READLINE_DIR)/libreadline.a'
+   READLINE_DEPS='$(READLINE)'
+--- a/gdb/event-loop.c
++++ b/gdb/event-loop.c
+@@ -37,6 +37,7 @@
+ #include "exceptions.h"
+ #include "gdb_assert.h"
+ #include "gdb_select.h"
++#include "readline/readline.h"
+ 
+ /* Data point to pass to the event handler.  */
+ typedef union event_data
+@@ -411,6 +412,9 @@ gdb_do_one_event (void *data)
+   static int event_source_head = 0;
+   const int number_of_sources = 3;
+   int current = 0;
++#ifdef HAVE_READLINE_CAUGHT_SIGNAL
++  extern int volatile _rl_caught_signal;
++#endif
+ 
+   /* Any events already waiting in the queue?  */
+   if (process_event ())
+@@ -455,6 +459,16 @@ gdb_do_one_event (void *data)
+   if (gdb_wait_for_event (1) < 0)
+     return -1;
+ 
++#ifdef HAVE_READLINE_CAUGHT_SIGNAL
++  if (async_command_editing_p && RL_ISSTATE (RL_STATE_CALLBACK)
++      && _rl_caught_signal)
++    {
++      /* Call RL_CHECK_SIGNALS this way.  */
++      rl_callback_handler_remove ();
++      rl_callback_handler_install (NULL, input_handler);
++    }
++#endif
++
+   /* Handle any new events occurred while waiting.  */
+   if (process_event ())
+     return 1;
+--- a/gdb/testsuite/gdb.gdb/selftest.exp
++++ b/gdb/testsuite/gdb.gdb/selftest.exp
+@@ -464,31 +464,42 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
+ 	    fail "$description (timeout)"
+ 	}
+     }
+-    
+-    set description "send SIGINT signal to child process"
+-    send_gdb "signal SIGINT\n"
+-    gdb_expect {
+-	-re "Continuing with signal SIGINT.*$gdb_prompt $" {
++
++    # get a stack trace with the poll function
++    #
++    # This fails on some linux systems for unknown reasons.  On the
++    # systems where it fails, sometimes it works fine when run manually.
++    # The testsuite failures may not be limited to just aout systems.
++    setup_xfail "i*86-pc-linuxaout-gnu"
++    set description "backtrace through signal handler"
++    gdb_test_multiple "backtrace" $description {
++	-re "#0.*(read|poll).*in main \\(.*\\) at .*gdb\\.c.*$gdb_prompt $" {
+ 	    pass "$description"
+ 	}
+ 	-re ".*$gdb_prompt $" {
++	    # On the alpha, we hit the infamous problem about gdb
++	    # being unable to get the frame pointer (mentioned in
++	    # gdb/README).  As it is intermittent, there is no way to
++	    # XFAIL it which will give us an XPASS if the problem goes
++	    # away.
++	    setup_xfail "alpha*-*-osf*"
+ 	    fail "$description"
+ 	}
+-	timeout {
+-	    fail "$description (timeout)"
+-	}
+     }
+     
+-    # get a stack trace
++    gdb_test "signal SIGINT" "Continuing with signal SIGINT.*" \
++	     "send SIGINT signal to child process"
++    
++    # get a stack trace being redelivered by readline
+     #
+     # This fails on some linux systems for unknown reasons.  On the
+     # systems where it fails, sometimes it works fine when run manually.
+     # The testsuite failures may not be limited to just aout systems.
++    # Optional system readline may not have symbols to be shown.
+     setup_xfail "i*86-pc-linuxaout-gnu"
+-    set description "backtrace through signal handler"
+-    send_gdb "backtrace\n"
+-    gdb_expect {
+-	-re "#0.*(read|poll).*in main \\(.*\\) at .*gdb\\.c.*$gdb_prompt $" {
++    set description "backtrace through readline handler"
++    gdb_test_multiple "backtrace" $description {
++	-re "#0.*gdb_do_one_event.*in main \\(.*\\) at .*gdb\\.c.*$gdb_prompt $" {
+ 	    pass "$description"
+ 	}
+ 	-re ".*$gdb_prompt $" {
+@@ -500,9 +510,6 @@ GDB.*Copyright \[0-9\]+ Free Software Foundation, Inc..*$gdb_prompt $"\
+ 	    setup_xfail "alpha*-*-osf*"
+ 	    fail "$description"
+ 	}
+-	timeout {
+-	    fail "$description (timeout)"
+-	}
+     }
+ 
+ 
+--- gdb-7.0/gdb/configure	2009-12-07 18:53:30.000000000 +0100
++++ gdb-7.0-x/gdb/configure	2009-12-07 18:53:14.000000000 +0100
+@@ -9201,15 +9201,11 @@ if test "$with_system_readline" = yes; t
+   # readline-6.0 started to use the name `_rl_echoing_p'.
+   # `$(READLINE_DIR)/' of bundled readline would not resolve in configure.
+ 
+-  echo "$as_me:$LINENO: checking for readline_echoing_p" >&5
+-echo $ECHO_N "checking for readline_echoing_p... $ECHO_C" >&6
+   save_LIBS=$LIBS
+   LIBS="$LIBS $READLINE"
+-  cat >conftest.$ac_ext <<_ACEOF
+-/* confdefs.h.  */
+-_ACEOF
+-cat confdefs.h >>conftest.$ac_ext
+-cat >>conftest.$ac_ext <<_ACEOF
++  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for readline_echoing_p" >&5
++$as_echo_n "checking for readline_echoing_p... " >&6; }
++  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+ /* end confdefs.h.  */
+ 
+ int
+@@ -9221,45 +9217,45 @@ extern int readline_echoing_p;
+   return 0;
+ }
+ _ACEOF
+-rm -f conftest.$ac_objext conftest$ac_exeext
+-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+-  (eval $ac_link) 2>conftest.er1
+-  ac_status=$?
+-  grep -v '^ *+' conftest.er1 >conftest.err
+-  rm -f conftest.er1
+-  cat conftest.err >&5
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); } &&
+-	 { ac_try='test -z "$ac_c_werror_flag"
+-			 || test ! -s conftest.err'
+-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+-  (eval $ac_try) 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; } &&
+-	 { ac_try='test -s conftest$ac_exeext'
+-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+-  (eval $ac_try) 2>&5
+-  ac_status=$?
+-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+-  (exit $ac_status); }; }; then
++if ac_fn_c_try_link "$LINENO"; then :
+   READLINE_ECHOING_P=yes
+ else
+-  echo "$as_me: failed program was:" >&5
+-sed 's/^/| /' conftest.$ac_ext >&5
++  READLINE_ECHOING_P=no
+ 
+-READLINE_ECHOING_P=no
++$as_echo "#define readline_echoing_p _rl_echoing_p" >>confdefs.h
++
++fi
++rm -f core conftest.err conftest.$ac_objext \
++    conftest$ac_exeext conftest.$ac_ext
++  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $READLINE_ECHOING_P" >&5
++$as_echo "$READLINE_ECHOING_P" >&6; }
++  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for _rl_caught_signal" >&5
++$as_echo_n "checking for _rl_caught_signal... " >&6; }
++  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
+ 
+-cat >>confdefs.h <<\_ACEOF
+-#define readline_echoing_p _rl_echoing_p
++int
++main ()
++{
++extern int volatile _rl_caught_signal;
++				    return _rl_caught_signal;
++  ;
++  return 0;
++}
+ _ACEOF
++if ac_fn_c_try_link "$LINENO"; then :
++  READLINE_CAUGHT_SIGNAL=yes
++
++$as_echo "#define HAVE_READLINE_CAUGHT_SIGNAL /**/" >>confdefs.h
+ 
++else
++  READLINE_CAUGHT_SIGNAL=no
+ fi
+-rm -f conftest.err conftest.$ac_objext \
+-      conftest$ac_exeext conftest.$ac_ext
++rm -f core conftest.err conftest.$ac_objext \
++    conftest$ac_exeext conftest.$ac_ext
++  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $READLINE_CAUGHT_SIGNAL" >&5
++$as_echo "$READLINE_CAUGHT_SIGNAL" >&6; }
+   LIBS="$save_LIBS"
+-  echo "$as_me:$LINENO: result: $READLINE_ECHOING_P" >&5
+-echo "${ECHO_T}$READLINE_ECHOING_P" >&6
+ else
+   READLINE='$(READLINE_DIR)/libreadline.a'
+   READLINE_DEPS='$(READLINE)'

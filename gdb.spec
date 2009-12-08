@@ -1,5 +1,6 @@
 # NOTE
 # - Do not remove -lib package, it is required by FPC
+# - does not build with -j2 - use -j1
 
 # TODO
 # - python subpkg

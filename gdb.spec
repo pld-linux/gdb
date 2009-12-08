@@ -11,7 +11,7 @@
 %bcond_without	python		# build without python support
 
 %define		snap	20090930
-%define		rel		0.3
+%define		rel		0.4
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de.UTF-8):	Symbolischer Debugger für C und andere Sprachen
 Summary(es.UTF-8):	Depurador de programas C y otras lenguajes
@@ -163,12 +163,14 @@ BuildRequires:	bison
 BuildRequires:	flex
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
-BuildRequires:	python-devel
 BuildRequires:	readline-devel >= 6.0
-BuildRequires:	rpm-pythonprov
+BuildRequires:	rpmbuild(macros) >= 1.219
 BuildRequires:	texinfo >= 4.4
 BuildRequires:	zlib-devel
-%{?with_python:Requires: python-libs}
+%if %{with python}
+BuildRequires:	python-devel
+BuildRequires:	rpm-pythonprov
+%endif
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -235,6 +237,15 @@ and printing their data.
 This package provides a program that allows you to run GDB on a
 different machine than the one which is running the program being
 debugged.
+
+%package -n python-%{name}
+Summary:	GDB Python bindings
+Summary(pl.UTF-8):	Wiązania PackageKit dla Pythona
+Group:		Development/Languages/Python
+Requires:	python-libs
+
+%description -n python-%{name}
+GDB Python bindings.
 
 %package lib
 Summary:	GDB in the form of a static library
@@ -448,9 +459,11 @@ for LIB in lib lib64; do
 	  < libstdcxxpython/hook.in	\
 	  > $LIBPATH/$(basename %{_prefix}/%{_lib}/libstdc++.so.6.*)-gdb.py
 done
-test ! -e $RPM_BUILD_ROOT%{_datadir}/gdb/python/libstdcxx
-install -d $RPM_BUILD_ROOT%{_datadir}/gdb/python
-cp -a libstdcxxpython/libstdcxx	$RPM_BUILD_ROOT%{_datadir}/gdb/python/libstdcxx
+cp -a libstdcxxpython/libstdcxx	$RPM_BUILD_ROOT%{py_sitescriptdir}
+
+%py_ocomp $RPM_BUILD_ROOT%{py_sitescriptdir}
+%py_comp $RPM_BUILD_ROOT%{py_sitescriptdir}
+%py_postclean
 %endif
 
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
@@ -493,9 +506,23 @@ rm -rf $RPM_BUILD_ROOT
 %{_infodir}/stabs.info*
 
 %if %{with python}
-%{py_sitescriptdir}/gdb
+%files -n python-%{name}
+%defattr(644,root,root,755)
+%dir %{py_sitescriptdir}/gdb
+%{py_sitescriptdir}/gdb/*.py[co]
+%dir %{py_sitescriptdir}/gdb/command
+%{py_sitescriptdir}/gdb/command/*.py[co]
+%dir %{py_sitescriptdir}/gdb/function
+%{py_sitescriptdir}/gdb/function/*.py[co]
+
+# likely oneday gcc.spec will provide this
+%dir %{py_sitescriptdir}/libstdcxx
+%{py_sitescriptdir}/libstdcxx/*.py[co]
+%dir %{py_sitescriptdir}/libstdcxx/v6
+%{py_sitescriptdir}/libstdcxx/v6/*.py[co]
+
+# or should we include it in base package?
 %{_datadir}/gdb/auto-load
-%{_datadir}/gdb/python
 %endif
 
 %files gdbserver

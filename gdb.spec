@@ -22,7 +22,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.0
-Release:	0.7.fc12.%{rel}
+Release:	0.9.fc12.%{rel}
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -36,6 +36,7 @@ Source4:	libstdc++-v3-python-r151798.tar.bz2
 # FEDORA -- use the same numbering that they do
 # don't ever modify these patches, apply secondary patch to alter it pld way
 # use:'<,'>!grep -vE '^(\#|$)' in vim to filterout comments, spaces
+
 Patch1:		%{name}-6.3-rh-dummykfail-20041202.patch
 Patch2:		%{name}-6.3-rh-testversion-20041202.patch
 Patch3:		%{name}-6.3-rh-testlibunwind-20041202.patch
@@ -47,9 +48,9 @@ Patch112:	%{name}-6.6-scheduler_locking-step-sw-watchpoints2.patch
 Patch260:	%{name}-6.6-scheduler_locking-step-is-default.patch
 Patch118:	%{name}-6.3-gstack-20050411.patch
 Patch122:	%{name}-6.3-test-pie-20050107.patch
-Patch124:	%{name}-6.3-pie-20050110.patch
+Patch124:	%{name}-archer-pie.patch
+Patch389:	%{name}-archer-pie-addons.patch
 Patch125:	%{name}-6.3-test-self-20050110.patch
-Patch128:	%{name}-6.3-nonthreaded-wp-20050117.patch
 Patch133:	%{name}-6.3-test-dtorfix-20050121.patch
 Patch136:	%{name}-6.3-test-movedir-20050125.patch
 Patch140:	%{name}-6.3-gcore-thread-20050204.patch
@@ -146,6 +147,8 @@ Patch384:	%{name}-bz528668-symfile-cleanup.patch
 Patch385:	%{name}-bz528668-symfile-multi.patch
 Patch387:	%{name}-bz539590-gnu-ifunc.patch
 Patch388:	%{name}-bz538626-bp_location-accel-bp-cond.patch
+Patch390:	%{name}-readline-6.0-signal.patch
+Patch391:	%{name}-x86_64-i386-syscall-restart.patch
 
 # PLD patches
 Patch1000:	%{name}-readline.patch
@@ -153,7 +156,6 @@ Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
 Patch1006:	buildid-locate-rpm-pld.patch
-
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -268,11 +270,13 @@ rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 
 # FEDORA PATCHES -- keep them in same order they do
+%patch2 -p1
 %patch232 -p1
 %patch349 -p1
 %patch383 -p1
 %patch384 -p1
 %patch385 -p1
+%patch124 -p1
 %patch1 -p1
 %patch3 -p1
 %patch104 -p1
@@ -283,7 +287,6 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch118 -p1
 %patch122 -p1
 %patch125 -p1
-%patch128 -p1
 %patch133 -p1
 %patch136 -p1
 %patch140 -p1
@@ -376,7 +379,9 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch382 -p1
 %patch387 -p1
 %patch388 -p1
-%patch124 -p1
+%patch389 -p1
+%patch390 -p1
+%patch391 -p1
 
 # PLD patches
 %patch1000 -p1

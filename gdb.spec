@@ -5,13 +5,13 @@
 # TODO
 # - python subpkg
 # - remove hacks in python, use sys.lib, use standard python dirs
-# - gdbtui is as big as gdb, but different md5, some kind of duplicate?
-# - change yum install msg to poldek one in buildid-locate-rpm.patch
+# - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
 #
 # Conditional build:
 %bcond_without	python		# build without python support
 
 %define		snap	20090930
+%define		rel		0.3
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de.UTF-8):	Symbolischer Debugger für C und andere Sprachen
 Summary(es.UTF-8):	Depurador de programas C y otras lenguajes
@@ -25,7 +25,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.0
-Release:	0.7.fc12.0.1
+Release:	0.7.fc12.%{rel}
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -35,13 +35,8 @@ Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-ma
 Source4:	libstdc++-v3-python-r151798.tar.bz2
 # Source4-md5:	7507540c50a1edeb2fc22a37bc4a08b8
 
-# PLD
-Patch1000:	%{name}-readline.patch
-Patch1001:	%{name}-info.patch
-Patch1002:	%{name}-passflags.patch
-Patch1005:	%{name}-pretty-print-by-default.patch
-
 # FEDORA -- use the same numbering that they do
+# don't ever modify these patches, apply secondary patch to alter it pld way
 # use:'<,'>!grep -vE '^(\#|$)' in vim to filterout comments, spaces
 Patch1:		%{name}-6.3-rh-dummykfail-20041202.patch
 Patch2:		%{name}-6.3-rh-testversion-20041202.patch
@@ -154,6 +149,13 @@ Patch385:	%{name}-bz528668-symfile-multi.patch
 Patch387:	%{name}-bz539590-gnu-ifunc.patch
 Patch388:	%{name}-bz538626-bp_location-accel-bp-cond.patch
 
+# PLD patches
+Patch1000:	%{name}-readline.patch
+Patch1001:	%{name}-info.patch
+Patch1002:	%{name}-passflags.patch
+Patch1005:	%{name}-pretty-print-by-default.patch
+Patch1006:	buildid-locate-rpm-pld.patch
+
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -251,11 +253,6 @@ GDB w postaci biblioteki statycznej.
 
 # libstdc++ pretty printers.
 bzip2 -dc %{SOURCE4} | tar xf -
-
-%patch1000 -p1
-%patch1001 -p1
-%patch1002 -p1
-%patch1005 -p1
 
 # Files have `# <number> <file>' statements breaking VPATH / find-debuginfo.sh .
 rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
@@ -372,6 +369,13 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch388 -p1
 %patch124 -p1
 
+# PLD patches
+%patch1000 -p1
+%patch1001 -p1
+%patch1002 -p1
+%patch1005 -p1
+%patch1006 -p1
+
 mv $(basename %{SOURCE4} .tar.bz2) libstdcxxpython
 
 %build
@@ -413,7 +417,7 @@ cp -f /usr/share/automake/config.* .
 	--without-x
 
 %{__make} -j1
-%{__make} info
+%{__make} -j1 info
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -421,6 +425,11 @@ install -d $RPM_BUILD_ROOT%{_infodir}
 
 %{__make} -j1 install install-info \
 	DESTDIR=$RPM_BUILD_ROOT
+
+# gdbtui seems all identical to gdb except when invoked as gdbtio, ncurses
+# window is created too.
+echo ".so gdb.1" > $RPM_BUILD_ROOT%{_mandir}/man1/gdbtui.1
+ln -f $RPM_BUILD_ROOT%{_bindir}/{gdb,gdbtui}
 
 bzip2 -dc %{SOURCE1} | tar xf - -C $RPM_BUILD_ROOT%{_mandir}
 cp -a gdb/libgdb.a $RPM_BUILD_ROOT%{_libdir}

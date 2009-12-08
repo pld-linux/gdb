@@ -4,6 +4,7 @@
 
 # TODO
 # - python subpkg
+# - remove hacks in python, use sys.lib, use standard python dirs
 # - gdbtui is as big as gdb, but different md5, some kind of duplicate?
 # - change yum install msg to poldek one in buildid-locate-rpm.patch
 #
@@ -11,7 +12,6 @@
 %bcond_without	python		# build without python support
 
 %define		snap	20090930
-%define		rel		0.1
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de.UTF-8):	Symbolischer Debugger für C und andere Sprachen
 Summary(es.UTF-8):	Depurador de programas C y otras lenguajes
@@ -25,16 +25,13 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.0
-Release:	0.5
+Release:	0.7.fc12.0.1
 License:	GPL v3+
 Group:		Development/Debuggers
-# Source0:	ftp://sourceware.org/pub/gdb/snapshots/current/gdb-%{version}.%{snap}.tar.bz2
-# Source0:	gdb-%{version}.%{snap}.tar.bz2
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
 # Source0-md5:	3386a7b69c010785c920ffc1e9cb890a
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
-# libstdc++ pretty printers from GCC SVN HEAD (4.5 experimental).
 Source4:	libstdc++-v3-python-r151798.tar.bz2
 # Source4-md5:	7507540c50a1edeb2fc22a37bc4a08b8
 
@@ -44,14 +41,11 @@ Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
 
-# FEDORA
+# FEDORA -- use the same numbering that they do
+# use:'<,'>!grep -vE '^(\#|$)' in vim to filterout comments, spaces
 Patch1:		%{name}-6.3-rh-dummykfail-20041202.patch
 Patch2:		%{name}-6.3-rh-testversion-20041202.patch
 Patch3:		%{name}-6.3-rh-testlibunwind-20041202.patch
-
-# Backported post gdb-7.0 fixups.
-Patch232:	%{name}-7.0-upstream.patch
-
 Patch104:	%{name}-6.3-ppcdotsolib-20041022.patch
 Patch105:	%{name}-6.3-ppc64syscall-20040622.patch
 Patch106:	%{name}-6.3-framepczero-20040927.patch
@@ -60,9 +54,9 @@ Patch112:	%{name}-6.6-scheduler_locking-step-sw-watchpoints2.patch
 Patch260:	%{name}-6.6-scheduler_locking-step-is-default.patch
 Patch118:	%{name}-6.3-gstack-20050411.patch
 Patch122:	%{name}-6.3-test-pie-20050107.patch
-Patch124:	%{name}-archer-pie.patch
-Patch389:	%{name}-archer-pie-addons.patch
+Patch124:	%{name}-6.3-pie-20050110.patch
 Patch125:	%{name}-6.3-test-self-20050110.patch
+Patch128:	%{name}-6.3-nonthreaded-wp-20050117.patch
 Patch133:	%{name}-6.3-test-dtorfix-20050121.patch
 Patch136:	%{name}-6.3-test-movedir-20050125.patch
 Patch140:	%{name}-6.3-gcore-thread-20050204.patch
@@ -101,6 +95,7 @@ Patch217:	%{name}-6.5-bz218379-solib-trampoline-lookup-lock-fix.patch
 Patch225:	%{name}-6.5-bz109921-DW_AT_decl_file-test.patch
 Patch229:	%{name}-6.3-bz140532-ppc-unwinding-test.patch
 Patch231:	%{name}-6.3-bz202689-exec-from-pthread-test.patch
+Patch232:	%{name}-7.0-upstream.patch
 Patch234:	%{name}-6.6-bz230000-power6-disassembly-test.patch
 Patch235:	%{name}-6.3-bz231832-obstack-2gb.patch
 Patch240:	%{name}-6.6-bz225783-prelink-path.patch
@@ -158,8 +153,6 @@ Patch384:	%{name}-bz528668-symfile-cleanup.patch
 Patch385:	%{name}-bz528668-symfile-multi.patch
 Patch387:	%{name}-bz539590-gnu-ifunc.patch
 Patch388:	%{name}-bz538626-bp_location-accel-bp-cond.patch
-Patch390:	%{name}-readline-6.0-signal.patch
-Patch391:	%{name}-x86_64-i386-syscall-restart.patch
 
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
@@ -254,7 +247,7 @@ GDB in the form of a static library.
 GDB w postaci biblioteki statycznej.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q
 
 # libstdc++ pretty printers.
 bzip2 -dc %{SOURCE4} | tar xf -
@@ -268,22 +261,14 @@ bzip2 -dc %{SOURCE4} | tar xf -
 rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 
-# Apply patches defined above.
-
-# Match the Fedora's version info.
-%patch2 -p1
-
-# backported fixes
+# FEDORA PATCHES -- keep them in same order they do
 %patch232 -p1
-
 %patch349 -p1
 %patch383 -p1
 %patch384 -p1
 %patch385 -p1
-%patch124 -p1
 %patch1 -p1
 %patch3 -p1
-
 %patch104 -p1
 %patch105 -p1
 %patch106 -p1
@@ -292,6 +277,7 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch118 -p1
 %patch122 -p1
 %patch125 -p1
+%patch128 -p1
 %patch133 -p1
 %patch136 -p1
 %patch140 -p1
@@ -384,9 +370,7 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch382 -p1
 %patch387 -p1
 %patch388 -p1
-%patch389 -p1
-%patch390 -p1
-%patch391 -p1
+%patch124 -p1
 
 mv $(basename %{SOURCE4} .tar.bz2) libstdcxxpython
 
@@ -428,14 +412,14 @@ cp -f /usr/share/automake/config.* .
 	--without-included-regex \
 	--without-x
 
-%{__make}
+%{__make} -j1
 %{__make} info
 
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_infodir}
 
-%{__make} install install-info \
+%{__make} -j1 install install-info \
 	DESTDIR=$RPM_BUILD_ROOT
 
 bzip2 -dc %{SOURCE1} | tar xf - -C $RPM_BUILD_ROOT%{_mandir}
@@ -450,8 +434,8 @@ for LIB in lib lib64; do
 	LIBPATH="$RPM_BUILD_ROOT%{_datadir}/gdb/auto-load%{_prefix}/$LIB"
 	install -d $LIBPATH
 	# basename is being run only for the native (non-biarch) file.
-	sed -e 's,@pythondir@,%{_datadir}/gdb/python,'		\
-	  -e 's,@toolexeclibdir@,%{_prefix}/'"$LIB,"		\
+	sed -e 's,@pythondir@,%{_datadir}/gdb/python,' \
+	  -e 's,@toolexeclibdir@,%{_prefix}/'"$LIB," \
 	  < libstdcxxpython/hook.in	\
 	  > $LIBPATH/$(basename %{_prefix}/%{_lib}/libstdc++.so.6.*)-gdb.py
 done

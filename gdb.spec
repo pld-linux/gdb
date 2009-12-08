@@ -160,9 +160,11 @@ URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
 BuildRequires:	bison
+BuildRequires:	expat-devel
 BuildRequires:	flex
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
+BuildRequires:	pkgconfig
 BuildRequires:	readline-devel >= 6.0
 BuildRequires:	rpmbuild(macros) >= 1.219
 BuildRequires:	texinfo >= 4.4

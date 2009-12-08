@@ -1,17 +1,14 @@
 # NOTE
 # - Do not remove -lib package, it is required by FPC
-# - does not build with -j2 - use -j1
 
 # TODO
-# - python subpkg
-# - remove hacks in python, use sys.lib, use standard python dirs
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
 #
 # Conditional build:
 %bcond_without	python		# build without python support
 
 %define		snap	20090930
-%define		rel		0.4
+%define		rel		0.6
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de.UTF-8):	Symbolischer Debugger für C und andere Sprachen
 Summary(es.UTF-8):	Depurador de programas C y otras lenguajes
@@ -32,6 +29,7 @@ Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
 # Source0-md5:	3386a7b69c010785c920ffc1e9cb890a
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
+Source3:	%{name}-gstack.man
 Source4:	libstdc++-v3-python-r151798.tar.bz2
 # Source4-md5:	7507540c50a1edeb2fc22a37bc4a08b8
 
@@ -389,6 +387,11 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 
 mv $(basename %{SOURCE4} .tar.bz2) libstdcxxpython
 
+# Change the version that gets printed at GDB startup, so it is PLD Linux specific.
+cat > gdb/version.in << EOF
+PLD Linux (%{version}-%{release})
+EOF
+
 %build
 for dir in $(find gdb -name 'configure.in'); do
 	dir=$(dirname "$dir")
@@ -466,6 +469,8 @@ cp -a libstdcxxpython/libstdcxx	$RPM_BUILD_ROOT%{py_sitescriptdir}
 %py_postclean
 %endif
 
+cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_mandir}/man1/gstack.1
+
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
 # These are part of binutils
 rm -rf $RPM_BUILD_ROOT%{_datadir}/locale
@@ -495,6 +500,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gdb/syscalls
 %{_mandir}/man1/gdb.1*
 %{_mandir}/man1/gdbtui.1*
+%{_mandir}/man1/gstack.1*
 %lang(es) %{_mandir}/es/man1/*
 %lang(fr) %{_mandir}/fr/man1/*
 %lang(hu) %{_mandir}/hu/man1/*

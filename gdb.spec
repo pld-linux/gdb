@@ -7,8 +7,6 @@
 # Conditional build:
 %bcond_without	python		# build without python support
 
-%define		snap	20090930
-%define		rel		0.6
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de.UTF-8):	Symbolischer Debugger für C und andere Sprachen
 Summary(es.UTF-8):	Depurador de programas C y otras lenguajes
@@ -22,7 +20,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.0
-Release:	0.9.fc12.%{rel}
+Release:	3
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2

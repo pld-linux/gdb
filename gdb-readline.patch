@@ -1,4 +1,3 @@
-diff -ur gdb-6.7.org/gdb/Makefile.in gdb-6.7/gdb/Makefile.in
 --- gdb-6.7.org/gdb/Makefile.in	2007-09-05 02:14:02.000000000 +0200
 +++ gdb-6.7/gdb/Makefile.in	2007-10-10 21:11:18.119976680 +0200
 @@ -126,11 +126,11 @@
@@ -27,7 +26,6 @@ diff -ur gdb-6.7.org/gdb/Makefile.in gdb-6.7/gdb/Makefile.in
  	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
  
  ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
-diff -ur gdb-6.7.org/Makefile.in gdb-6.7/Makefile.in
 --- gdb-6.7.org/Makefile.in	2007-10-10 19:09:32.000000000 +0200
 +++ gdb-6.7/Makefile.in	2007-10-10 21:10:23.310556251 +0200
 @@ -664,7 +664,6 @@
@@ -174,38 +172,3 @@ diff -ur gdb-6.7.org/Makefile.in gdb-6.7/Makefile.in
  all-sim: maybe-configure-gdb
  all-fastjar: maybe-all-zlib
  all-fastjar: maybe-all-build-texinfo
---- gdb-6.8.50.20090224/gdb/tui/tui-io.c~	2009-02-24 09:17:18.617891690 +0100
-+++ gdb-6.8.50.20090224/gdb/tui/tui-io.c	2009-02-24 09:17:43.554606911 +0100
-@@ -512,7 +512,7 @@
- void
- tui_setup_io (int mode)
- {
--  extern int readline_echoing_p;
-+  extern int _rl_echoing_p;
-  
-   if (mode)
-     {
-@@ -522,12 +522,12 @@
-       tui_old_rl_prep_terminal = rl_prep_term_function;
-       tui_old_rl_getc_function = rl_getc_function;
-       tui_old_rl_outstream = rl_outstream;
--      tui_old_readline_echoing_p = readline_echoing_p;
-+      tui_old_readline_echoing_p = _rl_echoing_p;
-       rl_redisplay_function = tui_redisplay_readline;
-       rl_deprep_term_function = tui_deprep_terminal;
-       rl_prep_term_function = tui_prep_terminal;
-       rl_getc_function = tui_getc;
--      readline_echoing_p = 0;
-+      _rl_echoing_p = 0;
-       rl_outstream = tui_rl_outstream;
-       rl_prompt = 0;
-       rl_completion_display_matches_hook = tui_rl_display_match_list;
-@@ -564,7 +564,7 @@
-       rl_getc_function = tui_old_rl_getc_function;
-       rl_outstream = tui_old_rl_outstream;
-       rl_completion_display_matches_hook = 0;
--      readline_echoing_p = tui_old_readline_echoing_p;
-+      _rl_echoing_p = tui_old_readline_echoing_p;
-       rl_already_prompted = 0;
- 
-       /* Save tty for SIGCONT.  */

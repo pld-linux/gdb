@@ -163,7 +163,7 @@ BuildRequires:	flex
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig
-BuildRequires:	readline-devel >= 6.0
+BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.219
 BuildRequires:	texinfo >= 4.4
 BuildRequires:	zlib-devel

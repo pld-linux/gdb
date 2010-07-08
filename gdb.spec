@@ -20,7 +20,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.0
-Release:	5
+Release:	6
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -154,6 +154,7 @@ Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
 Patch1006:	buildid-locate-rpm-pld.patch
+Patch1007:	%{name}-python.patch
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -389,6 +390,7 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch1002 -p1
 %patch1005 -p1
 %patch1006 -p1
+%patch1007 -p1
 
 mv $(basename %{SOURCE4} .tar.bz2) libstdcxxpython
 
@@ -397,15 +399,17 @@ cat > gdb/version.in << EOF
 PLD Linux (%{version}-%{release})
 EOF
 
+sed -i -e 's#_GCC_AUTOCONF_VERSION\], \[2\.64\]#_GCC_AUTOCONF_VERSION], [2.65]#g' config/override.m4
+
 %build
-for dir in $(find gdb -name 'configure.in'); do
+for dir in $(find gdb -name 'configure.in' -o -name 'configure.ac'); do
 	dir=$(dirname "$dir")
 	olddir=$(pwd)
 	cd $dir
 	rm -f aclocal.m4
 	%{__aclocal}
 	%{__autoconf}
-	%{__autoheader}
+	grep -q AC_CONFIG_HEADER configure.* && %{__autoheader}
 	cd $olddir
 done
 cp -f /usr/share/automake/config.* .

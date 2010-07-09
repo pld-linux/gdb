@@ -20,7 +20,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.0
-Release:	6
+Release:	7
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -407,7 +407,7 @@ for dir in $(find gdb -name 'configure.in' -o -name 'configure.ac'); do
 	olddir=$(pwd)
 	cd $dir
 	rm -f aclocal.m4
-	%{__aclocal}
+	%{__aclocal} `[ -d config ] && echo "-I config"` `[ -d m4 ] && echo "-I m4"` `[ -d gnulib/m4 ] && echo "-I gnulib/m4"`
 	%{__autoconf}
 	grep -q AC_CONFIG_HEADER configure.* && %{__autoheader}
 	cd $olddir
@@ -431,6 +431,7 @@ cp -f /usr/share/automake/config.* .
 	--enable-netrom \
 	--enable-nls \
 	--enable-tui \
+	--with-system-readline \
 	--with-cpu=%{_target_cpu} \
 %ifnarch alpha
 	--with-mmalloc \

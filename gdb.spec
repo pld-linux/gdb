@@ -5,7 +5,7 @@
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
 #
 # Conditional build:
-%bcond_with	python		# build with python support
+%bcond_without	python		# build without python support
 
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de.UTF-8):	Symbolischer Debugger für C und andere Sprachen
@@ -169,7 +169,7 @@ Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
-#Patch1006:	buildid-locate-rpm-pld.patch NEEDS UPDATE/REVIEW
+#Patch1006: buildid-locate-rpm-pld.patch NEEDS UPDATE/REVIEW
 
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
@@ -494,13 +494,7 @@ rm -f $RPM_BUILD_ROOT%{_mandir}/README.gdb-non-english-man-pages
 for LIB in lib lib64; do
 	LIBPATH="$RPM_BUILD_ROOT%{_datadir}/gdb/auto-load%{_prefix}/$LIB"
 	install -d $LIBPATH
-	# basename is being run only for the native (non-biarch) file.
-	sed -e 's,@pythondir@,%{_datadir}/gdb/python,' \
-	  -e 's,@toolexeclibdir@,%{_prefix}/'"$LIB," \
-	  < libstdcxxpython/hook.in	\
-	  > $LIBPATH/$(basename %{_prefix}/%{_lib}/libstdc++.so.6.*)-gdb.py
 done
-cp -a libstdcxxpython/libstdcxx	$RPM_BUILD_ROOT%{py_sitescriptdir}
 
 %py_ocomp $RPM_BUILD_ROOT%{py_sitescriptdir}
 %py_comp $RPM_BUILD_ROOT%{py_sitescriptdir}
@@ -559,14 +553,7 @@ rm -rf $RPM_BUILD_ROOT
 %{py_sitescriptdir}/gdb/command/*.py[co]
 %dir %{py_sitescriptdir}/gdb/function
 %{py_sitescriptdir}/gdb/function/*.py[co]
-
-# likely oneday gcc.spec will provide this
-%dir %{py_sitescriptdir}/libstdcxx
-%{py_sitescriptdir}/libstdcxx/*.py[co]
-%dir %{py_sitescriptdir}/libstdcxx/v6
-%{py_sitescriptdir}/libstdcxx/v6/*.py[co]
-
-# or should we include it in base package?
+# container for 3-rd party stuff.
 %{_datadir}/gdb/auto-load
 %endif
 

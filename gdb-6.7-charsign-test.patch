@@ -52,7 +52,7 @@ https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=224128
 +char_u u_typed[]="A";
 --- /dev/null	1 Jan 1970 00:00:00 -0000
 +++ ./gdb/testsuite/gdb.base/charsign.exp	26 Jan 2007 10:32:00 -0000
-@@ -0,0 +1,70 @@
+@@ -0,0 +1,63 @@
 +# Copyright 2007 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
@@ -68,13 +68,6 @@ https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=224128
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write to the Free Software
 +# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
-+
-+if $tracelevel then {
-+    strace $tracelevel
-+}
-+
-+set prms_id 0
-+set bug_id 0
 +
 +set testfile charsign
 +set srcfile ${testfile}.c

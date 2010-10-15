@@ -10,11 +10,11 @@ for gdb/ChangeLog:
 
 	Port to GDB-6.7.
 
-Index: gdb-6.7/gdb/dwarf2read.c
+Index: gdb-7.1.90.20100711/gdb/dwarf2read.c
 ===================================================================
---- gdb-6.7.orig/gdb/dwarf2read.c	2007-10-15 00:08:30.000000000 +0200
-+++ gdb-6.7/gdb/dwarf2read.c	2007-10-15 21:42:43.000000000 +0200
-@@ -9070,8 +9070,7 @@ dwarf2_fundamental_type (struct objfile 
+--- gdb-7.1.90.20100711.orig/gdb/dwarf2read.c	2010-07-12 10:43:53.000000000 +0200
++++ gdb-7.1.90.20100711/gdb/dwarf2read.c	2010-07-12 10:49:32.000000000 +0200
+@@ -11382,8 +11382,7 @@ read_signatured_type (struct objfile *ob
     callers will only want a very basic result and this can become a
     complaint.
  
@@ -24,7 +24,7 @@ Index: gdb-6.7/gdb/dwarf2read.c
  
  static CORE_ADDR
  decode_locdesc (struct dwarf_block *blk, struct dwarf2_cu *cu)
-@@ -9088,7 +9087,7 @@ decode_locdesc (struct dwarf_block *blk,
+@@ -11399,7 +11398,7 @@ decode_locdesc (struct dwarf_block *blk,
  
    i = 0;
    stacki = 0;
@@ -33,8 +33,8 @@ Index: gdb-6.7/gdb/dwarf2read.c
  
    while (i < size)
      {
-@@ -9270,6 +9269,16 @@ decode_locdesc (struct dwarf_block *blk,
- 		     dwarf_stack_op_name (op));
+@@ -11581,6 +11580,16 @@ decode_locdesc (struct dwarf_block *blk,
+ 		     dwarf_stack_op_name (op, 1));
  	  return (stack[stacki]);
  	}
 +      /* Enforce maximum stack depth of size-1 to avoid ++stacki writing

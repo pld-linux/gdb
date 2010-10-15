@@ -9,9 +9,9 @@ diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
  	"exec_prefix=$(exec_prefix)" \
  	"against=$(against)" \
  	"AR=$(AR)" \
---- gdb-6.1.1/gdb/doc/gdb.texinfo.orig	2004-06-15 00:25:29.000000000 +0200
-+++ gdb-6.1.1/gdb/doc/gdb.texinfo	2004-06-22 23:37:55.963941600 +0200
-@@ -38,9 +38,9 @@
+--- gdb-7.2/gdb/doc/gdb.texinfo.orig	2010-10-15 18:51:49.632994831 +0200
++++ gdb-7.2/gdb/doc/gdb.texinfo	2010-10-15 18:51:49.719668622 +0200
+@@ -39,9 +39,9 @@
  
  @c This is a dir.info fragment to support semi-automated addition of
  @c manuals to an info tree.
@@ -22,13 +22,13 @@ diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
 +* Gdb: (gdb).				The GNU debugger
  @end direntry
  
- @ifinfo
---- gdb-6.1.1/gdb/doc/gdbint.texinfo.orig	2004-06-15 00:25:31.000000000 +0200
-+++ gdb-6.1.1/gdb/doc/gdbint.texinfo	2004-06-22 23:38:21.741022888 +0200
-@@ -1,9 +1,9 @@
- \input texinfo   @c -*- texinfo -*-
- @setfilename gdbint.info
+ @copying
+--- gdb-7.2/gdb/doc/gdbint.texinfo.orig	2010-10-15 18:57:03.000000000 +0200
++++ gdb-7.2/gdb/doc/gdbint.texinfo	2010-10-15 18:58:17.944938994 +0200
+@@ -3,9 +3,9 @@
  @include gdb-cfg.texi
+ @settitle @value{GDBN} Internals
+ @setchapternewpage off
 -@dircategory Software development
 +@dircategory Programming tools:
  @direntry
@@ -36,7 +36,7 @@ diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
 +* Gdb-Internals: (gdbint).		The GNU debugger's internals
  @end direntry
  
- @ifinfo
+ @copying
 --- gdb-6.1.1/gdb/doc/stabs.texinfo.orig	2004-06-15 00:25:31.000000000 +0200
 +++ gdb-6.1.1/gdb/doc/stabs.texinfo	2004-06-22 23:38:51.279532352 +0200
 @@ -5,9 +5,9 @@

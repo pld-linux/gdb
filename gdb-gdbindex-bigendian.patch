@@ -1,0 +1,96 @@
+http://sourceware.org/ml/gdb-patches/2010-09/msg00434.html
+http://sourceware.org/ml/gdb-cvs/2010-09/msg00155.html
+
+### src/gdb/ChangeLog	2010/09/24 14:47:52	1.12202
+### src/gdb/ChangeLog	2010/09/24 16:11:44	1.12203
+## -1,3 +1,9 @@
++2010-09-24  Tom Tromey  <tromey@redhat.com>
++
++	* dwarf2read.c (dw2_expand_symtabs_matching): Add missing
++	MAYBE_SWAPs.
++	(dw2_map_symbol_names): Likewise.
++
+ 2010-09-24  Sami Wagiaalla  <swagiaal@redhat.com>
+ 
+ 	* valops.c (find_oload_champ_namespace_loop): replace incorrect
+--- src/gdb/dwarf2read.c	2010/09/22 19:22:44	1.460
++++ src/gdb/dwarf2read.c	2010/09/24 16:11:46	1.461
+@@ -2248,10 +2248,12 @@ dw2_expand_symtabs_matching (struct objf
+ {
+   int i;
+   offset_type iter;
++  struct mapped_index *index;
+ 
+   dw2_setup (objfile);
+   if (!dwarf2_per_objfile->index_table)
+     return;
++  index = dwarf2_per_objfile->index_table;
+ 
+   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
+     {
+@@ -2411,28 +2413,24 @@
+ 	}
+     }
+ 
+-  for (iter = 0;
+-       iter < dwarf2_per_objfile->index_table->index_table_slots;
+-       ++iter)
++  for (iter = 0; iter < index->index_table_slots; ++iter)
+     {
+       offset_type idx = 2 * iter;
+       const char *name;
+       offset_type *vec, vec_len, vec_idx;
+ 
+-      if (dwarf2_per_objfile->index_table->index_table[idx] == 0
+-	  && dwarf2_per_objfile->index_table->index_table[idx + 1] == 0)
++      if (index->index_table[idx] == 0 && index->index_table[idx + 1] == 0)
+ 	continue;
+ 
+-      name = (dwarf2_per_objfile->index_table->constant_pool
+-	      + dwarf2_per_objfile->index_table->index_table[idx]);
++      name = index->constant_pool + MAYBE_SWAP (index->index_table[idx]);
+ 
+       if (! (*name_matcher) (name, data))
+ 	continue;
+ 
+       /* The name was matched, now expand corresponding CUs that were
+ 	 marked.  */
+-      vec = (offset_type *) (dwarf2_per_objfile->index_table->constant_pool
+-			     + dwarf2_per_objfile->index_table->index_table[idx + 1]);
++      vec = (offset_type *) (index->constant_pool
++			     + MAYBE_SWAP (index->index_table[idx + 1]));
+       vec_len = MAYBE_SWAP (vec[0]);
+       for (vec_idx = 0; vec_idx < vec_len; ++vec_idx)
+ 	{
+@@ -2476,25 +2474,24 @@
+ 		      void *data)
+ {
+   offset_type iter;
++  struct mapped_index *index;
++
+   dw2_setup (objfile);
+ 
+   if (!dwarf2_per_objfile->index_table)
+     return;
++  index = dwarf2_per_objfile->index_table;
+ 
+-  for (iter = 0;
+-       iter < dwarf2_per_objfile->index_table->index_table_slots;
+-       ++iter)
++  for (iter = 0; iter < index->index_table_slots; ++iter)
+     {
+       offset_type idx = 2 * iter;
+       const char *name;
+       offset_type *vec, vec_len, vec_idx;
+ 
+-      if (dwarf2_per_objfile->index_table->index_table[idx] == 0
+-	  && dwarf2_per_objfile->index_table->index_table[idx + 1] == 0)
++      if (index->index_table[idx] == 0 && index->index_table[idx + 1] == 0)
+ 	continue;
+ 
+-      name = (dwarf2_per_objfile->index_table->constant_pool
+-	      + dwarf2_per_objfile->index_table->index_table[idx]);
++      name = (index->constant_pool + MAYBE_SWAP (index->index_table[idx]));
+ 
+       (*fun) (name, data);
+     }

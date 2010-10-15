@@ -62,7 +62,7 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.threads/step-thread-exit.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
 +++ gdb-6.8.50.20081128/gdb/testsuite/gdb.threads/step-thread-exit.exp	2008-12-08 22:22:14.000000000 +0100
-@@ -0,0 +1,130 @@
+@@ -0,0 +1,123 @@
 +# This testcase is part of GDB, the GNU debugger.
 +
 +# Copyright 2005 Free Software Foundation, Inc.
@@ -82,13 +82,6 @@ Index: gdb-6.8.50.20081128/gdb/testsuite/gdb.threads/step-thread-exit.exp
 +# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 +
 +# Check that GDB can step over a thread exit.
-+
-+if $tracelevel {
-+    strace $tracelevel
-+}
-+
-+set prms_id 0
-+set bug_id 0
 +
 +set testfile "step-thread-exit"
 +set srcfile ${testfile}.c

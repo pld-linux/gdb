@@ -1,0 +1,61 @@
+http://sourceware.org/ml/gdb-patches/2010-09/msg00183.html
+Subject: [patch] .gdb_index: Do not crash on NOBITS
+
+Hi,
+
+elfutils-0.148 still do not contain patch of its GIT
+804e9ca4d644e64a6125307cbf0a0b89477d7611 where the .gdb_index section has been
+also split into the separate debug info file.
+
+Due to it binaries split using elfutils-0.148 contain
+  [38] .gdb_index        NOBITS           0000000000000000  0000338c
+instead of expected
+  [28] .gdb_index        PROGBITS         0000000000000000  0000211c
+
+and due to it GDB while reading the file can error() by:
+Reading symbols from x.debug...Dwarf Error: Can't read DWARF data from 'x.debug'
+
+which should not be fatal but due to some other bugs therein it can crash GDB.
+
+The wrong separate debug info file is for example:
+http://kojipkgs.fedoraproject.org/packages/glibc/2.12.90/10/x86_64/glibc-debuginfo-2.12.90-10.x86_64.rpm
+/usr/lib/debug/lib64/libutil-2.12.90.so.debug
+
+OK to check-in?
+
+It does not attempt to use .gdb_index from the main binary, it will just
+disable .gdb_index usage on these binaries.
+
+
+Thanks,
+Jan
+
+
+http://sourceware.org/ml/gdb-cvs/2010-09/msg00062.html
+
+### src/gdb/ChangeLog	2010/09/08 19:09:42	1.12162
+### src/gdb/ChangeLog	2010/09/08 19:49:28	1.12163
+## -1,3 +1,7 @@
++2010-09-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
++
++	* dwarf2read.c (dwarf2_read_index): Return on no SEC_HAS_CONTENTS.
++
+ 2010-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
+ 
+ 	* dwarf2read.c (read_structure_type): Move processing of
+--- src/gdb/dwarf2read.c	2010/09/08 19:09:42	1.452
++++ src/gdb/dwarf2read.c	2010/09/08 19:49:28	1.453
+@@ -1904,6 +1904,13 @@
+   if (dwarf2_per_objfile->gdb_index.asection == NULL
+       || dwarf2_per_objfile->gdb_index.size == 0)
+     return 0;
++
++  /* Older elfutils strip versions could keep the section in the main
++     executable while splitting it for the separate debug info file.  */
++  if ((bfd_get_file_flags (dwarf2_per_objfile->gdb_index.asection)
++       & SEC_HAS_CONTENTS) == 0)
++    return 0;
++
+   dwarf2_read_section (objfile, &dwarf2_per_objfile->gdb_index);
+ 
+   addr = dwarf2_per_objfile->gdb_index.buffer;

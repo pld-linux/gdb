@@ -5,7 +5,7 @@
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
 #
 # Conditional build:
-%bcond_without	python		# build without python support
+%bcond_with	python		# build with python support
 
 Summary:	A GNU source-level debugger for C, C++ and Fortran
 Summary(de.UTF-8):	Symbolischer Debugger für C und andere Sprachen
@@ -19,17 +19,15 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	7.0
-Release:	7
+Version:	7.2
+Release:	0.1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	3386a7b69c010785c920ffc1e9cb890a
+# Source0-md5:	64260e6c56979ee750a01055f16091a5
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
-Source4:	libstdc++-v3-python-r151798.tar.bz2
-# Source4-md5:	7507540c50a1edeb2fc22a37bc4a08b8
 
 # FEDORA -- use the same numbering that they do
 # don't ever modify these patches, apply secondary patch to alter it pld way
@@ -46,8 +44,8 @@ Patch112:	%{name}-6.6-scheduler_locking-step-sw-watchpoints2.patch
 Patch260:	%{name}-6.6-scheduler_locking-step-is-default.patch
 Patch118:	%{name}-6.3-gstack-20050411.patch
 Patch122:	%{name}-6.3-test-pie-20050107.patch
-Patch124:	%{name}-archer-pie.patch
 Patch389:	%{name}-archer-pie-addons.patch
+Patch394:	%{name}-archer-pie-addons-keep-disabled.patch
 Patch125:	%{name}-6.3-test-self-20050110.patch
 Patch133:	%{name}-6.3-test-dtorfix-20050121.patch
 Patch136:	%{name}-6.3-test-movedir-20050125.patch
@@ -68,33 +66,27 @@ Patch164:	%{name}-6.3-readnever-20050907.patch
 Patch169:	%{name}-6.3-ia64-sigill-20051115.patch
 Patch170:	%{name}-6.3-bt-past-zero-20051201.patch
 Patch176:	%{name}-6.3-large-core-20051206.patch
-Patch177:	%{name}-6.3-gstack-without-path-20060414.patch
 Patch188:	%{name}-6.5-bz203661-emit-relocs.patch
 Patch190:	%{name}-6.5-dwarf-stack-overflow.patch
 Patch194:	%{name}-6.5-bz185337-resolve-tls-without-debuginfo-v2.patch
-Patch195:	%{name}-6.5-tls-of-separate-debuginfo.patch
 Patch196:	%{name}-6.5-sharedlibrary-path.patch
 Patch199:	%{name}-6.5-bz190810-gdbserver-arch-advice.patch
-Patch201:	%{name}-6.5-gcore-i386-on-amd64.patch
 Patch211:	%{name}-6.5-last-address-space-byte-test.patch
 Patch208:	%{name}-6.5-BEA-testsuite.patch
 Patch209:	%{name}-6.5-readline-long-line-crash.patch
 Patch213:	%{name}-6.5-readline-long-line-crash-test.patch
 Patch214:	%{name}-6.5-bz216711-clone-is-outermost.patch
-Patch215:	%{name}-6.5-bz218379-ppc-solib-trampoline-fix.patch
 Patch216:	%{name}-6.5-bz218379-ppc-solib-trampoline-test.patch
 Patch217:	%{name}-6.5-bz218379-solib-trampoline-lookup-lock-fix.patch
 Patch225:	%{name}-6.5-bz109921-DW_AT_decl_file-test.patch
 Patch229:	%{name}-6.3-bz140532-ppc-unwinding-test.patch
 Patch231:	%{name}-6.3-bz202689-exec-from-pthread-test.patch
-Patch232:	%{name}-7.0-upstream.patch
+Patch232:	%{name}-upstream.patch
 Patch234:	%{name}-6.6-bz230000-power6-disassembly-test.patch
 Patch235:	%{name}-6.3-bz231832-obstack-2gb.patch
-Patch240:	%{name}-6.6-bz225783-prelink-path.patch
 Patch241:	%{name}-6.6-bz225783-gdb-debuginfo-paths.patch
 Patch245:	%{name}-6.6-bz229517-gcore-without-terminal.patch
 Patch247:	%{name}-6.6-bz235197-fork-detach-info.patch
-Patch249:	%{name}-6.6-gcore32-test.patch
 Patch254:	%{name}-6.6-testsuite-timeouts.patch
 Patch258:	%{name}-6.6-bz237572-ppc-atomic-sequence-test.patch
 Patch261:	%{name}-6.6-readline-system.patch
@@ -104,6 +96,7 @@ Patch266:	%{name}-6.6-bz247354-leader-exit-test.patch
 Patch271:	%{name}-6.5-bz243845-stale-testing-zombie-test.patch
 Patch274:	%{name}-6.6-buildid-locate.patch
 Patch353:	%{name}-6.6-buildid-locate-rpm.patch
+Patch415:	%{name}-6.6-buildid-locate-core-as-arg.patch
 Patch282:	%{name}-6.7-charsign-test.patch
 Patch284:	%{name}-6.7-ppc-clobbered-registers-O2-test.patch
 Patch287:	%{name}-6.7-testsuite-stable-results.patch
@@ -116,16 +109,12 @@ Patch298:	%{name}-6.6-threads-static-test.patch
 Patch304:	%{name}-6.7-kernel-headers-compat.patch
 Patch309:	%{name}-6.3-mapping-zero-inode-test.patch
 Patch311:	%{name}-6.3-focus-cmd-prev-test.patch
-Patch314:	%{name}-6.3-watchpoint-cond-gone-test.patch
 Patch315:	%{name}-6.8-bz442765-threaded-exec-test.patch
 Patch317:	%{name}-6.8-sparc64-silence-memcpy-check.patch
 Patch318:	%{name}-6.8-gcc35998-ada-memory-trash.patch
 Patch320:	%{name}-6.5-section-num-fixup-test.patch
-Patch322:	%{name}-6.8-constant-watchpoints.patch
 Patch324:	%{name}-6.8-glibc-headers-compat.patch
 Patch326:	%{name}-6.8-tui-singlebinary.patch
-Patch350:	%{name}-6.8-inlining-addon.patch
-Patch328:	%{name}-6.8-inlining-by-name.patch
 Patch329:	%{name}-6.8-bz254229-gcore-prpsinfo.patch
 Patch330:	%{name}-6.8-bz436037-reg-no-longer-active.patch
 Patch331:	%{name}-6.8-quit-never-aborts.patch
@@ -134,27 +123,54 @@ Patch337:	%{name}-6.8-attach-signalled-detach-stopped.patch
 Patch343:	%{name}-6.8-watchpoint-conditionals-test.patch
 Patch348:	%{name}-6.8-bz466901-backtrace-full-prelinked.patch
 Patch349:	%{name}-archer.patch
-Patch352:	%{name}-6.8-bz457187-largefile.patch
+Patch420:	%{name}-archer-ada.patch
 Patch360:	%{name}-6.8-bz457187-largefile-test.patch
-Patch375:	%{name}-readline-6.0.patch
-Patch376:	libstdc++-v3-python-common-prefix.patch
 Patch381:	%{name}-simultaneous-step-resume-breakpoint-test.patch
 Patch382:	%{name}-core-open-vdso-warning.patch
-Patch383:	%{name}-bz528668-symfile-sepcrc.patch
-Patch384:	%{name}-bz528668-symfile-cleanup.patch
-Patch385:	%{name}-bz528668-symfile-multi.patch
-Patch387:	%{name}-bz539590-gnu-ifunc.patch
-Patch388:	%{name}-bz538626-bp_location-accel-bp-cond.patch
-Patch390:	%{name}-readline-6.0-signal.patch
 Patch391:	%{name}-x86_64-i386-syscall-restart.patch
+Patch392:	%{name}-bz533176-fortran-omp-step.patch
+Patch397:	%{name}-follow-child-stale-parent.patch
+Patch403:	%{name}-ccache-workaround.patch
+Patch404:	%{name}-fortran-common-reduce.patch
+Patch405:	%{name}-fortran-common.patch
+Patch407:	%{name}-lineno-makeup-test.patch
+Patch408:	%{name}-ppc-power7-test.patch
+Patch412:	%{name}-unused-revert.patch
+Patch417:	%{name}-bz541866-rwatch-before-run.patch
+Patch451:	%{name}-bz575292-delayed-physname.patch
+Patch454:	%{name}-bz539590-gnu-ifunc-fix-cond.patch
+Patch459:	%{name}-moribund-utrace-workaround.patch
+Patch461:	%{name}-bz594560-core-vs-process.patch
+Patch470:	%{name}-archer-next-over-throw-cxx-exec.patch
+Patch475:	%{name}-bz601887-dwarf4-rh-test.patch
+Patch486:	%{name}-bz562763-pretty-print-2d-vectors.patch
+Patch489:	%{name}-bz614659-prelink-dynbss.patch
+Patch491:	%{name}-gdb-add-index-script.patch
+Patch493:	%{name}-bz555076-gcore-small-height.patch
+Patch496:	%{name}-bz568248-oom-is-error.patch
+Patch497:	%{name}-false-gcc-warning.patch
+Patch499:	%{name}-bz631575-gdb-index-nobits.patch
+Patch500:	%{name}-bz631158-cxx-this-lookup.patch
+Patch501:	%{name}-gdbindex-ada-regression.patch
+Patch502:	%{name}-bz634660-gdbpy-load-on-attach.patch
+Patch503:	%{name}-pr12028-double-free.patch
+Patch504:	%{name}-bz623749-gcore-relro.patch
+Patch506:	%{name}-bz627432-loop-static-self-class.patch
+Patch507:	%{name}-bz592031-siginfo-lost-1of5.patch
+Patch508:	%{name}-bz592031-siginfo-lost-2of5.patch
+Patch509:	%{name}-bz592031-siginfo-lost-3of5.patch
+Patch510:	%{name}-bz592031-siginfo-lost-4of5.patch
+Patch511:	%{name}-bz592031-siginfo-lost-5of5.patch
+Patch512:	%{name}-gdbindex-bigendian.patch
+Patch513:	%{name}-bz637770-ifunc-watchpoint-delete.patch
 
 # PLD patches
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
-Patch1006:	buildid-locate-rpm-pld.patch
-Patch1007:	%{name}-python.patch
+#Patch1006:	buildid-locate-rpm-pld.patch NEEDS UPDATE/REVIEW
+
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
 BuildRequires:	automake
@@ -263,9 +279,6 @@ GDB w postaci biblioteki statycznej.
 %prep
 %setup -q
 
-# libstdc++ pretty printers.
-bzip2 -dc %{SOURCE4} | tar xf -
-
 # Files have `# <number> <file>' statements breaking VPATH / find-debuginfo.sh .
 rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
@@ -274,10 +287,7 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch2 -p1
 %patch232 -p1
 %patch349 -p1
-%patch383 -p1
-%patch384 -p1
-%patch385 -p1
-%patch124 -p1
+%patch420 -p1
 %patch1 -p1
 %patch3 -p1
 %patch104 -p1
@@ -307,20 +317,16 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch169 -p1
 %patch170 -p1
 %patch176 -p1
-%patch177 -p1
 %patch188 -p1
 %patch190 -p1
 %patch194 -p1
-%patch195 -p1
 %patch196 -p1
 %patch199 -p1
-%patch201 -p1
 %patch208 -p1
 %patch209 -p1
 %patch211 -p1
 %patch213 -p1
 %patch214 -p1
-%patch215 -p1
 %patch216 -p1
 %patch217 -p1
 %patch225 -p1
@@ -328,11 +334,9 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch231 -p1
 %patch234 -p1
 %patch235 -p1
-%patch240 -p1
 %patch241 -p1
 %patch245 -p1
 %patch247 -p1
-%patch249 -p1
 %patch254 -p1
 %patch258 -p1
 %patch260 -p1
@@ -355,16 +359,12 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch304 -p1
 %patch309 -p1
 %patch311 -p1
-%patch314 -p1
 %patch315 -p1
 %patch317 -p1
 %patch318 -p1
 %patch320 -p1
-%patch322 -p1
 %patch324 -p1
 %patch326 -p1
-%patch350 -p1
-%patch328 -p1
 %patch329 -p1
 %patch330 -p1
 %patch331 -p1
@@ -372,34 +372,62 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch337 -p1
 %patch343 -p1
 %patch348 -p1
-%patch352 -p1
 %patch360 -p1
-%patch375 -p1
-%patch376 -p1
 %patch381 -p1
 %patch382 -p1
-%patch387 -p1
-%patch388 -p1
-%patch389 -p1
-%patch390 -p1
 %patch391 -p1
+%patch392 -p1
+%patch397 -p1
+%patch403 -p1
+%patch404 -p1
+%patch405 -p1
+%patch389 -p1
+%patch394 -p1
+%patch407 -p1
+%patch408 -p1
+%patch412 -p1
+%patch417 -p1
+%patch451 -p1
+%patch454 -p1
+%patch459 -p1
+%patch461 -p1
+%patch470 -p1
+%patch475 -p1
+%patch486 -p1
+%patch415 -p1
+%patch489 -p1
+%patch491 -p1
+%patch493 -p1
+%patch496 -p1
+%patch497 -p1
+%patch499 -p1
+%patch500 -p1
+%patch501 -p1
+%patch502 -p1
+%patch503 -p1
+%patch504 -p1
+%patch506 -p1
+%patch507 -p1
+%patch508 -p1
+%patch509 -p1
+%patch510 -p1
+%patch511 -p1
+%patch512 -p1
+%patch513 -p1
 
 # PLD patches
 %patch1000 -p1
 %patch1001 -p1
 %patch1002 -p1
 %patch1005 -p1
-%patch1006 -p1
-%patch1007 -p1
-
-mv $(basename %{SOURCE4} .tar.bz2) libstdcxxpython
+#patch1006 -p1
 
 # Change the version that gets printed at GDB startup, so it is PLD Linux specific.
 cat > gdb/version.in << EOF
 PLD Linux (%{version}-%{release})
 EOF
 
-sed -i -e 's#_GCC_AUTOCONF_VERSION\], \[2\.64\]#_GCC_AUTOCONF_VERSION], [2.65]#g' config/override.m4
+sed -i -e 's#_GCC_AUTOCONF_VERSION\], \[2\.64\]#_GCC_AUTOCONF_VERSION], [2.68]#g' config/override.m4
 
 %build
 for dir in $(find gdb -name 'configure.in' -o -name 'configure.ac'); do
@@ -505,6 +533,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc gdb/{ChangeLog,NEWS,PROBLEMS,README}
 %attr(755,root,root) %{_bindir}/gdb
 %attr(755,root,root) %{_bindir}/gdbtui
+%attr(755,root,root) %{_bindir}/gdb-add-index
 %attr(755,root,root) %{_bindir}/gstack
 %dir %{_datadir}/gdb
 %{_datadir}/gdb/syscalls
@@ -545,6 +574,7 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/gdbserver
 %{_mandir}/man1/gdbserver.1*
+%attr(755,root,root) %{_libdir}/libinproctrace.so
 
 %files lib
 %defattr(644,root,root,755)

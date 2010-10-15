@@ -62,7 +62,7 @@ Index: gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
 +++ gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835.exp	2009-08-12 06:58:28.000000000 +0200
-@@ -0,0 +1,54 @@
+@@ -0,0 +1,47 @@
 +# This testcase is part of GDB, the GNU debugger.
 +
 +# Copyright 2005 Free Software Foundation, Inc.
@@ -83,13 +83,6 @@ Index: gdb-6.8.50.20090811/gdb/testsuite/gdb.cp/b146835.exp
 +
 +# Check that GDB can properly print an inherited member variable
 +# (Bugzilla 146835)
-+
-+if $tracelevel {
-+    strace $tracelevel
-+}
-+
-+set prms_id 0
-+set bug_id 0
 +
 +set testfile "b146835"
 +set srcfile ${testfile}.cc

@@ -1,20 +1,5 @@
 Fix resolving of variables at locations lists in prelinked libs (BZ 466901).
 
-Index: gdb-6.8.50.20090909/gdb/dwarf2loc.c
-===================================================================
---- gdb-6.8.50.20090909.orig/gdb/dwarf2loc.c	2009-09-09 20:08:03.000000000 +0200
-+++ gdb-6.8.50.20090909/gdb/dwarf2loc.c	2009-09-09 20:10:35.000000000 +0200
-@@ -56,7 +56,9 @@ find_location_expression (struct dwarf2_
-   CORE_ADDR low, high;
-   gdb_byte *loc_ptr, *buf_end;
-   int length;
--  struct objfile *objfile = dwarf2_per_cu_objfile (baton->per_cu);
-+  struct objfile *objfile1 = dwarf2_per_cu_objfile (baton->per_cu);
-+  struct objfile *objfile = objfile1->separate_debug_objfile
-+			    ? objfile1->separate_debug_objfile : objfile1;
-   struct gdbarch *gdbarch = get_objfile_arch (objfile);
-   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-   unsigned int addr_size = dwarf2_per_cu_addr_size (baton->per_cu);
 Index: gdb-6.8.50.20090909/gdb/testsuite/gdb.dwarf2/dw2-loclist-prelinked.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000

@@ -1,0 +1,111 @@
+commit 30fedadf224a8c119575fcc8a6ced51f0d4aee9f
+Author: Jan Kratochvil <jan.kratochvil@redhat.com>
+Date:   Wed Sep 29 01:25:39 2010 +0200
+
+    Fix the crash.
+
+commit d101ce597f2d6143e9f023a4444352bceffb2679
+Author: Jan Kratochvil <jan.kratochvil@redhat.com>
+Date:   Wed Sep 29 00:42:37 2010 +0200
+
+    New testcase for: https://bugzilla.redhat.com/show_bug.cgi?id=637770
+
+diff --git a/gdb/breakpoint.c b/gdb/breakpoint.c
+index de51231..18b7868 100644
+--- a/gdb/breakpoint.c
++++ b/gdb/breakpoint.c
+@@ -10560,6 +10560,11 @@ map_breakpoint_numbers (char *args, void (*function) (struct breakpoint *,
+ 		    /* FUNCTION can be also delete_breakpoint.  */
+ 		    next_related_b = related_breakpoint->related_breakpoint;
+ 		    function (related_breakpoint, data);
++
++		    /* For delete_breakpoint of the last entry of the ring we
++		       were traversing we would never get back to B.  */
++		    if (next_related_b == related_breakpoint)
++		      break;
+ 		    related_breakpoint = next_related_b;
+ 		  }
+ 		while (related_breakpoint != b);
+diff --git a/gdb/testsuite/gdb.base/watchpoint-delete.c b/gdb/testsuite/gdb.base/watchpoint-delete.c
+new file mode 100644
+index 0000000..031ef92
+--- /dev/null
++++ b/gdb/testsuite/gdb.base/watchpoint-delete.c
+@@ -0,0 +1,33 @@
++/* This testcase is part of GDB, the GNU debugger.
++
++   Copyright 2010 Free Software Foundation, Inc.
++
++   This program is free software; you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++void
++func (void)
++{
++  volatile int x = 0;
++
++  x++;	/* break-here */
++  x++;
++}
++
++int
++main (void)
++{
++  func ();
++
++  return 0;
++}
+diff --git a/gdb/testsuite/gdb.base/watchpoint-delete.exp b/gdb/testsuite/gdb.base/watchpoint-delete.exp
+new file mode 100644
+index 0000000..45bc650
+--- /dev/null
++++ b/gdb/testsuite/gdb.base/watchpoint-delete.exp
+@@ -0,0 +1,38 @@
++# Copyright 2010 Free Software Foundation, Inc.
++
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++set testfile "watchpoint-delete"
++set srcfile ${testfile}.c
++set binfile ${objdir}/${subdir}/${testfile}
++
++if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
++    untested ${testfile}.exp
++    return -1
++}
++
++# It is more compatible this way.
++gdb_test_no_output "set can-use-hw-watchpoints 0"
++
++if ![runto_main] {
++    return -1
++}
++
++# Ensure there is a parent frame to create related bp_watchpoint_scope.
++gdb_breakpoint [gdb_get_line_number "break-here"]
++gdb_continue_to_breakpoint "break-here" ".* break-here .*"
++
++gdb_test "watch x" {Watchpoint [0-9]+: x}
++
++gdb_test_no_output {delete $bpnum}

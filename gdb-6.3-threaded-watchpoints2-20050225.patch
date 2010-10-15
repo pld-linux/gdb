@@ -114,7 +114,7 @@ Index: gdb-6.5/gdb/testsuite/gdb.threads/watchthreads2.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
 +++ gdb-6.5/gdb/testsuite/gdb.threads/watchthreads-threaded.exp	2006-07-12 01:54:29.000000000 -0300
-@@ -0,0 +1,133 @@
+@@ -0,0 +1,126 @@
 +# This testcase is part of GDB, the GNU debugger.
 +
 +# Copyright 2005 Free Software Foundation, Inc.
@@ -134,13 +134,6 @@ Index: gdb-6.5/gdb/testsuite/gdb.threads/watchthreads2.exp
 +# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
 +
 +# Check that GDB can support multiple watchpoints across threads.
-+
-+if $tracelevel {
-+    strace $tracelevel
-+}
-+
-+set prms_id 0
-+set bug_id 0
 +
 +# This test verifies that a watchpoint is detected in the proper thread
 +# so the test is only meaningful on a system with hardware watchpoints.

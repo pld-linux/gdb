@@ -3,7 +3,7 @@ Fix has been committed to:
 
 --- /dev/null	2007-12-14 20:45:09.113039517 +0100
 +++ gdb-6.5/gdb/testsuite/gdb.base/watchpoint-during-step.exp	2007-12-24 19:42:00.000000000 +0100
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,44 @@
 +# Copyright 2007 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
@@ -19,13 +19,6 @@ Fix has been committed to:
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write to the Free Software
 +# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
-+
-+if $tracelevel then {
-+    strace $tracelevel
-+}
-+
-+set prms_id 0
-+set bug_id 0
 +
 +set testfile watchpoint-during-step
 +set srcfile ${testfile}.c

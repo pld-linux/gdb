@@ -218,7 +218,7 @@ diff -u -ruNp gdb-6.3-unpatched/gdb/testsuite/gdb.arch/powerpc-bcl-prologue.c gd
 diff -u -ruNp gdb-6.3-unpatched/gdb/testsuite/gdb.arch/powerpc-bcl-prologue.exp gdb-6.3/gdb/testsuite/gdb.arch/powerpc-bcl-prologue.exp
 --- gdb-6.3-unpatched/gdb/testsuite/gdb.arch/powerpc-bcl-prologue.exp	1969-12-31 19:00:00.000000000 -0500
 +++ gdb-6.3/gdb/testsuite/gdb.arch/powerpc-bcl-prologue.exp	2007-08-02 14:21:29.000000000 -0400
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,72 @@
 +#   Copyright 2006, 2007 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
@@ -237,13 +237,6 @@ diff -u -ruNp gdb-6.3-unpatched/gdb/testsuite/gdb.arch/powerpc-bcl-prologue.exp 
 +
 +# Test unwinding fixes of the PPC platform, specifically on the coping with BCL
 +# jump of the PIE code.
-+
-+if $tracelevel then {
-+    strace $tracelevel
-+}
-+
-+set prms_id 0
-+set bug_id 0
 +
 +if ![istarget "powerpc*-*-linux*"] then {
 +    verbose "Skipping powerpc-linux prologue tests."

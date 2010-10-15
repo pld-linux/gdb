@@ -34,7 +34,7 @@ diff -u -rup gdb-6.3-orig/gdb/testsuite/gdb.base/unwind-leak.c gdb-6.3/gdb/tests
 diff -u -rup gdb-6.3-orig/gdb/testsuite/gdb.base/unwind-leak.exp gdb-6.3/gdb/testsuite/gdb.base/unwind-leak.exp
 --- gdb-6.3-orig/gdb/testsuite/gdb.base/unwind-leak.exp	2007-12-19 15:12:53.000000000 -0500
 +++ gdb-6.3/gdb/testsuite/gdb.base/unwind-leak.exp	2007-12-19 15:11:35.000000000 -0500
-@@ -0,0 +1,90 @@
+@@ -0,0 +1,83 @@
 +# Copyright 2007 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
@@ -50,13 +50,6 @@ diff -u -rup gdb-6.3-orig/gdb/testsuite/gdb.base/unwind-leak.exp gdb-6.3/gdb/tes
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write to the Free Software
 +# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
-+
-+if $tracelevel then {
-+    strace $tracelevel
-+}
-+
-+set prms_id 0
-+set bug_id 0
 +
 +set testfile unwind-leak
 +set srcfile ${testfile}.c

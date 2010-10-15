@@ -1,0 +1,61 @@
+http://sourceware.org/ml/gdb-patches/2010-09/msg00365.html
+Subject: [patch] python: load *-gdb.py for shlibs during attach
+
+Hi,
+
+currently if you attach to or load a core file for executable, its -gdb.py
+script is loaded.  But none -gdb.py for the shared libraries.
+
+Spawned or with the fix (libstdc++-gdb.py):
+#1  0x00000000004007b5 in f (s="a") at 1.C:4
+                             ^ is std::string
+
+Attached/core without the fix:
+#1  0x00000000004007b5 in f (s=...) at 1.C:4
+
+No regressions on {x86_64,x86_64-m32,i686}-fedora13-linux-gnu.
+
+Mostly obvious, I will check it in later.
+
+
+Thanks,
+Jan
+
+
+gdb/
+2010-09-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* main.c: Include objfiles.h.
+	(captured_main): New variable objfile.  Call
+	load_auto_scripts_for_objfile for ALL_OBJFILES.
+
+--- ./gdb/main.c	2010-09-22 10:51:32.000000000 +0200
++++ ./gdb/main.c	2010-09-22 10:50:44.000000000 +0200
+@@ -43,6 +43,7 @@
+ #include "source.h"
+ #include "cli/cli-cmds.h"
+ #include "python/python.h"
++#include "objfiles.h"
+ 
+ /* The selected interpreter.  This will be used as a set command
+    variable, so it should always be malloc'ed - since
+@@ -323,6 +324,7 @@ captured_main (void *data)
+ 
+   int i;
+   int save_auto_load;
++  struct objfile *objfile;
+ 
+   struct cleanup *pre_stat_chain = make_command_stats_cleanup (0);
+ 
+@@ -957,8 +959,8 @@ Can't attach to process and specify a co
+      We wait until now because it is common to add to the source search
+      path in local_gdbinit.  */
+   gdbpy_global_auto_load = save_auto_load;
+-  if (symfile_objfile != NULL)
+-    load_auto_scripts_for_objfile (symfile_objfile);
++  ALL_OBJFILES (objfile)
++    load_auto_scripts_for_objfile (objfile);
+ 
+   for (i = 0; i < ncmd; i++)
+     {
+

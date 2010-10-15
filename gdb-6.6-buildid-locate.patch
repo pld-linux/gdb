@@ -1,19 +1,18 @@
-Index: gdb-7.0/gdb/corelow.c
+Index: gdb-7.1.90.20100711/gdb/corelow.c
 ===================================================================
---- gdb-7.0.orig/gdb/corelow.c	2009-07-31 17:25:21.000000000 +0200
-+++ gdb-7.0/gdb/corelow.c	2009-10-23 00:17:29.000000000 +0200
-@@ -45,6 +45,10 @@
- #include "exceptions.h"
- #include "solib.h"
+--- gdb-7.1.90.20100711.orig/gdb/corelow.c	2010-05-14 01:53:32.000000000 +0200
++++ gdb-7.1.90.20100711/gdb/corelow.c	2010-07-12 11:07:33.000000000 +0200
+@@ -47,6 +47,9 @@
  #include "filenames.h"
+ #include "progspace.h"
+ #include "objfiles.h"
 +#include "auxv.h"
 +#include "elf/common.h"
-+#include "objfiles.h"
 +#include "gdbcmd.h"
  
  
  #ifndef O_LARGEFILE
-@@ -273,6 +277,52 @@ add_to_thread_list (bfd *abfd, asection 
+@@ -289,6 +292,52 @@ add_to_thread_list (bfd *abfd, asection 
      inferior_ptid = ptid;			 /* Yes, make it current */
  }
  
@@ -66,7 +65,7 @@ Index: gdb-7.0/gdb/corelow.c
  /* This routine opens and sets up the core file bfd.  */
  
  static void
-@@ -371,6 +421,12 @@ core_open (char *filename, int from_tty)
+@@ -386,6 +435,12 @@ core_open (char *filename, int from_tty)
    push_target (&core_ops);
    discard_cleanups (old_chain);
  
@@ -76,10 +75,10 @@ Index: gdb-7.0/gdb/corelow.c
 +  if (build_id_core_loads != 0)
 +    build_id_locate_exec (from_tty);
 +
-   add_inferior_silent (corelow_pid);
- 
    /* Do this before acknowledging the inferior, so if
-@@ -878,4 +934,11 @@ _initialize_corelow (void)
+      post_create_inferior throws (can happen easilly if you're loading
+      a core file with the wrong exec), we aren't left with threads
+@@ -924,4 +979,11 @@ _initialize_corelow (void)
    init_core_ops ();
  
    add_target (&core_ops);
@@ -91,11 +90,11 @@ Index: gdb-7.0/gdb/corelow.c
 +			   NULL, NULL, NULL,
 +			   &setlist, &showlist);
  }
-Index: gdb-7.0/gdb/doc/gdb.texinfo
+Index: gdb-7.1.90.20100711/gdb/doc/gdb.texinfo
 ===================================================================
---- gdb-7.0.orig/gdb/doc/gdb.texinfo	2009-10-23 00:12:39.000000000 +0200
-+++ gdb-7.0/gdb/doc/gdb.texinfo	2009-10-23 00:17:29.000000000 +0200
-@@ -13896,6 +13896,27 @@ information files.
+--- gdb-7.1.90.20100711.orig/gdb/doc/gdb.texinfo	2010-07-12 10:59:30.000000000 +0200
++++ gdb-7.1.90.20100711/gdb/doc/gdb.texinfo	2010-07-12 11:05:57.000000000 +0200
+@@ -14980,6 +14980,27 @@ information files.
  
  @end table
  
@@ -123,11 +122,11 @@ Index: gdb-7.0/gdb/doc/gdb.texinfo
  @cindex @code{.gnu_debuglink} sections
  @cindex debug link sections
  A debug link is a special section of the executable file named
-Index: gdb-7.0/gdb/solib-svr4.c
+Index: gdb-7.1.90.20100711/gdb/solib-svr4.c
 ===================================================================
---- gdb-7.0.orig/gdb/solib-svr4.c	2009-10-23 00:12:38.000000000 +0200
-+++ gdb-7.0/gdb/solib-svr4.c	2009-10-23 00:17:29.000000000 +0200
-@@ -1101,9 +1101,49 @@ svr4_current_sos (void)
+--- gdb-7.1.90.20100711.orig/gdb/solib-svr4.c	2010-07-12 10:00:56.000000000 +0200
++++ gdb-7.1.90.20100711/gdb/solib-svr4.c	2010-07-12 11:05:57.000000000 +0200
+@@ -1181,9 +1181,49 @@ svr4_current_sos (void)
  		     safe_strerror (errcode));
  	  else
  	    {
@@ -180,20 +179,23 @@ Index: gdb-7.0/gdb/solib-svr4.c
  	    }
  	  xfree (buffer);
  
-Index: gdb-7.0/gdb/symfile.c
+Index: gdb-7.1.90.20100711/gdb/elfread.c
 ===================================================================
---- gdb-7.0.orig/gdb/symfile.c	2009-10-23 00:12:38.000000000 +0200
-+++ gdb-7.0/gdb/symfile.c	2009-10-23 00:43:28.000000000 +0200
-@@ -56,6 +56,7 @@
- #include "elf-bfd.h"
- #include "solib.h"
- #include "remote.h"
+--- gdb-7.1.90.20100711.orig/gdb/elfread.c	2010-07-12 10:00:56.000000000 +0200
++++ gdb-7.1.90.20100711/gdb/elfread.c	2010-07-12 11:30:30.000000000 +0200
+@@ -38,6 +38,10 @@
+ #include "demangle.h"
+ #include "psympriv.h"
+ #include "gdbtypes.h"
 +#include "libbfd.h"
++#include "gdbcore.h"
++#include "gdbcmd.h"
++#include "observer.h"
  
- #include <sys/types.h>
- #include <fcntl.h>
-@@ -1173,16 +1174,65 @@ symbol_file_clear (int from_tty)
-     printf_unfiltered (_("No symbol file now.\n"));
+ extern void _initialize_elfread (void);
+ 
+@@ -818,16 +822,65 @@ resolve_gnu_ifunc (const char *function_
+   return 0;
  }
  
 +/* Locate NT_GNU_BUILD_ID and return its matching debug filename.
@@ -260,7 +262,7 @@ Index: gdb-7.0/gdb/symfile.c
  {
    struct build_id *retval;
  
-@@ -1198,6 +1248,348 @@ build_id_bfd_get (bfd *abfd)
+@@ -843,6 +896,348 @@ build_id_bfd_get (bfd *abfd)
    return retval;
  }
  
@@ -609,7 +611,7 @@ Index: gdb-7.0/gdb/symfile.c
  /* Return if FILENAME has NT_GNU_BUILD_ID matching the CHECK value.  */
  
  static int
-@@ -1215,7 +1607,7 @@ build_id_verify (const char *filename, s
+@@ -857,7 +1252,7 @@ build_id_verify (const char *filename, s
    if (abfd == NULL)
      return 0;
  
@@ -618,7 +620,7 @@ Index: gdb-7.0/gdb/symfile.c
  
    if (found == NULL)
      warning (_("File \"%s\" has no build-id, file skipped"), filename);
-@@ -1234,14 +1626,16 @@ build_id_verify (const char *filename, s
+@@ -874,14 +1269,16 @@ build_id_verify (const char *filename, s
    return retval;
  }
  
@@ -639,7 +641,7 @@ Index: gdb-7.0/gdb/symfile.c
  
    /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
       cause "/.build-id/..." lookups.  */
-@@ -1272,7 +1666,10 @@ build_id_to_debug_filename (struct build
+@@ -912,7 +1309,10 @@ build_id_to_debug_filename (struct build
  	*s++ = '/';
        while (size-- > 0)
  	s += sprintf (s, "%02x", (unsigned) *data++);
@@ -651,7 +653,7 @@ Index: gdb-7.0/gdb/symfile.c
  
        /* lrealpath() is expensive even for the usually non-existent files.  */
        if (access (link, F_OK) == 0)
-@@ -1285,15 +1682,185 @@ build_id_to_debug_filename (struct build
+@@ -925,26 +1325,201 @@ build_id_to_debug_filename (struct build
  	}
  
        if (retval != NULL)
@@ -836,72 +838,86 @@ Index: gdb-7.0/gdb/symfile.c
 +}
 +
  static char *
- get_debug_link_info (struct objfile *objfile, unsigned long *crc32_out)
+-find_separate_debug_file_by_buildid (struct objfile *objfile)
++find_separate_debug_file_by_buildid (struct objfile *objfile,
++				     char **build_id_filename_return)
  {
-@@ -1384,13 +1951,14 @@ find_separate_debug_file (struct objfile
-   unsigned long crc32;
-   int i;
    struct build_id *build_id;
-+  char *build_id_filename = NULL;
  
 -  build_id = build_id_bfd_get (objfile->obfd);
++  if (build_id_filename_return)
++    *build_id_filename_return = NULL;
++
 +  build_id = build_id_bfd_shdr_get (objfile->obfd);
    if (build_id != NULL)
      {
        char *build_id_name;
  
 -      build_id_name = build_id_to_debug_filename (build_id);
-+      build_id_name = build_id_to_filename (build_id, &build_id_filename, 1);
++      build_id_name = build_id_to_filename (build_id, build_id_filename_return,
++					    1);
        xfree (build_id);
        /* Prevent looping on a stripped .debug file.  */
        if (build_id_name != NULL && strcmp (build_id_name, objfile->name) == 0)
-@@ -1400,7 +1968,10 @@ find_separate_debug_file (struct objfile
+@@ -954,7 +1529,7 @@ find_separate_debug_file_by_buildid (str
  	  xfree (build_id_name);
  	}
        else if (build_id_name != NULL)
 -        return build_id_name;
-+	{
-+	  xfree (build_id_filename);
-+	  return build_id_name;
-+	}
++	return build_id_name;
      }
- 
-   basename = get_debug_link_info (objfile, &crc32);
-@@ -1501,8 +2072,10 @@ find_separate_debug_file (struct objfile
-   
-   xfree (debugfile);
-   debugfile = NULL;
-+  debug_print_missing (objfile->name, build_id_filename);
- 
- cleanup_return_debugfile:
-+  xfree (build_id_filename);
-   xfree (canon_name);
-   xfree (basename);
-   xfree (dir);
-@@ -4256,4 +4829,16 @@ each global debug-file-directory compone
- 				     NULL,
- 				     show_debug_file_directory,
- 				     &setlist, &showlist);
-+
-+   add_setshow_zinteger_cmd ("build-id-verbose", no_class, &build_id_verbose,
-+ 			    _("\
-+ Set debugging level of the build-id locator."), _("\
-+ Show debugging level of the build-id locator."), _("\
-+ Level 1 (default) enables printing the missing debug filenames,\n\
-+ level 2 also prints the parsing of binaries to find the identificators."),
-+ 			    NULL,
-+ 			    show_build_id_verbose,
-+ 			    &setlist, &showlist);
-+
-+   observer_attach_executable_changed (debug_print_executable_changed);
+   return NULL;
  }
-Index: gdb-7.0/gdb/symfile.h
+@@ -1131,9 +1706,10 @@ elf_symfile_read (struct objfile *objfil
+      `.gnu_debuglink' may no longer be present with `.note.gnu.build-id'.  */
+   if (!objfile_has_partial_symbols (objfile))
+     {
+-      char *debugfile;
++      char *debugfile, *build_id_filename;
+ 
+-      debugfile = find_separate_debug_file_by_buildid (objfile);
++      debugfile = find_separate_debug_file_by_buildid (objfile,
++						       &build_id_filename);
+ 
+       if (debugfile == NULL)
+ 	debugfile = find_separate_debug_file_by_debuglink (objfile);
+@@ -1145,6 +1721,12 @@ elf_symfile_read (struct objfile *objfil
+ 	  symbol_file_add_separate (abfd, symfile_flags, objfile);
+ 	  xfree (debugfile);
+ 	}
++      /* Check if any separate debug info has been extracted out.  */
++      else if (bfd_get_section_by_name (objfile->obfd, ".gnu_debuglink")
++	       != NULL)
++	debug_print_missing (objfile->name, build_id_filename);
++
++      xfree (build_id_filename);
+     }
+ }
+ 
+@@ -1304,4 +1886,16 @@ void
+ _initialize_elfread (void)
+ {
+   add_symtab_fns (&elf_sym_fns);
++
++  add_setshow_zinteger_cmd ("build-id-verbose", no_class, &build_id_verbose,
++			    _("\
++Set debugging level of the build-id locator."), _("\
++Show debugging level of the build-id locator."), _("\
++Level 1 (default) enables printing the missing debug filenames,\n\
++level 2 also prints the parsing of binaries to find the identificators."),
++			    NULL,
++			    show_build_id_verbose,
++			    &setlist, &showlist);
++
++  observer_attach_executable_changed (debug_print_executable_changed);
+ }
+Index: gdb-7.1.90.20100711/gdb/symfile.h
 ===================================================================
---- gdb-7.0.orig/gdb/symfile.h	2009-10-23 00:12:38.000000000 +0200
-+++ gdb-7.0/gdb/symfile.h	2009-10-23 00:17:29.000000000 +0200
-@@ -381,6 +381,13 @@ extern int symfile_map_offsets_to_segmen
- struct symfile_segment_data *get_symfile_segment_data (bfd *abfd);
- void free_symfile_segment_data (struct symfile_segment_data *data);
+--- gdb-7.1.90.20100711.orig/gdb/symfile.h	2010-05-08 06:58:45.000000000 +0200
++++ gdb-7.1.90.20100711/gdb/symfile.h	2010-07-12 11:06:18.000000000 +0200
+@@ -562,6 +562,13 @@ void free_symfile_segment_data (struct s
+ 
+ extern struct cleanup *increment_reading_symtab (void);
  
 +/* build-id support.  */
 +struct build_id;
@@ -913,11 +929,11 @@ Index: gdb-7.0/gdb/symfile.h
  /* From dwarf2read.c */
  
  extern int dwarf2_has_info (struct objfile *);
-Index: gdb-7.0/gdb/testsuite/lib/gdb.exp
+Index: gdb-7.1.90.20100711/gdb/testsuite/lib/gdb.exp
 ===================================================================
---- gdb-7.0.orig/gdb/testsuite/lib/gdb.exp	2009-10-23 00:12:38.000000000 +0200
-+++ gdb-7.0/gdb/testsuite/lib/gdb.exp	2009-10-23 00:17:29.000000000 +0200
-@@ -1248,6 +1248,16 @@ proc default_gdb_start { } {
+--- gdb-7.1.90.20100711.orig/gdb/testsuite/lib/gdb.exp	2010-07-12 10:00:56.000000000 +0200
++++ gdb-7.1.90.20100711/gdb/testsuite/lib/gdb.exp	2010-07-12 11:05:57.000000000 +0200
+@@ -1353,6 +1353,16 @@ proc default_gdb_start { } {
  	    warning "Couldn't set the width to 0."
  	}
      }
@@ -934,10 +950,10 @@ Index: gdb-7.0/gdb/testsuite/lib/gdb.exp
      return 0;
  }
  
-Index: gdb-7.0/gdb/testsuite/lib/mi-support.exp
+Index: gdb-7.1.90.20100711/gdb/testsuite/lib/mi-support.exp
 ===================================================================
---- gdb-7.0.orig/gdb/testsuite/lib/mi-support.exp	2009-09-15 20:51:26.000000000 +0200
-+++ gdb-7.0/gdb/testsuite/lib/mi-support.exp	2009-10-23 00:17:29.000000000 +0200
+--- gdb-7.1.90.20100711.orig/gdb/testsuite/lib/mi-support.exp	2010-03-15 04:43:13.000000000 +0100
++++ gdb-7.1.90.20100711/gdb/testsuite/lib/mi-support.exp	2010-07-12 11:05:57.000000000 +0200
 @@ -221,6 +221,16 @@ proc default_mi_gdb_start { args } {
  	    }
      	}
@@ -955,18 +971,18 @@ Index: gdb-7.0/gdb/testsuite/lib/mi-support.exp
  
      detect_async
  
-Index: gdb-7.0/gdb/objfiles.h
+Index: gdb-7.1.90.20100711/gdb/objfiles.h
 ===================================================================
---- gdb-7.0.orig/gdb/objfiles.h	2009-10-23 00:12:38.000000000 +0200
-+++ gdb-7.0/gdb/objfiles.h	2009-10-23 00:17:29.000000000 +0200
-@@ -428,6 +428,10 @@ struct objfile
+--- gdb-7.1.90.20100711.orig/gdb/objfiles.h	2010-04-14 19:26:11.000000000 +0200
++++ gdb-7.1.90.20100711/gdb/objfiles.h	2010-07-12 11:07:08.000000000 +0200
+@@ -426,6 +426,10 @@ struct objfile
  
- #define OBJF_MAIN (1 << 7)
+ #define OBJF_USERLOADED	(1 << 3)	/* User loaded */
  
 +/* This file was loaded according to the BUILD_ID_CORE_LOADS rules.  */
 +
 +#define OBJF_BUILD_ID_CORE_LOADED (1 << 12)
 +
- /* The object file that the main symbol table was loaded from (e.g. the
-    argument to the "symbol-file" or "file" command).  */
+ /* The object file that contains the runtime common minimal symbols
+    for SunOS4. Note that this objfile has no associated BFD.  */
  

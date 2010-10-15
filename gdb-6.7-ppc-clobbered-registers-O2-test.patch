@@ -39,7 +39,7 @@ http://sourceware.org/ml/gdb-patches/2007-09/msg00228.html
 +}
 --- /dev/null	1 Jan 1970 00:00:00 -0000
 +++ ./gdb/testsuite/gdb.arch/ppc-clobbered-registers-O2.exp	3 Nov 2007 22:22:28 -0000
-@@ -0,0 +1,61 @@
+@@ -0,0 +1,54 @@
 +# Copyright 2006 Free Software Foundation, Inc.
 +#
 +# This program is free software; you can redistribute it and/or modify
@@ -58,15 +58,8 @@ http://sourceware.org/ml/gdb-patches/2007-09/msg00228.html
 +#
 +# This file is part of the gdb testsuite.
 +
-+if $tracelevel {
-+    strace $tracelevel
-+}
-+
 +# Test displaying call clobbered registers in optimized binaries for ppc.
 +# GDB should not show incorrect values.
-+
-+set prms_id 0
-+set bug_id 0
 +
 +if ![istarget "powerpc*-*"] then {
 +    verbose "Skipping powerpc* call clobbered registers testing."

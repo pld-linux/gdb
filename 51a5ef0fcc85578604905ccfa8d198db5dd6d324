@@ -1,0 +1,3 @@
+- updated to 7.2 with fedora patchset w/o rhel compat fixes.
+- python pretty printers dropped (bcond temporary inverted). we'll use original sources from gcc tarball.
+- release 0.1.

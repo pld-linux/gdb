@@ -20,7 +20,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.2
-Release:	0.1
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -169,7 +169,7 @@ Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
-#Patch1006: buildid-locate-rpm-pld.patch NEEDS UPDATE/REVIEW
+Patch1006:	buildid-locate-rpm-pld.patch
 
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.53
@@ -420,7 +420,7 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch1001 -p1
 %patch1002 -p1
 %patch1005 -p1
-#patch1006 -p1
+%patch1006 -p1
 
 # Change the version that gets printed at GDB startup, so it is PLD Linux specific.
 cat > gdb/version.in << EOF

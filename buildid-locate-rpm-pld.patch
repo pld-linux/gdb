@@ -1,11 +1,12 @@
---- gdb-7.0/gdb/symfile.c~	2009-12-08 08:19:05.000000000 +0200
-+++ gdb-7.0/gdb/symfile.c	2009-12-08 08:47:21.738081248 +0200
-@@ -2236,8 +2236,8 @@
+--- gdb-7.2/gdb/elfread.c.orig	2010-10-16 10:25:51.886687929 +0200
++++ gdb-7.2/gdb/elfread.c	2010-10-16 10:26:30.752319402 +0200
+@@ -1878,9 +1878,8 @@
  	fprintf_unfiltered (gdb_stdlog,
  			    _("Missing separate debuginfo for %s\n"), binary);
          if (debug != NULL)
 -	  fprintf_unfiltered (gdb_stdlog, _("Try: %s %s\n"),
--			      "yum --enablerepo='*-debuginfo' install", debug);
+-			      "yum --disablerepo='*' --enablerepo='*-debuginfo'"
+-			      " install", debug);
 +	  fprintf_unfiltered (gdb_stdlog, _("Try to install package that provides `%s' file\n"),
 +			      debug);
        }

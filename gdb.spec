@@ -20,7 +20,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.2
-Release:	1
+Release:	2
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -172,7 +172,7 @@ Patch1005:	%{name}-pretty-print-by-default.patch
 Patch1006:	buildid-locate-rpm-pld.patch
 
 URL:		http://www.gnu.org/software/gdb/
-BuildRequires:	autoconf >= 2.53
+BuildRequires:	autoconf >= 2.68
 BuildRequires:	automake
 BuildRequires:	bison
 BuildRequires:	expat-devel

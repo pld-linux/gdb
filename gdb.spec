@@ -244,6 +244,7 @@ verir.
 
 %package gdbserver
 Summary:	A standalone server for GDB (the GNU source-level debugger)
+Summary(pl.UTF-8):	Samodzielny serwer GDB (debuggera GNU)
 Group:		Development/Debuggers
 
 %description gdbserver
@@ -255,14 +256,25 @@ This package provides a program that allows you to run GDB on a
 different machine than the one which is running the program being
 debugged.
 
+%description gdbserver -l pl.UTF-8
+GDB (GNU debugger) pozwala śledzić programy napisane w C, C++, Javie
+i innych językach programowania poprzez wykonywanie ich w sposób
+kontrolowany oraz wypisywanie ich danych.
+
+Ten pakiet zawiera program pozwalający uruchamiać GDB na innej
+maszynie niż ta, na której działa śledzony program.
+
 %package -n python-%{name}
 Summary:	GDB Python bindings
-Summary(pl.UTF-8):	Wiązania PackageKit dla Pythona
+Summary(pl.UTF-8):	Wiązania GDB dla Pythona
 Group:		Development/Languages/Python
 Requires:	python-libs
 
 %description -n python-%{name}
 GDB Python bindings.
+
+%description -n python-%{name} -l pl.UTF-8
+Wiązania GDB dla Pythona.
 
 %package lib
 Summary:	GDB in the form of a static library
@@ -516,10 +528,10 @@ rm -rf $RPM_BUILD_ROOT%{_libdir}/lib{bfd*,opcodes*,iberty*,mmalloc*}
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%post	-p	/sbin/postshell
+%post	-p /sbin/postshell
 -/usr/sbin/fix-info-dir -c %{_infodir}
 
-%postun	-p	/sbin/postshell
+%postun	-p /sbin/postshell
 -/usr/sbin/fix-info-dir -c %{_infodir}
 
 %files
@@ -544,6 +556,12 @@ rm -rf $RPM_BUILD_ROOT
 %{_infodir}/gdbint.info*
 %{_infodir}/stabs.info*
 
+%files gdbserver
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/gdbserver
+%{_mandir}/man1/gdbserver.1*
+%attr(755,root,root) %{_libdir}/libinproctrace.so
+
 %if %{with python}
 %files -n python-%{name}
 %defattr(644,root,root,755)
@@ -556,12 +574,6 @@ rm -rf $RPM_BUILD_ROOT
 # container for 3-rd party stuff.
 %{_datadir}/gdb/auto-load
 %endif
-
-%files gdbserver
-%defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/gdbserver
-%{_mandir}/man1/gdbserver.1*
-%attr(755,root,root) %{_libdir}/libinproctrace.so
 
 %files lib
 %defattr(644,root,root,755)

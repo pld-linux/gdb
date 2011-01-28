@@ -177,6 +177,7 @@ BuildRequires:	automake
 BuildRequires:	bison
 BuildRequires:	expat-devel
 BuildRequires:	flex
+BuildRequires:	gettext-devel
 BuildRequires:	libtool
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig

@@ -2,11 +2,12 @@ Index: gdb-7.1.90.20100711/bfd/elf-bfd.h
 ===================================================================
 --- gdb-7.1.90.20100711.orig/bfd/elf-bfd.h	2010-06-27 06:07:51.000000000 +0200
 +++ gdb-7.1.90.20100711/bfd/elf-bfd.h	2010-07-12 23:00:04.000000000 +0200
-@@ -2171,8 +2171,9 @@ extern Elf_Internal_Phdr * _bfd_elf_find
+@@ -2171,8 +2171,10 @@ extern Elf_Internal_Phdr * _bfd_elf_find
  /* Exported interface for writing elf corefile notes. */
  extern char *elfcore_write_note
    (bfd *, char *, int *, const char *, int, const void *, int);
-+#include <sys/procfs.h>
++struct elf_prpsinfo;
++typedef struct elf_prpsinfo prpsinfo_t;
  extern char *elfcore_write_prpsinfo
 -  (bfd *, char *, int *, const char *, const char *);
 +  (bfd *, char *, int *, const prpsinfo_t *);

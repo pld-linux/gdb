@@ -15,7 +15,7 @@ http://sourceware.org/ml/gdb-cvs/2010-09/msg00155.html
  	* valops.c (find_oload_champ_namespace_loop): replace incorrect
 --- src/gdb/dwarf2read.c	2010/09/22 19:22:44	1.460
 +++ src/gdb/dwarf2read.c	2010/09/24 16:11:46	1.461
-@@ -2248,10 +2248,12 @@ dw2_expand_symtabs_matching (struct objf
+@@ -2382,10 +2382,12 @@
  {
    int i;
    offset_type iter;
@@ -26,8 +26,8 @@ http://sourceware.org/ml/gdb-cvs/2010-09/msg00155.html
      return;
 +  index = dwarf2_per_objfile->index_table;
  
-   for (i = 0; i < dwarf2_per_objfile->n_comp_units; ++i)
-     {
+   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
+ 		   + dwarf2_per_objfile->n_type_comp_units); ++i)
 @@ -2411,28 +2413,24 @@
  	}
      }

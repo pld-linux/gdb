@@ -79,6 +79,35 @@ Index: gdb-7.0.50.20100115/gdb/linux-nat.c
  }
  
  /* Convert a native/host siginfo object, into/from the siginfo in the
+Index: gdb-7.0.50.20100115/gdb/linux-nat.c
+===================================================================
+--- gdb-7.0.50.20100115.orig/gdb/linux-nat.c	2010-01-15 22:19:27.000000000 +0100
++++ gdb-7.0.50.20100115/gdb/linux-nat.c	2010-01-15 22:19:55.000000000 +0100
+@@ -1768,8 +1768,22 @@ GPT: lwp %s had signal %s, but it is in 
+ 			    target_signal_to_string (signo));
+     }
+ 
+-  if (*status == 0 && GET_PID (lp->ptid) == pid_was_stopped)
+-    *status = W_STOPCODE (SIGSTOP);
++  /* Workaround RHEL-5 kernel which has unreliable PTRACE_DETACH, SIGSTOP (that
++     many TIDs are left unstopped).  See RH Bug 496732.  */
++  if (GET_PID (lp->ptid) == pid_was_stopped)
++    {
++      int err;
++
++      errno = 0;
++      err = kill_lwp (GET_LWP (lp->ptid), SIGSTOP);
++      if (debug_linux_nat)
++	{
++	  fprintf_unfiltered (gdb_stdlog,
++			      "SC:  lwp kill %d %s\n",
++			      err,
++			      errno ? safe_strerror (errno) : "ERRNO-OK");
++	}
++    }
+ 
+   return 0;
+ }
 Index: gdb-7.0.50.20100115/gdb/testsuite/gdb.threads/attach-stopped.exp
 ===================================================================
 --- gdb-7.0.50.20100115.orig/gdb/testsuite/gdb.threads/attach-stopped.exp	2010-01-01 08:32:06.000000000 +0100

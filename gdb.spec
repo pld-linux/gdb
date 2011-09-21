@@ -20,7 +20,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.2
-Release:	5
+Release:	6
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -282,7 +282,7 @@ Summary:	GDB in the form of a static library
 Summary(pl.UTF-8):	GDB w postaci biblioteki statycznej
 Group:		Development/Debuggers
 #Requires:	binutils-devel >= 2.17.50
-Requires:	python-static
+#Requires:	python-static
 
 %description lib
 GDB in the form of a static library.

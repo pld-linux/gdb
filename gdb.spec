@@ -20,7 +20,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.2
-Release:	6
+Release:	7
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -517,6 +517,8 @@ done
 
 cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_mandir}/man1/gstack.1
 
+install libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
+
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
 # These are part of binutils
 rm -rf $RPM_BUILD_ROOT%{_datadir}/locale
@@ -579,4 +581,5 @@ rm -rf $RPM_BUILD_ROOT
 
 %files lib
 %defattr(644,root,root,755)
+%{_libdir}/libdecnumber.a
 %{_libdir}/libgdb.a

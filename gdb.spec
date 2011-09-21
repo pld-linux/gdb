@@ -282,6 +282,7 @@ Summary:	GDB in the form of a static library
 Summary(pl.UTF-8):	GDB w postaci biblioteki statycznej
 Group:		Development/Debuggers
 #Requires:	binutils-devel >= 2.17.50
+Requires:	python-static
 
 %description lib
 GDB in the form of a static library.

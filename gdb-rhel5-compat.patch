@@ -1,0 +1,69 @@
+gdb/linux-nat.c:
+- Workaround RHEL-5 kernels for detaching SIGSTOPped processes (BZ 498595).
+
+Index: gdb-7.2.50.20110328/gdb/elfread.c
+===================================================================
+--- gdb-7.2.50.20110328.orig/gdb/elfread.c	2011-03-28 18:46:16.000000000 +0200
++++ gdb-7.2.50.20110328/gdb/elfread.c	2011-03-28 18:48:19.000000000 +0200
+@@ -1083,7 +1083,7 @@ elf_gnu_ifunc_resolver_return_stop (stru
+ #define BUILD_ID_VERBOSE_NONE 0
+ #define BUILD_ID_VERBOSE_FILENAMES 1
+ #define BUILD_ID_VERBOSE_BINARY_PARSE 2
+-static int build_id_verbose = BUILD_ID_VERBOSE_FILENAMES;
++static int build_id_verbose = BUILD_ID_VERBOSE_NONE;
+ static void
+ show_build_id_verbose (struct ui_file *file, int from_tty,
+ 		       struct cmd_list_element *c, const char *value)
+@@ -2173,8 +2173,10 @@ find_separate_debug_file_by_buildid (str
+       if (build_id_name != NULL
+ 	  && filename_cmp (build_id_name, objfile->name) == 0)
+         {
++#if 0 /* RHEL-5 backward behavior compatibility.  */
+ 	  warning (_("\"%s\": separate debug info file has no debug info"),
+ 		   build_id_name);
++#endif
+ 	  xfree (build_id_name);
+ 	}
+       else if (build_id_name != NULL)
+Index: gdb-7.2.50.20110328/gdb/corelow.c
+===================================================================
+--- gdb-7.2.50.20110328.orig/gdb/corelow.c	2011-03-28 18:46:16.000000000 +0200
++++ gdb-7.2.50.20110328/gdb/corelow.c	2011-03-28 18:47:56.000000000 +0200
+@@ -282,7 +282,7 @@ add_to_thread_list (bfd *abfd, asection 
+     inferior_ptid = ptid;			/* Yes, make it current.  */
+ }
+ 
+-static int build_id_core_loads = 1;
++static int build_id_core_loads = 0;
+ 
+ static void
+ build_id_locate_exec (int from_tty)
+Index: gdb-7.2.50.20110328/gdb/linux-nat.c
+===================================================================
+--- gdb-7.2.50.20110328.orig/gdb/linux-nat.c	2011-03-28 18:46:16.000000000 +0200
++++ gdb-7.2.50.20110328/gdb/linux-nat.c	2011-03-28 18:47:56.000000000 +0200
+@@ -1774,8 +1774,22 @@ get_pending_status (struct lwp_info *lp,
+ 			    target_signal_to_string (signo));
+     }
+ 
+-  if (*status == 0 && GET_PID (lp->ptid) == pid_was_stopped)
+-    *status = W_STOPCODE (SIGSTOP);
++  /* Workaround RHEL-5 kernel which has unreliable PTRACE_DETACH, SIGSTOP (that
++     many TIDs are left unstopped).  See RH Bug 496732.  */
++  if (GET_PID (lp->ptid) == pid_was_stopped)
++    {
++      int err;
++
++      errno = 0;
++      err = kill_lwp (GET_LWP (lp->ptid), SIGSTOP);
++      if (debug_linux_nat)
++	{
++	  fprintf_unfiltered (gdb_stdlog,
++			      "SC:  lwp kill %d %s\n",
++			      err,
++			      errno ? safe_strerror (errno) : "ERRNO-OK");
++	}
++    }
+ 
+   return 0;
+ }

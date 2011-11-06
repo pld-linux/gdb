@@ -19,10 +19,10 @@ Proposed upstream but never committed upstream.
         (source_command): Update documentation.  Check permissions if
         FROM_TTY is -1.
 
-Index: gdb-7.1.90.20100720/gdb/cli/cli-cmds.c
+Index: gdb-7.2.50.20101231/gdb/cli/cli-cmds.c
 ===================================================================
---- gdb-7.1.90.20100720.orig/gdb/cli/cli-cmds.c	2010-05-17 21:28:12.000000000 +0200
-+++ gdb-7.1.90.20100720/gdb/cli/cli-cmds.c	2010-07-21 20:30:30.000000000 +0200
+--- gdb-7.2.50.20101231.orig/gdb/cli/cli-cmds.c	2010-12-29 03:11:04.000000000 +0100
++++ gdb-7.2.50.20101231/gdb/cli/cli-cmds.c	2011-01-01 00:53:51.000000000 +0100
 @@ -39,6 +39,7 @@
  #include "source.h"
  #include "disasm.h"
@@ -31,7 +31,7 @@ Index: gdb-7.1.90.20100720/gdb/cli/cli-cmds.c
  
  #include "ui-out.h"
  
-@@ -487,7 +488,7 @@ Script filename extension recognition is
+@@ -488,7 +489,7 @@ Script filename extension recognition is
  
  int
  find_and_open_script (const char *script_file, int search_path,
@@ -40,7 +40,7 @@ Index: gdb-7.1.90.20100720/gdb/cli/cli-cmds.c
  {
    char *file;
    int fd;
-@@ -513,6 +514,32 @@ find_and_open_script (const char *script
+@@ -514,6 +515,32 @@ find_and_open_script (const char *script
        return 0;
      }
  
@@ -73,7 +73,7 @@ Index: gdb-7.1.90.20100720/gdb/cli/cli-cmds.c
    do_cleanups (old_cleanups);
  
    *streamp = fdopen (fd, FOPEN_RT);
-@@ -572,13 +599,14 @@ source_script_with_search (const char *f
+@@ -573,13 +600,14 @@ source_script_with_search (const char *f
    if (file == NULL || *file == 0)
      error (_("source command requires file name of file to source."));
  
@@ -81,19 +81,19 @@ Index: gdb-7.1.90.20100720/gdb/cli/cli-cmds.c
 +  if (!find_and_open_script (file, search_path, &stream, &full_path,
 +			     from_tty))
      {
-       /* The script wasn't found, or was otherwise inaccessible.
- 	 If the source command was invoked interactively, throw an error.
- 	 Otherwise (e.g. if it was invoked by a script), silently ignore
- 	 the error.  */
+       /* The script wasn't found, or was otherwise inaccessible.  
+          If the source command was invoked interactively, throw an
+ 	 error.  Otherwise (e.g. if it was invoked by a script),
+ 	 silently ignore the error.  */
 -      if (from_tty)
 +      if (from_tty > 0)
  	perror_with_name (file);
        else
  	return;
-Index: gdb-7.1.90.20100720/gdb/testsuite/gdb.base/gdbinit.exp
+Index: gdb-7.2.50.20101231/gdb/testsuite/gdb.base/gdbinit.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.1.90.20100720/gdb/testsuite/gdb.base/gdbinit.exp	2010-07-20 22:25:40.000000000 +0200
++++ gdb-7.2.50.20101231/gdb/testsuite/gdb.base/gdbinit.exp	2011-01-01 00:53:09.000000000 +0100
 @@ -0,0 +1,91 @@
 +#   Copyright 2005
 +#   Free Software Foundation, Inc.
@@ -186,17 +186,17 @@ Index: gdb-7.1.90.20100720/gdb/testsuite/gdb.base/gdbinit.exp
 +}
 +
 +remote_exec build "rm .gdbinit"
-Index: gdb-7.1.90.20100720/gdb/testsuite/gdb.base/gdbinit.sample
+Index: gdb-7.2.50.20101231/gdb/testsuite/gdb.base/gdbinit.sample
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.1.90.20100720/gdb/testsuite/gdb.base/gdbinit.sample	2010-07-20 22:25:40.000000000 +0200
++++ gdb-7.2.50.20101231/gdb/testsuite/gdb.base/gdbinit.sample	2011-01-01 00:53:09.000000000 +0100
 @@ -0,0 +1 @@
 +echo "\nin gdbinit"
-Index: gdb-7.1.90.20100720/gdb/main.c
+Index: gdb-7.2.50.20101231/gdb/main.c
 ===================================================================
---- gdb-7.1.90.20100720.orig/gdb/main.c	2010-06-26 08:44:47.000000000 +0200
-+++ gdb-7.1.90.20100720/gdb/main.c	2010-07-21 20:09:03.000000000 +0200
-@@ -794,7 +794,7 @@ Excess command line arguments ignored. (
+--- gdb-7.2.50.20101231.orig/gdb/main.c	2010-12-29 01:58:14.000000000 +0100
++++ gdb-7.2.50.20101231/gdb/main.c	2011-01-01 00:53:09.000000000 +0100
+@@ -805,7 +805,7 @@ Excess command line arguments ignored. (
       debugging or what directory you are in.  */
  
    if (home_gdbinit && !inhibit_gdbinit)
@@ -205,7 +205,7 @@ Index: gdb-7.1.90.20100720/gdb/main.c
  
    /* Now perform all the actions indicated by the arguments.  */
    if (cdarg != NULL)
-@@ -868,7 +868,7 @@ Can't attach to process and specify a co
+@@ -880,7 +880,7 @@ Can't attach to process and specify a co
    /* Read the .gdbinit file in the current directory, *if* it isn't
       the same as the $HOME/.gdbinit file (it should exist, also).  */
    if (local_gdbinit && !inhibit_gdbinit)
@@ -214,11 +214,11 @@ Index: gdb-7.1.90.20100720/gdb/main.c
  
    /* Now that all .gdbinit's have been read and all -d options have been
       processed, we can read any scripts mentioned in SYMARG.
-Index: gdb-7.1.90.20100720/gdb/python/py-auto-load.c
+Index: gdb-7.2.50.20101231/gdb/python/py-auto-load.c
 ===================================================================
---- gdb-7.1.90.20100720.orig/gdb/python/py-auto-load.c	2010-05-17 23:23:25.000000000 +0200
-+++ gdb-7.1.90.20100720/gdb/python/py-auto-load.c	2010-07-20 22:25:40.000000000 +0200
-@@ -219,7 +219,7 @@ source_section_scripts (struct objfile *
+--- gdb-7.2.50.20101231.orig/gdb/python/py-auto-load.c	2010-12-15 18:27:59.000000000 +0100
++++ gdb-7.2.50.20101231/gdb/python/py-auto-load.c	2011-01-01 00:53:09.000000000 +0100
+@@ -224,7 +224,7 @@ source_section_scripts (struct objfile *
  	}
  
        opened = find_and_open_script (file, 1 /*search_path*/,
@@ -227,10 +227,10 @@ Index: gdb-7.1.90.20100720/gdb/python/py-auto-load.c
  
        /* If the file is not found, we still record the file in the hash table,
  	 we only want to print an error message once.
-Index: gdb-7.1.90.20100720/gdb/cli/cli-cmds.h
+Index: gdb-7.2.50.20101231/gdb/cli/cli-cmds.h
 ===================================================================
---- gdb-7.1.90.20100720.orig/gdb/cli/cli-cmds.h	2010-05-03 01:52:14.000000000 +0200
-+++ gdb-7.1.90.20100720/gdb/cli/cli-cmds.h	2010-07-20 22:25:40.000000000 +0200
+--- gdb-7.2.50.20101231.orig/gdb/cli/cli-cmds.h	2010-12-29 03:11:04.000000000 +0100
++++ gdb-7.2.50.20101231/gdb/cli/cli-cmds.h	2011-01-01 00:53:09.000000000 +0100
 @@ -126,7 +126,8 @@ extern void source_script (char *, int);
  /* Exported to objfiles.c.  */
  

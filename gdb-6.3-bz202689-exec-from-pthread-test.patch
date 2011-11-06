@@ -92,7 +92,7 @@
 +gdb_run_cmd
 +
 +gdb_test_multiple {} "Program exited" {
-+   -re "\r\nProgram exited normally.\r\n$gdb_prompt $" {
++   -re "\r\n\\\[Inferior .* exited normally\\\]\r\n$gdb_prompt $" {
 +       pass "Program exited"
 +   }
 +}

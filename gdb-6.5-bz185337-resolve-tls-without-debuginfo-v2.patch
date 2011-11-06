@@ -32,51 +32,17 @@ glibc-debuginfo-2.7-2.x86_64: /usr/lib/debug/lib64/libc.so.6.debug:
   <81a2>     DW_AT_name        : (indirect string, offset: 0x280e): __errno_location
   <81a8>     DW_AT_MIPS_linkage_name: (indirect string, offset: 0x2808): *__GI___errno_location
 
-Index: gdb-7.2/gdb/printcmd.c
-===================================================================
---- gdb-7.2.orig/gdb/printcmd.c	2011-03-29 10:55:32.000000000 +0200
-+++ gdb-7.2/gdb/printcmd.c	2011-03-29 10:56:00.000000000 +0200
-@@ -947,10 +947,10 @@ validate_format (struct format_data fmt,
- static void
- print_command_1 (char *exp, int inspect, int voidprint)
- {
--  struct expression *expr;
-   struct cleanup *old_chain = 0;
-   char format = 0;
--  struct value *val;
-+  /* False GCC warning due to the TRY_CATCH.  */
-+  struct value *val = NULL;
-   struct format_data fmt;
-   int cleanup = 0;
- 
-@@ -971,10 +971,25 @@ print_command_1 (char *exp, int inspect,
+--- a/gdb/printcmd.c
++++ b/gdb/printcmd.c
+@@ -967,6 +967,8 @@ print_command_1 (char *exp, int inspect, int voidprint)
  
    if (exp && *exp)
      {
-+      struct expression *expr;
-+      volatile struct gdb_exception except;
-+
++      if (strcmp (exp, "errno") == 0)
++	exp = "*((int *(*) (void)) __errno_location) ()";
        expr = parse_expression (exp);
--      old_chain = make_cleanup (free_current_contents, &expr);
-+      old_chain = make_cleanup (xfree, expr);
+       old_chain = make_cleanup (free_current_contents, &expr);
        cleanup = 1;
--      val = evaluate_expression (expr);
-+      TRY_CATCH (except, RETURN_MASK_ERROR)
-+	{
-+	  val = evaluate_expression (expr);
-+	}
-+      if (except.reason < 0)
-+	{
-+	  if (strcmp (exp, "errno") != 0)
-+	    throw_exception (except);
-+
-+	  expr = parse_expression ("*((int *(*) (void)) __errno_location) ()");
-+	  make_cleanup (xfree, expr);
-+	  val = evaluate_expression (expr);
-+	}
-     }
-   else
-     val = access_value_history (0);
 Index: gdb-7.2/gdb/testsuite/gdb.dwarf2/dw2-errno.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000

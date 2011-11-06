@@ -170,4 +170,4 @@ diff -up -u -X /root/jkratoch/.diffi.list -rup gdb-6.8/gdb/testsuite/gdb.threads
 +gdb_run_cmd ${binfile_nothreads} ${binfile_threads} 0
  
  gdb_test_multiple {} "Program exited" {
-    -re "\r\nProgram exited normally.\r\n$gdb_prompt $" {
+    -re "\r\n\\\[Inferior .* exited normally\\\]\r\n$gdb_prompt $" {

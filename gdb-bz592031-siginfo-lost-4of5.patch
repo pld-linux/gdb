@@ -78,11 +78,11 @@ gdb/testsuite/
 	* gdb.threads/sigstep-threads.exp: New file.
 	* gdb.threads/sigstep-threads.c: New file.
 
-Index: gdb-7.2/gdb/linux-nat.c
+Index: gdb-7.2.50.20110117/gdb/linux-nat.c
 ===================================================================
---- gdb-7.2.orig/gdb/linux-nat.c	2010-09-25 15:30:54.000000000 +0200
-+++ gdb-7.2/gdb/linux-nat.c	2010-09-25 15:37:23.000000000 +0200
-@@ -2702,6 +2702,8 @@ stop_wait_callback (struct lwp_info *lp,
+--- gdb-7.2.50.20110117.orig/gdb/linux-nat.c	2011-01-17 15:53:14.000000000 +0100
++++ gdb-7.2.50.20110117/gdb/linux-nat.c	2011-01-17 16:05:57.000000000 +0100
+@@ -2803,6 +2803,8 @@ stop_wait_callback (struct lwp_info *lp,
      {
        int status;
  
@@ -91,11 +91,11 @@ Index: gdb-7.2/gdb/linux-nat.c
        status = wait_lwp (lp);
        if (status == 0)
  	return 0;
-@@ -2726,110 +2728,61 @@ stop_wait_callback (struct lwp_info *lp,
+@@ -2828,110 +2830,61 @@ stop_wait_callback (struct lwp_info *lp,
  
        if (WSTOPSIG (status) != SIGSTOP)
  	{
--	  if (WSTOPSIG (status) == SIGTRAP)
+-	  if (linux_nat_status_is_event (status))
 -	    {
 -	      /* If a LWP other than the LWP that we're reporting an
 -	         event for has hit a GDB breakpoint (as opposed to
@@ -115,7 +115,7 @@ Index: gdb-7.2/gdb/linux-nat.c
 -
 -	      save_sigtrap (lp);
 -
--	      /* Now resume this LWP and get the SIGSTOP event. */
+-	      /* Now resume this LWP and get the SIGSTOP event.  */
 -	      errno = 0;
 -	      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
 -	      if (debug_linux_nat)
@@ -130,13 +130,13 @@ Index: gdb-7.2/gdb/linux-nat.c
 -				      target_pid_to_str (lp->ptid));
 -		}
 -	      /* Hold this event/waitstatus while we check to see if
--		 there are any more (we still want to get that SIGSTOP). */
+-		 there are any more (we still want to get that SIGSTOP).  */
 -	      stop_wait_callback (lp, NULL);
 +	  /* The thread was stopped with a signal other than SIGSTOP.  */
  
 -	      /* Hold the SIGTRAP for handling by linux_nat_wait.  If
 -		 there's another event, throw it back into the
--		 queue. */
+-		 queue.  */
 -	      if (lp->status)
 -		{
 -		  if (debug_linux_nat)
@@ -149,14 +149,14 @@ Index: gdb-7.2/gdb/linux-nat.c
 +	  /* Save the trap's siginfo in case we need it later.  */
 +	  save_siginfo (lp);
  
--	      /* Save the sigtrap event. */
+-	      /* Save the sigtrap event.  */
 -	      lp->status = status;
 -	      return 0;
 -	    }
 -	  else
 -	    {
 -	      /* The thread was stopped with a signal other than
--	         SIGSTOP, and didn't accidentally trip a breakpoint. */
+-	         SIGSTOP, and didn't accidentally trip a breakpoint.  */
 +	  save_sigtrap (lp);
  
 -	      if (debug_linux_nat)
@@ -166,7 +166,7 @@ Index: gdb-7.2/gdb/linux-nat.c
 -				      status_to_str ((int) status),
 -				      target_pid_to_str (lp->ptid));
 -		}
--	      /* Now resume this LWP and get the SIGSTOP event. */
+-	      /* Now resume this LWP and get the SIGSTOP event.  */
 -	      errno = 0;
 -	      ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
 -	      if (debug_linux_nat)
@@ -176,7 +176,7 @@ Index: gdb-7.2/gdb/linux-nat.c
 -				    errno ? safe_strerror (errno) : "OK");
 -
 -	      /* Hold this event/waitstatus while we check to see if
--	         there are any more (we still want to get that SIGSTOP). */
+-	         there are any more (we still want to get that SIGSTOP).  */
 -	      stop_wait_callback (lp, NULL);
 +	  if (debug_linux_nat)
 +	    fprintf_unfiltered (gdb_stdlog,
@@ -202,7 +202,7 @@ Index: gdb-7.2/gdb/linux-nat.c
 -		lp->status = status;
 -	      return 0;
 -	    }
-+	  /* Save the sigtrap event. */
++	  /* Save the sigtrap event.  */
 +	  lp->status = status;
 +	  gdb_assert (! lp->stopped);
 +	  gdb_assert (lp->signalled);
@@ -248,7 +248,7 @@ Index: gdb-7.2/gdb/linux-nat.c
  	  lp->signalled = 0;
  	}
      }
-@@ -3416,52 +3369,6 @@ retry:
+@@ -3514,52 +3467,6 @@ retry:
  	lp = NULL;
      }
  
@@ -301,10 +301,10 @@ Index: gdb-7.2/gdb/linux-nat.c
    if (!target_can_async_p ())
      {
        /* Causes SIGINT to be passed on to the attached process.  */
-Index: gdb-7.2/gdb/testsuite/gdb.threads/siginfo-threads.c
+Index: gdb-7.2.50.20110117/gdb/testsuite/gdb.threads/siginfo-threads.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.2/gdb/testsuite/gdb.threads/siginfo-threads.c	2010-09-25 15:32:32.000000000 +0200
++++ gdb-7.2.50.20110117/gdb/testsuite/gdb.threads/siginfo-threads.c	2011-01-17 16:02:40.000000000 +0100
 @@ -0,0 +1,447 @@
 +/* This testcase is part of GDB, the GNU debugger.
 +
@@ -753,10 +753,10 @@ Index: gdb-7.2/gdb/testsuite/gdb.threads/siginfo-threads.c
 +
 +  return EXIT_SUCCESS;
 +}
-Index: gdb-7.2/gdb/testsuite/gdb.threads/siginfo-threads.exp
+Index: gdb-7.2.50.20110117/gdb/testsuite/gdb.threads/siginfo-threads.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.2/gdb/testsuite/gdb.threads/siginfo-threads.exp	2010-09-25 15:32:32.000000000 +0200
++++ gdb-7.2.50.20110117/gdb/testsuite/gdb.threads/siginfo-threads.exp	2011-01-17 16:02:40.000000000 +0100
 @@ -0,0 +1,94 @@
 +# Copyright 2010 Free Software Foundation, Inc.
 +
@@ -852,10 +852,10 @@ Index: gdb-7.2/gdb/testsuite/gdb.threads/siginfo-threads.exp
 +}
 +
 +gdb_continue_to_breakpoint break-at-exit ".*break-at-exit.*"
-Index: gdb-7.2/gdb/testsuite/gdb.threads/sigstep-threads.c
+Index: gdb-7.2.50.20110117/gdb/testsuite/gdb.threads/sigstep-threads.c
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.2/gdb/testsuite/gdb.threads/sigstep-threads.c	2010-09-25 15:32:32.000000000 +0200
++++ gdb-7.2.50.20110117/gdb/testsuite/gdb.threads/sigstep-threads.c	2011-01-17 16:02:40.000000000 +0100
 @@ -0,0 +1,54 @@
 +/* This testcase is part of GDB, the GNU debugger.
 +
@@ -911,10 +911,10 @@ Index: gdb-7.2/gdb/testsuite/gdb.threads/sigstep-threads.c
 +  start (NULL);	/* main-start */
 +  return 0;
 +}
-Index: gdb-7.2/gdb/testsuite/gdb.threads/sigstep-threads.exp
+Index: gdb-7.2.50.20110117/gdb/testsuite/gdb.threads/sigstep-threads.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.2/gdb/testsuite/gdb.threads/sigstep-threads.exp	2010-09-25 15:32:32.000000000 +0200
++++ gdb-7.2.50.20110117/gdb/testsuite/gdb.threads/sigstep-threads.exp	2011-01-17 16:02:40.000000000 +0100
 @@ -0,0 +1,74 @@
 +# Copyright 2010 Free Software Foundation, Inc.
 +

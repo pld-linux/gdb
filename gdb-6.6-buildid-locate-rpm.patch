@@ -1,25 +1,25 @@
-Index: gdb-7.2/gdb/event-top.c
+Index: gdb-7.2.90.20110429/gdb/event-top.c
 ===================================================================
---- gdb-7.2.orig/gdb/event-top.c	2010-06-26 08:44:47.000000000 +0200
-+++ gdb-7.2/gdb/event-top.c	2010-10-06 22:39:32.000000000 +0200
+--- gdb-7.2.90.20110429.orig/gdb/event-top.c	2011-03-16 16:18:58.000000000 +0100
++++ gdb-7.2.90.20110429/gdb/event-top.c	2011-05-03 05:21:11.000000000 +0200
 @@ -33,6 +33,7 @@
  #include "cli/cli-script.h"     /* for reset_command_nest_depth */
  #include "main.h"
  #include "gdbthread.h"
 +#include "symfile.h"
  
- /* For dont_repeat() */
- #include "gdbcmd.h"
-@@ -193,6 +194,8 @@ cli_command_loop (void)
+ #include "gdbcmd.h"		/* for dont_repeat() */
+ 
+@@ -192,6 +193,8 @@ cli_command_loop (void)
        char *a_prompt;
        char *gdb_prompt = get_prompt ();
  
 +      debug_flush_missing ();
 +
-       /* Tell readline what the prompt to display is and what function it
-          will need to call after a whole line is read. This also displays
-          the first prompt. */
-@@ -264,6 +267,8 @@ display_gdb_prompt (char *new_prompt)
+       /* Tell readline what the prompt to display is and what function
+          it will need to call after a whole line is read.  This also
+          displays the first prompt.  */
+@@ -263,6 +266,8 @@ display_gdb_prompt (char *new_prompt)
    /* Reset the nesting depth used when trace-commands is set.  */
    reset_command_nest_depth ();
  
@@ -28,19 +28,19 @@ Index: gdb-7.2/gdb/event-top.c
    /* Each interpreter has its own rules on displaying the command
       prompt.  */
    if (!current_interp_display_prompt_p ())
-Index: gdb-7.2/gdb/elfread.c
+Index: gdb-7.2.90.20110429/gdb/elfread.c
 ===================================================================
---- gdb-7.2.orig/gdb/elfread.c	2010-10-06 22:39:32.000000000 +0200
-+++ gdb-7.2/gdb/elfread.c	2010-10-06 22:39:52.000000000 +0200
-@@ -42,6 +42,7 @@
+--- gdb-7.2.90.20110429.orig/gdb/elfread.c	2011-05-03 05:19:27.000000000 +0200
++++ gdb-7.2.90.20110429/gdb/elfread.c	2011-05-03 05:21:22.000000000 +0200
+@@ -53,6 +53,7 @@
  #include "gdbcore.h"
  #include "gdbcmd.h"
  #include "observer.h"
 +#include "elf/external.h"
+ #include <sys/stat.h>
  
  extern void _initialize_elfread (void);
- 
-@@ -1371,8 +1372,361 @@ build_id_to_filename (struct build_id *b
+@@ -1655,8 +1656,361 @@ build_id_to_filename (struct build_id *b
    return retval;
  }
  
@@ -403,7 +403,7 @@ Index: gdb-7.2/gdb/elfread.c
     avoidance.  */
  
  struct missing_filepair
-@@ -1426,11 +1780,17 @@ missing_filepair_change (void)
+@@ -1710,11 +2064,17 @@ missing_filepair_change (void)
        /* All their memory came just from missing_filepair_OBSTACK.  */
        missing_filepair_hash = NULL;
      }
@@ -421,7 +421,7 @@ Index: gdb-7.2/gdb/elfread.c
    missing_filepair_change ();
  }
  
-@@ -1497,14 +1857,35 @@ debug_print_missing (const char *binary,
+@@ -1781,14 +2141,35 @@ debug_print_missing (const char *binary,
  
    *slot = missing_filepair;
  
@@ -464,11 +464,11 @@ Index: gdb-7.2/gdb/elfread.c
  }
  
  static char *
-Index: gdb-7.2/gdb/symfile.h
+Index: gdb-7.2.90.20110429/gdb/symfile.h
 ===================================================================
---- gdb-7.2.orig/gdb/symfile.h	2010-10-06 22:39:32.000000000 +0200
-+++ gdb-7.2/gdb/symfile.h	2010-10-06 22:39:52.000000000 +0200
-@@ -577,6 +577,8 @@ extern struct build_id *build_id_addr_ge
+--- gdb-7.2.90.20110429.orig/gdb/symfile.h	2011-05-03 05:14:57.000000000 +0200
++++ gdb-7.2.90.20110429/gdb/symfile.h	2011-05-03 05:21:11.000000000 +0200
+@@ -611,6 +611,8 @@ extern struct build_id *build_id_addr_ge
  extern char *build_id_to_filename (struct build_id *build_id,
  				   char **link_return, int add_debug_suffix);
  extern void debug_print_missing (const char *binary, const char *debug);
@@ -477,11 +477,11 @@ Index: gdb-7.2/gdb/symfile.h
  
  /* From dwarf2read.c */
  
-Index: gdb-7.2/gdb/testsuite/lib/gdb.exp
+Index: gdb-7.2.90.20110429/gdb/testsuite/lib/gdb.exp
 ===================================================================
---- gdb-7.2.orig/gdb/testsuite/lib/gdb.exp	2010-10-06 22:39:32.000000000 +0200
-+++ gdb-7.2/gdb/testsuite/lib/gdb.exp	2010-10-06 22:39:32.000000000 +0200
-@@ -1359,7 +1359,7 @@ proc default_gdb_start { } {
+--- gdb-7.2.90.20110429.orig/gdb/testsuite/lib/gdb.exp	2011-05-03 05:14:57.000000000 +0200
++++ gdb-7.2.90.20110429/gdb/testsuite/lib/gdb.exp	2011-05-03 05:21:11.000000000 +0200
+@@ -1381,7 +1381,7 @@ proc default_gdb_start { } {
  	    warning "Couldn't set the width to 0."
  	}
      }
@@ -490,10 +490,10 @@ Index: gdb-7.2/gdb/testsuite/lib/gdb.exp
      send_gdb "set build-id-verbose 0\n"
      gdb_expect 10 {
  	-re "$gdb_prompt $" {
-Index: gdb-7.2/gdb/testsuite/lib/mi-support.exp
+Index: gdb-7.2.90.20110429/gdb/testsuite/lib/mi-support.exp
 ===================================================================
---- gdb-7.2.orig/gdb/testsuite/lib/mi-support.exp	2010-10-06 22:39:32.000000000 +0200
-+++ gdb-7.2/gdb/testsuite/lib/mi-support.exp	2010-10-06 22:39:32.000000000 +0200
+--- gdb-7.2.90.20110429.orig/gdb/testsuite/lib/mi-support.exp	2011-05-03 05:14:57.000000000 +0200
++++ gdb-7.2.90.20110429/gdb/testsuite/lib/mi-support.exp	2011-05-03 05:21:11.000000000 +0200
 @@ -221,7 +221,7 @@ proc default_mi_gdb_start { args } {
  	    }
      	}
@@ -503,11 +503,11 @@ Index: gdb-7.2/gdb/testsuite/lib/mi-support.exp
      send_gdb "190-gdb-set build-id-verbose 0\n"
      gdb_expect 10 {
  	-re ".*190-gdb-set build-id-verbose 0\r\n190\\\^done\r\n$mi_gdb_prompt$" {
-Index: gdb-7.2/gdb/tui/tui-interp.c
+Index: gdb-7.2.90.20110429/gdb/tui/tui-interp.c
 ===================================================================
---- gdb-7.2.orig/gdb/tui/tui-interp.c	2010-05-18 00:21:43.000000000 +0200
-+++ gdb-7.2/gdb/tui/tui-interp.c	2010-10-06 22:39:32.000000000 +0200
-@@ -30,6 +30,7 @@
+--- gdb-7.2.90.20110429.orig/gdb/tui/tui-interp.c	2011-01-01 16:33:52.000000000 +0100
++++ gdb-7.2.90.20110429/gdb/tui/tui-interp.c	2011-05-03 05:21:11.000000000 +0200
+@@ -31,6 +31,7 @@
  #include "tui/tui.h"
  #include "tui/tui-io.h"
  #include "exceptions.h"
@@ -515,7 +515,7 @@ Index: gdb-7.2/gdb/tui/tui-interp.c
  
  /* Set to 1 when the TUI mode must be activated when we first start
     gdb.  */
-@@ -146,6 +147,8 @@ tui_command_loop (void *data)
+@@ -147,6 +148,8 @@ tui_command_loop (void *data)
        char *a_prompt;
        char *gdb_prompt = get_prompt ();
  
@@ -524,10 +524,10 @@ Index: gdb-7.2/gdb/tui/tui-interp.c
        /* Tell readline what the prompt to display is and what function
           it will need to call after a whole line is read. This also
           displays the first prompt.  */
-Index: gdb-7.2/gdb/aclocal.m4
+Index: gdb-7.2.90.20110429/gdb/aclocal.m4
 ===================================================================
---- gdb-7.2.orig/gdb/aclocal.m4	2010-05-23 02:56:59.000000000 +0200
-+++ gdb-7.2/gdb/aclocal.m4	2010-10-06 22:39:32.000000000 +0200
+--- gdb-7.2.90.20110429.orig/gdb/aclocal.m4	2011-02-15 22:05:53.000000000 +0100
++++ gdb-7.2.90.20110429/gdb/aclocal.m4	2011-05-03 05:21:11.000000000 +0200
 @@ -19,6 +19,162 @@ You have another version of autoconf.  I
  If you have problems, you may need to regenerate the build system entirely.
  To do so, use the procedure documented by the package, typically `autoreconf'.])])
@@ -691,10 +691,10 @@ Index: gdb-7.2/gdb/aclocal.m4
  # Copyright (C) 2002, 2003, 2005, 2006, 2007, 2008  Free Software Foundation, Inc.
  #
  # This file is free software; the Free Software Foundation
-Index: gdb-7.2/gdb/config.in
+Index: gdb-7.2.90.20110429/gdb/config.in
 ===================================================================
---- gdb-7.2.orig/gdb/config.in	2010-10-06 22:39:31.000000000 +0200
-+++ gdb-7.2/gdb/config.in	2010-10-06 22:39:32.000000000 +0200
+--- gdb-7.2.90.20110429.orig/gdb/config.in	2011-03-17 14:19:09.000000000 +0100
++++ gdb-7.2.90.20110429/gdb/config.in	2011-05-03 05:21:11.000000000 +0200
 @@ -46,6 +46,9 @@
  /* Define to BFD's default target vector. */
  #undef DEFAULT_BFD_VEC
@@ -705,7 +705,7 @@ Index: gdb-7.2/gdb/config.in
  /* Define to 1 if translation of program messages to the user's native
     language is requested. */
  #undef ENABLE_NLS
-@@ -231,6 +234,9 @@
+@@ -233,6 +236,9 @@
  /* Define if Python 2.7 is being used. */
  #undef HAVE_LIBPYTHON2_7
  
@@ -715,29 +715,29 @@ Index: gdb-7.2/gdb/config.in
  /* Define if libunwind library is being used. */
  #undef HAVE_LIBUNWIND
  
-Index: gdb-7.2/gdb/configure
+Index: gdb-7.2.90.20110429/gdb/configure
 ===================================================================
---- gdb-7.2.orig/gdb/configure	2010-10-06 22:39:31.000000000 +0200
-+++ gdb-7.2/gdb/configure	2010-10-06 22:39:32.000000000 +0200
-@@ -679,6 +679,9 @@ REPORT_BUGS_TO
+--- gdb-7.2.90.20110429.orig/gdb/configure	2011-04-03 18:32:40.000000000 +0200
++++ gdb-7.2.90.20110429/gdb/configure	2011-05-03 05:21:11.000000000 +0200
+@@ -682,6 +682,9 @@ REPORT_BUGS_TO
  PKGVERSION
  TARGET_OBS
  subdirs
 +RPM_LIBS
 +RPM_CFLAGS
 +PKG_CONFIG
- pythondir
- GDB_DATADIR_PATH
  GDB_DATADIR
-@@ -948,6 +951,7 @@ with_separate_debug_dir
+ DEBUGDIR
+ am__fastdepCC_FALSE
+@@ -948,6 +951,7 @@ enable_dependency_tracking
+ with_separate_debug_dir
  with_gdb_datadir
  with_relocated_sources
- with_pythondir
 +with_rpm
  enable_targets
  enable_64_bit_bfd
  enable_gdbcli
-@@ -988,6 +992,9 @@ LDFLAGS
+@@ -989,6 +993,9 @@ LDFLAGS
  LIBS
  CPPFLAGS
  CPP
@@ -747,16 +747,16 @@ Index: gdb-7.2/gdb/configure
  YACC
  YFLAGS
  XMKMF'
-@@ -1653,6 +1660,8 @@ Optional Packages:
+@@ -1652,6 +1659,8 @@ Optional Packages:
                            [DATADIR/gdb]
-   --with-pythondir        install Python data files in this path
-                           [DATADIR/gdb/python]
+   --with-relocated-sources=PATH
+                           automatically relocate this path for source files
 +  --with-rpm              query rpm database for missing debuginfos (yes/no,
 +                          def. auto=librpm.so)
    --with-libunwind        use libunwind frame unwinding support
    --with-curses           use the curses library instead of the termcap
                            library
-@@ -1688,6 +1697,9 @@ Some influential environment variables:
+@@ -1687,6 +1696,9 @@ Some influential environment variables:
    CPPFLAGS    C/C++/Objective C preprocessor flags, e.g. -I<include dir> if
                you have headers in a nonstandard directory <include dir>
    CPP         C preprocessor
@@ -766,7 +766,7 @@ Index: gdb-7.2/gdb/configure
    YACC        The `Yet Another C Compiler' implementation to use. Defaults to
                the first program found out of: `bison -y', `byacc', `yacc'.
    YFLAGS      The list of arguments that will be passed by default to $YACC.
-@@ -7951,6 +7963,485 @@ _ACEOF
+@@ -7884,6 +7896,486 @@ _ACEOF
  fi
  
  
@@ -1249,16 +1249,17 @@ Index: gdb-7.2/gdb/configure
 +    fi
 +  fi
 +fi
++
  
  
- 
-Index: gdb-7.2/gdb/configure.ac
+ subdirs="$subdirs testsuite"
+Index: gdb-7.2.90.20110429/gdb/configure.ac
 ===================================================================
---- gdb-7.2.orig/gdb/configure.ac	2010-10-06 22:39:31.000000000 +0200
-+++ gdb-7.2/gdb/configure.ac	2010-10-06 22:39:32.000000000 +0200
-@@ -152,6 +152,198 @@ else
- fi
- AC_SUBST(pythondir)
+--- gdb-7.2.90.20110429.orig/gdb/configure.ac	2011-04-03 18:32:40.000000000 +0200
++++ gdb-7.2.90.20110429/gdb/configure.ac	2011-05-03 05:21:11.000000000 +0200
+@@ -108,6 +108,199 @@ AS_HELP_STRING([--with-relocated-sources
+               [Relocated directory for source files. ])
+ ])
  
 +# Integration with rpm library to support missing debuginfo suggestions.
 +# --without-rpm: Disable any rpm support.
@@ -1452,13 +1453,14 @@ Index: gdb-7.2/gdb/configure.ac
 +    fi
 +  fi
 +fi
++ 
+ AC_CONFIG_SUBDIRS(testsuite)
  
- AC_CONFIG_SUBDIRS(doc testsuite)
- 
-Index: gdb-7.2/gdb/acinclude.m4
+ # Check whether to support alternative target configurations
+Index: gdb-7.2.90.20110429/gdb/acinclude.m4
 ===================================================================
---- gdb-7.2.orig/gdb/acinclude.m4	2010-05-27 05:40:45.000000000 +0200
-+++ gdb-7.2/gdb/acinclude.m4	2010-10-06 22:39:32.000000000 +0200
+--- gdb-7.2.90.20110429.orig/gdb/acinclude.m4	2010-05-27 05:40:45.000000000 +0200
++++ gdb-7.2.90.20110429/gdb/acinclude.m4	2011-05-03 05:21:11.000000000 +0200
 @@ -1,3 +1,5 @@
 +# serial 1
 +
@@ -1474,11 +1476,11 @@ Index: gdb-7.2/gdb/acinclude.m4
  # @defmac AC_PROG_CC_STDC
  # @maindex PROG_CC_STDC
  # @ovindex CC
-Index: gdb-7.2/gdb/corelow.c
+Index: gdb-7.2.90.20110429/gdb/corelow.c
 ===================================================================
---- gdb-7.2.orig/gdb/corelow.c	2010-10-06 22:39:39.000000000 +0200
-+++ gdb-7.2/gdb/corelow.c	2010-10-06 22:39:52.000000000 +0200
-@@ -331,7 +331,7 @@ build_id_locate_exec (int from_tty)
+--- gdb-7.2.90.20110429.orig/gdb/corelow.c	2011-05-03 05:14:57.000000000 +0200
++++ gdb-7.2.90.20110429/gdb/corelow.c	2011-05-03 05:21:11.000000000 +0200
+@@ -320,7 +320,7 @@ build_id_locate_exec (int from_tty)
          symfile_objfile->flags |= OBJF_BUILD_ID_CORE_LOADED;
      }
    else

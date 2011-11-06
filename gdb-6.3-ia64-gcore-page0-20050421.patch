@@ -1,8 +1,8 @@
-Index: gdb-6.8.50.20090802/gdb/gcore.c
+Index: gdb-7.2.50.20110107/gdb/gcore.c
 ===================================================================
---- gdb-6.8.50.20090802.orig/gdb/gcore.c	2009-08-03 12:27:55.000000000 +0200
-+++ gdb-6.8.50.20090802/gdb/gcore.c	2009-08-03 12:28:56.000000000 +0200
-@@ -479,8 +479,14 @@ gcore_copy_callback (bfd *obfd, asection
+--- gdb-7.2.50.20110107.orig/gdb/gcore.c	2011-01-05 23:22:49.000000000 +0100
++++ gdb-7.2.50.20110107/gdb/gcore.c	2011-01-07 09:04:28.000000000 +0100
+@@ -534,8 +534,14 @@ gcore_copy_callback (bfd *obfd, asection
        if (size > total_size)
  	size = total_size;
  
@@ -16,5 +16,5 @@ Index: gdb-6.8.50.20090802/gdb/gcore.c
 +		      "ia64")
 +	      || bfd_section_vma (obfd, osec) != 0))
  	{
- 	  warning (_("Memory read failed for corefile section, %s bytes at %s."),
- 		   plongest (size),
+ 	  warning (_("Memory read failed for corefile "
+ 		     "section, %s bytes at %s."),

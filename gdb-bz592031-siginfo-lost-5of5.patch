@@ -26,11 +26,11 @@ gdb/
 	(linux_nat_set_siginfo_fixup): Use PTRACE_GETSIGINFO.
 	* linux-nat.h (struct lwp_info) <siginfo>: Remove.
 
-Index: gdb-7.2/gdb/linux-nat.c
+Index: gdb-7.2.50.20101116/gdb/linux-nat.c
 ===================================================================
---- gdb-7.2.orig/gdb/linux-nat.c	2010-09-25 15:37:23.000000000 +0200
-+++ gdb-7.2/gdb/linux-nat.c	2010-09-25 15:38:18.000000000 +0200
-@@ -1851,7 +1851,6 @@ resume_callback (struct lwp_info *lp, vo
+--- gdb-7.2.50.20101116.orig/gdb/linux-nat.c	2010-11-16 09:12:26.000000000 +0100
++++ gdb-7.2.50.20101116/gdb/linux-nat.c	2010-11-16 09:13:21.000000000 +0100
+@@ -1850,7 +1850,6 @@ resume_callback (struct lwp_info *lp, vo
  			    target_pid_to_str (lp->ptid));
        lp->stopped = 0;
        lp->step = 0;
@@ -46,7 +46,7 @@ Index: gdb-7.2/gdb/linux-nat.c
    lp->stopped_by_watchpoint = 0;
  
    if (debug_linux_nat)
-@@ -2483,22 +2481,6 @@ wait_lwp (struct lwp_info *lp)
+@@ -2503,22 +2501,6 @@ wait_lwp (struct lwp_info *lp)
    return status;
  }
  
@@ -69,7 +69,7 @@ Index: gdb-7.2/gdb/linux-nat.c
  /* Send a SIGSTOP to LP.  */
  
  static int
-@@ -2730,9 +2712,6 @@ stop_wait_callback (struct lwp_info *lp,
+@@ -2787,9 +2769,6 @@ stop_wait_callback (struct lwp_info *lp,
  	{
  	  /* The thread was stopped with a signal other than SIGSTOP.  */
  
@@ -79,10 +79,10 @@ Index: gdb-7.2/gdb/linux-nat.c
  	  save_sigtrap (lp);
  
  	  if (debug_linux_nat)
-@@ -3102,12 +3081,7 @@ linux_nat_filter_event (int lwpid, int s
+@@ -3155,12 +3134,7 @@ linux_nat_filter_event (int lwpid, int s
      }
  
-   if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
+   if (linux_nat_status_is_event (status))
 -    {
 -      /* Save the trap's siginfo in case we need it later.  */
 -      save_siginfo (lp);
@@ -93,7 +93,7 @@ Index: gdb-7.2/gdb/linux-nat.c
  
    /* Check if the thread has exited.  */
    if ((WIFEXITED (status) || WIFSIGNALED (status))
-@@ -3706,7 +3680,6 @@ resume_stopped_resumed_lwps (struct lwp_
+@@ -3763,7 +3737,6 @@ resume_stopped_resumed_lwps (struct lwp_
        linux_ops->to_resume (linux_ops, pid_to_ptid (GET_LWP (lp->ptid)),
  			    lp->step, TARGET_SIGNAL_0);
        lp->stopped = 0;
@@ -101,7 +101,7 @@ Index: gdb-7.2/gdb/linux-nat.c
        lp->stopped_by_watchpoint = 0;
      }
  
-@@ -5878,11 +5851,19 @@ linux_nat_set_siginfo_fixup (struct targ
+@@ -5932,11 +5905,19 @@ linux_nat_set_siginfo_fixup (struct targ
  struct siginfo *
  linux_nat_get_siginfo (ptid_t ptid)
  {
@@ -124,10 +124,10 @@ Index: gdb-7.2/gdb/linux-nat.c
  }
  
  /* Provide a prototype to silence -Wmissing-prototypes.  */
-Index: gdb-7.2/gdb/linux-nat.h
+Index: gdb-7.2.50.20101116/gdb/linux-nat.h
 ===================================================================
---- gdb-7.2.orig/gdb/linux-nat.h	2010-09-25 15:30:50.000000000 +0200
-+++ gdb-7.2/gdb/linux-nat.h	2010-09-25 15:37:57.000000000 +0200
+--- gdb-7.2.50.20101116.orig/gdb/linux-nat.h	2010-11-16 07:54:36.000000000 +0100
++++ gdb-7.2.50.20101116/gdb/linux-nat.h	2010-11-16 09:12:44.000000000 +0100
 @@ -58,10 +58,6 @@ struct lwp_info
    /* The kind of stepping of this LWP.  */
    enum resume_step step;

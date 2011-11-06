@@ -1,8 +1,8 @@
-Index: gdb-6.8.50.20090811/gdb/linux-nat.c
+Index: gdb-7.2.50.20101116/gdb/linux-nat.c
 ===================================================================
---- gdb-6.8.50.20090811.orig/gdb/linux-nat.c	2009-08-12 07:21:20.000000000 +0200
-+++ gdb-6.8.50.20090811/gdb/linux-nat.c	2009-08-12 08:11:25.000000000 +0200
-@@ -1656,16 +1656,18 @@ resume_set_callback (struct lwp_info *lp
+--- gdb-7.2.50.20101116.orig/gdb/linux-nat.c	2010-11-16 07:58:15.000000000 +0100
++++ gdb-7.2.50.20101116/gdb/linux-nat.c	2010-11-16 07:59:06.000000000 +0100
+@@ -1863,16 +1863,18 @@ resume_set_callback (struct lwp_info *lp
  
  static void
  linux_nat_resume (struct target_ops *ops,
@@ -21,9 +21,9 @@ Index: gdb-6.8.50.20090811/gdb/linux-nat.c
 +			(step == RESUME_STEP_NEEDED
 +			 ? "needed" : (step ? "step" : "resume")),
  			target_pid_to_str (ptid),
- 			signo ? strsignal (signo) : "0",
- 			target_pid_to_str (inferior_ptid));
-@@ -2625,10 +2627,34 @@ linux_nat_filter_event (int lwpid, int s
+ 			(signo != TARGET_SIGNAL_0
+ 			 ? strsignal (target_signal_to_host (signo)) : "0"),
+@@ -3171,10 +3173,34 @@ linux_nat_filter_event (int lwpid, int s
  
        if (num_lwps (GET_PID (lp->ptid)) > 1)
         {

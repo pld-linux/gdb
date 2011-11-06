@@ -21,11 +21,13 @@ debugging problem of GOMP outside of the scope of this Bug.
 
 
 
---- ./gdb/infrun.c	2009-12-09 22:03:33.000000000 +0100
-+++ ./gdb/infrun.c	2009-12-09 22:29:56.000000000 +0100
-@@ -3994,6 +3994,12 @@ infrun: not switching back to stepped th
+Index: gdb-7.2.50.20101231/gdb/infrun.c
+===================================================================
+--- gdb-7.2.50.20101231.orig/gdb/infrun.c	2011-01-01 01:02:45.000000000 +0100
++++ gdb-7.2.50.20101231/gdb/infrun.c	2011-01-01 01:10:22.000000000 +0100
+@@ -4585,6 +4585,12 @@ infrun: not switching back to stepped th
  
-       if (ecs->event_thread->step_over_calls == STEP_OVER_ALL)
+       if (ecs->event_thread->control.step_over_calls == STEP_OVER_ALL)
  	{
 +	  struct symbol *stop_fn = find_pc_function (stop_pc);
 +
@@ -36,7 +38,7 @@ debugging problem of GOMP outside of the scope of this Bug.
  	  /* We're doing a "next".
  
  	     Normal (forward) execution: set a breakpoint at the
-@@ -4020,6 +4026,7 @@ infrun: not switching back to stepped th
+@@ -4612,6 +4618,7 @@ infrun: not switching back to stepped th
  
  	  keep_going (ecs);
  	  return;
@@ -44,8 +46,10 @@ debugging problem of GOMP outside of the scope of this Bug.
  	}
  
        /* If we are in a function call trampoline (a stub between the
---- ./gdb/testsuite/gdb.fortran/omp-step.exp	1970-01-01 01:00:00.000000000 +0100
-+++ ./gdb/testsuite/gdb.fortran/omp-step.exp	2009-12-09 22:31:04.000000000 +0100
+Index: gdb-7.2.50.20101231/gdb/testsuite/gdb.fortran/omp-step.exp
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-7.2.50.20101231/gdb/testsuite/gdb.fortran/omp-step.exp	2011-01-01 01:09:58.000000000 +0100
 @@ -0,0 +1,31 @@
 +# Copyright 2009 Free Software Foundation, Inc.
 +
@@ -78,8 +82,10 @@ debugging problem of GOMP outside of the scope of this Bug.
 +
 +gdb_breakpoint [gdb_get_line_number "success"]
 +gdb_continue_to_breakpoint "success" ".*success.*"
---- ./gdb/testsuite/gdb.fortran/omp-step.f90	1970-01-01 01:00:00.000000000 +0100
-+++ ./gdb/testsuite/gdb.fortran/omp-step.f90	2009-12-09 22:25:35.000000000 +0100
+Index: gdb-7.2.50.20101231/gdb/testsuite/gdb.fortran/omp-step.f90
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-7.2.50.20101231/gdb/testsuite/gdb.fortran/omp-step.f90	2011-01-01 01:09:58.000000000 +0100
 @@ -0,0 +1,32 @@
 +! Copyright 2009 Free Software Foundation, Inc.
 +

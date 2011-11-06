@@ -1,11 +1,11 @@
 https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=231832
 
 
-Index: gdb-6.8/gdb/symmisc.c
+Index: gdb-7.2.50.20101116/gdb/symmisc.c
 ===================================================================
---- gdb-6.8.orig/gdb/symmisc.c	2008-03-17 16:06:24.000000000 +0100
-+++ gdb-6.8/gdb/symmisc.c	2008-07-14 10:27:50.000000000 +0200
-@@ -230,8 +230,8 @@ print_objfile_statistics (void)
+--- gdb-7.2.50.20101116.orig/gdb/symmisc.c	2010-11-16 07:53:59.000000000 +0100
++++ gdb-7.2.50.20101116/gdb/symmisc.c	2010-11-16 08:03:08.000000000 +0100
+@@ -186,8 +186,8 @@ print_objfile_statistics (void)
      if (OBJSTAT (objfile, sz_strtab) > 0)
        printf_filtered (_("  Space used by a.out string tables: %d\n"),
  		       OBJSTAT (objfile, sz_strtab));
@@ -14,12 +14,12 @@ Index: gdb-6.8/gdb/symmisc.c
 +    printf_filtered (_("  Total memory used for objfile obstack: %ld\n"),
 +		     (long) obstack_memory_used (&objfile->objfile_obstack));
      printf_filtered (_("  Total memory used for psymbol cache: %d\n"),
- 		     bcache_memory_used (objfile->psymbol_cache));
-     printf_filtered (_("  Total memory used for macro cache: %d\n"),
-Index: gdb-6.8/include/obstack.h
+ 		     bcache_memory_used (psymbol_bcache_get_bcache
+ 		                          (objfile->psymbol_cache)));
+Index: gdb-7.2.50.20101116/include/obstack.h
 ===================================================================
---- gdb-6.8.orig/include/obstack.h	2005-05-10 12:21:08.000000000 +0200
-+++ gdb-6.8/include/obstack.h	2008-07-14 10:27:50.000000000 +0200
+--- gdb-7.2.50.20101116.orig/include/obstack.h	2008-10-21 01:03:31.000000000 +0200
++++ gdb-7.2.50.20101116/include/obstack.h	2010-11-16 08:02:37.000000000 +0100
 @@ -188,31 +188,31 @@ struct obstack		/* control current objec
  
  /* Declare the external functions we use; they are in obstack.c.  */
@@ -134,10 +134,10 @@ Index: gdb-6.8/include/obstack.h
  	    = (h)->temp + (char *) (h)->chunk)				\
     : (((obstack_free) ((h), (h)->temp + (char *) (h)->chunk), 0), 0)))
  
-Index: gdb-6.8/libiberty/obstack.c
+Index: gdb-7.2.50.20101116/libiberty/obstack.c
 ===================================================================
---- gdb-6.8.orig/libiberty/obstack.c	2005-05-10 17:33:33.000000000 +0200
-+++ gdb-6.8/libiberty/obstack.c	2008-07-14 10:27:50.000000000 +0200
+--- gdb-7.2.50.20101116.orig/libiberty/obstack.c	2005-05-10 17:33:33.000000000 +0200
++++ gdb-7.2.50.20101116/libiberty/obstack.c	2010-11-16 08:02:37.000000000 +0100
 @@ -44,9 +44,11 @@
  #if !defined (_LIBC) && defined (__GNU_LIBRARY__) && __GNU_LIBRARY__ > 1
  #include <gnu-versions.h>

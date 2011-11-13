@@ -432,12 +432,18 @@ EOF
 sed -i -e 's#_GCC_AUTOCONF_VERSION\], \[2\.64\]#_GCC_AUTOCONF_VERSION], [2.68]#g' config/override.m4
 
 %build
+# omit hand-written gdb/testsuite aclocal.m4
+for dir in gdb gdb/gdbserver ; do
+	olddir=$(pwd)
+	cd $dir
+	%{__rm} aclocal.m4
+	%{__aclocal} $(grep '^ACLOCAL_AMFLAGS' Makefile.in | sed -e 's/.*=//')
+	cd $olddir
+done
 for dir in $(find gdb -name 'configure.in' -o -name 'configure.ac'); do
 	dir=$(dirname "$dir")
 	olddir=$(pwd)
 	cd $dir
-	rm -f aclocal.m4
-	%{__aclocal} `[ -d config ] && echo "-I config"` `[ -d m4 ] && echo "-I m4"` `[ -d gnulib/m4 ] && echo "-I gnulib/m4"`
 	%{__autoconf}
 	grep -q AC_CONFIG_HEADER configure.* && %{__autoheader}
 	cd $olddir

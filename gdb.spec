@@ -268,8 +268,13 @@ maszynie niż ta, na której działa śledzony program.
 Summary:	GDB in the form of a static library
 Summary(pl.UTF-8):	GDB w postaci biblioteki statycznej
 Group:		Development/Debuggers
-#Requires:	binutils-devel >= 2.17.50
-#Requires:	python-static
+# libraries that needs to be linked to fulfill libgdb.a symbol requirements
+Requires:	binutils-devel >= 2.17.50
+Requires:	expat-devel
+Requires:	ncurses-devel
+Requires:	python-devel
+Requires:	readline-devel
+Requires:	zlib-devel
 
 %description lib
 GDB in the form of a static library.

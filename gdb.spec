@@ -20,7 +20,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	7.3.1
-Release:	2
+Release:	3
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -545,6 +545,12 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/gdb-add-index
 %attr(755,root,root) %{_bindir}/gstack
 %dir %{_datadir}/gdb
+%dir %{_datadir}/gdb/auto-load
+%dir %{_datadir}/gdb/auto-load%{_prefix}
+%dir %{_datadir}/gdb/auto-load%{_prefix}/lib
+%ifarch %{x8664}
+%dir %{_datadir}/gdb/auto-load%{_prefix}/lib64
+%endif
 %{_datadir}/gdb/syscalls
 %{_datadir}/gdb/python
 %{_mandir}/man1/gdb.1*

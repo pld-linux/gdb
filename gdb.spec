@@ -186,6 +186,8 @@ BuildRequires:	zlib-devel
 BuildRequires:	python-devel
 BuildRequires:	rpm-pythonprov
 Obsoletes:	python-gdb
+# for traceback module
+Requires:	python-modules
 %endif
 Requires:	libunwind >= 0.97
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)

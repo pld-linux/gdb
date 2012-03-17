@@ -1,813 +1,97 @@
-https://bugzilla.redhat.com/show_bug.cgi?id=610986
-http://sourceware.org/ml/gdb-cvs/2010-08/msg00112.html
+FYI: fix possible crash in find_charset_names
+http://sourceware.org/ml/gdb-patches/2012-02/msg00073.html
+http://sourceware.org/ml/gdb-cvs/2012-02/msg00037.html
+https://bugzilla.redhat.com/show_bug.cgi?id=786091
 
-### src/gdb/ChangeLog	2010/08/18 22:57:45	1.12097
-### src/gdb/ChangeLog	2010/08/19 07:34:26	1.12098
-## -1,3 +1,9 @@
-+2010-08-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
-+
-+	* varobj.c (varobj_create): Replace variable old_fi with old_id,
-+	initialize it by null_frame_id, wrap its usage by get_frame_id,
-+	frame_id_p and frame_find_by_id.
-+
- 2010-08-18  Tom Tromey  <tromey@redhat.com>
- 
- 	PR python/11900:
---- src/gdb/varobj.c	2010/08/06 14:17:56	1.159
-+++ src/gdb/varobj.c	2010/08/19 07:34:27	1.160
-@@ -524,7 +524,7 @@ varobj_create (char *objname,
- {
-   struct varobj *var;
-   struct frame_info *fi;
--  struct frame_info *old_fi = NULL;
-+  struct frame_id old_id = null_frame_id;
-   struct block *block;
-   struct cleanup *old_chain;
- 
-@@ -611,7 +611,7 @@
- 
- 	  var->root->frame = get_frame_id (fi);
- 	  var->root->thread_id = pid_to_thread_id (inferior_ptid);
--	  old_fi = get_selected_frame (NULL);
-+	  old_id = get_frame_id (get_selected_frame (NULL));
- 	  select_frame (fi);	 
- 	}
- 
-@@ -639,8 +639,8 @@
-       var->root->rootvar = var;
- 
-       /* Reset the selected frame */
--      if (old_fi != NULL)
--	select_frame (old_fi);
-+      if (frame_id_p (old_id))
-+	select_frame (frame_find_by_id (old_id));
-     }
- 
-   /* If the variable object name is null, that means this
-
-
-
-https://bugzilla.redhat.com/show_bug.cgi?id=627506
-Re: [patch] Fix nesting of ui_out_redirect
-http://sourceware.org/ml/gdb-patches/2010-09/msg00122.html
-http://sourceware.org/ml/gdb-cvs/2010-09/msg00031.html
-
-### src/gdb/ChangeLog	2010/09/03 01:29:09	1.12149
-### src/gdb/ChangeLog	2010/09/03 15:41:59	1.12150
-## -1,3 +1,27 @@
-+2010-09-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
-+
-+	* breakpoint.c (save_breakpoints): Use RETURN_MASK_ALL.
-+	* cli-out.c: Include vec.h.
-+	(cli_field_fmt, cli_spaces, cli_text, cli_message, cli_flush): New
-+	variable stream, initialize it, use it.
-+	(cli_redirect): New function comment.  Replace the stream and
-+	original_stream fields by the new streams field.  Remove the
-+	original_stream != NULL conditional, assert error on NULL instead.
-+	(out_field_fmt, field_separator): New variable stream, initialize it, use it.
-+	(cli_out_data_ctor): Assert non-NULL stream.  Replace the stream and
-+	original_stream fields by the new streams field.
-+	(cli_out_set_stream): Replace the stream field by the new streams
-+	field.
-+	* cli-out.h: Include vec.h.
-+	(ui_filep): New typedef, call DEF_VEC_P for it.
-+	(struct cli_ui_out_data): Replace the stream and original_stream
-+	fields by the new streams field.
-+	* cli/cli-logging.c (set_logging_redirect): Call ui_out_redirect with
-+	NULL first.  Extend the comment.
-+	(handle_redirections): Call ui_out_redirect with output.
-+	* python/py-breakpoint.c (bppy_get_commands): Move ui_out_redirect
-+	calls outside of the TRY_CATCH block.
-+
-
-[ cli/cli-logging.c removed.  ]
-
---- src/gdb/breakpoint.c	2010/08/30 09:49:12	1.511
-+++ src/gdb/breakpoint.c	2010/09/03 15:42:02	1.512
-@@ -11487,7 +11487,7 @@
- 	fprintf_unfiltered (fp, "  commands\n");
- 	
- 	ui_out_redirect (uiout, fp);
--	TRY_CATCH (ex, RETURN_MASK_ERROR)
-+	TRY_CATCH (ex, RETURN_MASK_ALL)
- 	  {
- 	    print_command_lines (uiout, tp->commands->commands, 2);
- 	  }
---- src/gdb/cli-out.c	2010/05/13 23:53:32	1.30
-+++ src/gdb/cli-out.c	2010/09/03 15:42:02	1.31
-@@ -26,6 +26,7 @@
- #include "cli-out.h"
- #include "gdb_string.h"
- #include "gdb_assert.h"
-+#include "vec.h"
- 
- typedef struct cli_ui_out_data cli_out_data;
- 
-@@ -224,11 +225,13 @@
- 	       va_list args)
- {
-   cli_out_data *data = ui_out_data (uiout);
-+  struct ui_file *stream;
- 
-   if (data->suppress_output)
-     return;
- 
--  vfprintf_filtered (data->stream, format, args);
-+  stream = VEC_last (ui_filep, data->streams);
-+  vfprintf_filtered (stream, format, args);
- 
-   if (align != ui_noalign)
-     field_separator ();
-@@ -238,20 +241,26 @@
- cli_spaces (struct ui_out *uiout, int numspaces)
- {
-   cli_out_data *data = ui_out_data (uiout);
-+  struct ui_file *stream;
- 
-   if (data->suppress_output)
-     return;
--  print_spaces_filtered (numspaces, data->stream);
-+
-+  stream = VEC_last (ui_filep, data->streams);
-+  print_spaces_filtered (numspaces, stream);
- }
- 
- static void
- cli_text (struct ui_out *uiout, const char *string)
- {
-   cli_out_data *data = ui_out_data (uiout);
-+  struct ui_file *stream;
- 
-   if (data->suppress_output)
-     return;
--  fputs_filtered (string, data->stream);
-+
-+  stream = VEC_last (ui_filep, data->streams);
-+  fputs_filtered (string, stream);
- }
- 
- static void ATTRIBUTE_PRINTF (3, 0)
-@@ -262,8 +271,13 @@
- 
-   if (data->suppress_output)
-     return;
-+
-   if (ui_out_get_verblvl (uiout) >= verbosity)
--    vfprintf_unfiltered (data->stream, format, args);
-+    {
-+      struct ui_file *stream = VEC_last (ui_filep, data->streams);
-+
-+      vfprintf_unfiltered (stream, format, args);
-+    }
- }
- 
- static void
-@@ -280,25 +294,24 @@
- cli_flush (struct ui_out *uiout)
- {
-   cli_out_data *data = ui_out_data (uiout);
-+  struct ui_file *stream = VEC_last (ui_filep, data->streams);
- 
--  gdb_flush (data->stream);
-+  gdb_flush (stream);
- }
- 
-+/* OUTSTREAM as non-NULL will push OUTSTREAM on the stack of output streams
-+   and make it therefore active.  OUTSTREAM as NULL will pop the last pushed
-+   output stream; it is an internal error if it does not exist.  */
-+
- static int
- cli_redirect (struct ui_out *uiout, struct ui_file *outstream)
- {
-   cli_out_data *data = ui_out_data (uiout);
- 
-   if (outstream != NULL)
--    {
--      data->original_stream = data->stream;
--      data->stream = outstream;
--    }
--  else if (data->original_stream != NULL)
--    {
--      data->stream = data->original_stream;
--      data->original_stream = NULL;
--    }
-+    VEC_safe_push (ui_filep, data->streams, outstream);
-+  else
-+    VEC_pop (ui_filep, data->streams);
- 
-   return 0;
- }
-@@ -315,10 +328,11 @@
- 	       const char *format,...)
- {
-   cli_out_data *data = ui_out_data (uiout);
-+  struct ui_file *stream = VEC_last (ui_filep, data->streams);
-   va_list args;
- 
-   va_start (args, format);
--  vfprintf_filtered (data->stream, format, args);
-+  vfprintf_filtered (stream, format, args);
- 
-   va_end (args);
- }
-@@ -329,8 +343,9 @@
- field_separator (void)
- {
-   cli_out_data *data = ui_out_data (uiout);
-+  struct ui_file *stream = VEC_last (ui_filep, data->streams);
- 
--  fputc_filtered (' ', data->stream);
-+  fputc_filtered (' ', stream);
- }
- 
- /* This is the CLI ui-out implementation functions vector */
-@@ -364,8 +379,11 @@
- void
- cli_out_data_ctor (cli_out_data *self, struct ui_file *stream)
- {
--  self->stream = stream;
--  self->original_stream = NULL;
-+  gdb_assert (stream != NULL);
-+
-+  self->streams = NULL;
-+  VEC_safe_push (ui_filep, self->streams, stream);
-+
-   self->suppress_output = 0;
- }
- 
-@@ -385,8 +403,10 @@
- cli_out_set_stream (struct ui_out *uiout, struct ui_file *stream)
- {
-   cli_out_data *data = ui_out_data (uiout);
--  struct ui_file *old = data->stream;
-+  struct ui_file *old;
-+  
-+  old = VEC_pop (ui_filep, data->streams);
-+  VEC_quick_push (ui_filep, data->streams, stream);
- 
--  data->stream = stream;
-   return old;
- }
---- src/gdb/cli-out.h	2010/04/18 00:11:55	1.11
-+++ src/gdb/cli-out.h	2010/09/03 15:42:02	1.12
-@@ -22,14 +22,19 @@
- #define CLI_OUT_H
- 
- #include "ui-out.h"
-+#include "vec.h"
-+
-+/* Used for cli_ui_out_data->streams.  */
-+
-+typedef struct ui_file *ui_filep;
-+DEF_VEC_P (ui_filep);
- 
- /* These are exported so that they can be extended by other `ui_out'
-    implementations, like TUI's.  */
- 
- struct cli_ui_out_data
-   {
--    struct ui_file *stream;
--    struct ui_file *original_stream;
-+    VEC (ui_filep) *streams;
-     int suppress_output;
-   };
- 
---- src/gdb/python/py-breakpoint.c	2010/07/01 10:36:12	1.4
-+++ src/gdb/python/py-breakpoint.c	2010/09/03 15:42:03	1.5
-@@ -474,12 +474,12 @@
-   string_file = mem_fileopen ();
-   chain = make_cleanup_ui_file_delete (string_file);
- 
-+  ui_out_redirect (uiout, string_file);
-   TRY_CATCH (except, RETURN_MASK_ALL)
-     {
--      ui_out_redirect (uiout, string_file);
-       print_command_lines (uiout, breakpoint_commands (bp), 0);
--      ui_out_redirect (uiout, NULL);
-     }
-+  ui_out_redirect (uiout, NULL);
-   cmdstr = ui_file_xstrdup (string_file, &length);
-   GDB_PY_HANDLE_EXCEPTION (except);
- 
-### src/gdb/testsuite/ChangeLog	2010/09/02 15:19:56	1.2435
-### src/gdb/testsuite/ChangeLog	2010/09/03 15:42:04	1.2436
+### src/gdb/ChangeLog	2012/02/07 04:48:14	1.13810
+### src/gdb/ChangeLog	2012/02/07 15:42:33	1.13811
 ## -1,3 +1,7 @@
-+2010-09-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
++2012-02-07  Tom Tromey  <tromey@redhat.com>
 +
-+	* gdb.base/ui-redirect.exp: New file.
++	* charset.c (find_charset_names): Check 'in' against NULL.
 +
- 2010-09-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
-             Joel Brobecker  <brobecker@adacore.com>
+ 2012-02-06  Doug Evans  <dje@google.com>
  
---- src/gdb/testsuite/gdb.base/ui-redirect.exp
-+++ src/gdb/testsuite/gdb.base/ui-redirect.exp	2010-09-11 18:42:40.040910000 +0000
-@@ -0,0 +1,41 @@
-+# Copyright (C) 2010 Free Software Foundation, Inc.
-+
-+# This program is free software; you can redistribute it and/or modify
-+# it under the terms of the GNU General Public License as published by
-+# the Free Software Foundation; either version 3 of the License, or
-+# (at your option) any later version.
-+#
-+# This program is distributed in the hope that it will be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-+
-+if { [prepare_for_testing ui-redirect.exp ui-redirect start.c] } {
-+    return -1
-+}
-+
-+gdb_breakpoint main
-+
-+set test "commands"
-+gdb_test_multiple $test $test {
-+    -re "End with a line saying just \"end\"\\.\r\n>$" {
-+	pass $test
-+    }
-+}
-+
-+set test "print 1"
-+gdb_test_multiple $test $test {
-+    -re "\r\n>$" {
-+	pass $test
-+    }
-+}
-+gdb_test_no_output "end"
-+
-+gdb_test_no_output "set logging file /dev/null"
-+gdb_test "set logging on" "Copying output to /dev/null\\."
-+gdb_test "save breakpoints /dev/null" "Saved to file '/dev/null'\\."
-+gdb_test "set logging off" "Done logging to /dev/null\\."
-+gdb_test "help" "List of classes of commands:.*"
+ 	* gdbtypes.h (struct main_type): Change type of name,tag_name,
+--- src/gdb/charset.c	2012/01/24 21:36:37	1.47
++++ src/gdb/charset.c	2012/02/07 15:42:39	1.48
+@@ -839,7 +839,7 @@
+ 	 parse the glibc and libiconv formats; feel free to add others
+ 	 as needed.  */
+ 
+-      while (!feof (in))
++      while (in != NULL && !feof (in))
+ 	{
+ 	  /* The size of buf is chosen arbitrarily.  */
+ 	  char buf[1024];
 
 
 
-https://bugzilla.redhat.com/show_bug.cgi?id=627506
-Re: [patch] Fix uiout for execute_command_to_string
-http://sourceware.org/ml/gdb-patches/2010-09/msg00235.html
-http://sourceware.org/ml/gdb-cvs/2010-09/msg00080.html
+http://sourceware.org/ml/gdb-patches/2012-02/msg00151.html
+Subject: [patch] ppc-linux-nat.c: Fix gcc-4.7 aliasing warnings
 
-### src/gdb/ChangeLog	2010/09/10 16:17:11	1.12170
-### src/gdb/ChangeLog	2010/09/11 16:00:20	1.12171
-## -1,3 +1,21 @@
-+2010-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
-+	    Paul Bolle  <pebolle@tiscali.nl>
-+
-+	Redirect also uiout and stdtarg{,err} in execute_command_to_string.
-+	* cli-logging.c (struct saved_output_files) <targerr>: New.
-+	(set_logging_redirect, pop_output_files, handle_redirections):
-+	Redirect also gdb_stdtargerr.
-+	* defs.h (struct ui_out, make_cleanup_ui_out_redirect_pop): New
-+	declarations.
-+	* event-top.c (gdb_setup_readline, gdb_disable_readline): Redirect
-+	also gdb_stdtargerr.
-+	* top.c (execute_command_to_string): Move make_cleanup_ui_file_delete
-+	to the top.  Redirect also gdb_stdlog, gdb_stdtarg and gdb_stdtargerr.
-+	Use ui_out_redirect, register make_cleanup_ui_out_redirect_pop.
-+	* tui/tui-io.c (tui_setup_io): Redirect also gdb_stdtargerr.
-+	* utils.c (do_ui_out_redirect_pop, make_cleanup_ui_out_redirect_pop):
-+	New functions.
-+
+Hi,
 
-### src/gdb/testsuite/ChangeLog	2010/09/10 20:29:25	1.2444
-### src/gdb/testsuite/ChangeLog	2010/09/11 16:00:26	1.2445
-## -1,3 +1,8 @@
-+2010-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
-+
-+	* gdb.python/python.exp (set height 0, collect help from uiout)
-+	(verify help to uiout): New tests.
-+
+ppc-linux-nat.c: In function 'fetch_register':
+ppc-linux-nat.c:598:9: error: dereferencing type-punned pointer will break strict-aliasing rules [-Werror=strict-aliasing]
+ppc-linux-nat.c: In function 'store_register':
+ppc-linux-nat.c:1078:8: error: dereferencing type-punned pointer will break strict-aliasing rules [-Werror=strict-aliasing]
 
-[ gdb_stdtargerr handling dropped.  ]
+gcc-4.7.0-0.10.fc17.ppc64
 
---- src/gdb/defs.h	2010/08/31 18:08:43	1.278
-+++ src/gdb/defs.h	2010/09/11 16:00:25	1.279
-@@ -337,6 +337,10 @@
- struct ui_file;
- extern struct cleanup *make_cleanup_ui_file_delete (struct ui_file *);
- 
-+struct ui_out;
-+extern struct cleanup *
-+  make_cleanup_ui_out_redirect_pop (struct ui_out *uiout);
-+
- struct section_addr_info;
- extern struct cleanup *(make_cleanup_free_section_addr_info 
-                         (struct section_addr_info *));
---- src/gdb/top.c	2010/08/07 15:00:37	1.183
-+++ src/gdb/top.c	2010/09/11 16:00:25	1.184
-@@ -475,12 +475,23 @@
- 
-   str_file = mem_fileopen ();
- 
-+  make_cleanup_ui_file_delete (str_file);
-   make_cleanup_restore_ui_file (&gdb_stdout);
-   make_cleanup_restore_ui_file (&gdb_stderr);
--  make_cleanup_ui_file_delete (str_file);
-+  make_cleanup_restore_ui_file (&gdb_stdlog);
-+  make_cleanup_restore_ui_file (&gdb_stdtarg);
-+  make_cleanup_restore_ui_file (&gdb_stdtargerr);
-+
-+  if (ui_out_redirect (uiout, str_file) < 0)
-+    warning (_("Current output protocol does not support redirection"));
-+  else
-+    make_cleanup_ui_out_redirect_pop (uiout);
- 
-   gdb_stdout = str_file;
-   gdb_stderr = str_file;
-+  gdb_stdlog = str_file;
-+  gdb_stdtarg = str_file;
-+  gdb_stdtargerr = str_file;
- 
-   execute_command (p, from_tty);
- 
---- src/gdb/utils.c	2010/08/07 15:00:37	1.239
-+++ src/gdb/utils.c	2010/09/11 16:00:25	1.240
-@@ -311,6 +311,26 @@
-   return make_my_cleanup (&cleanup_chain, do_ui_file_delete, arg);
- }
- 
-+/* Helper function for make_cleanup_ui_out_redirect_pop.  */
-+
-+static void
-+do_ui_out_redirect_pop (void *arg)
-+{
-+  struct ui_out *uiout = arg;
-+
-+  if (ui_out_redirect (uiout, NULL) < 0)
-+    warning (_("Cannot restore redirection of the current output protocol"));
-+}
-+
-+/* Return a new cleanup that pops the last redirection by ui_out_redirect
-+   with NULL parameter.  */
-+
-+struct cleanup *
-+make_cleanup_ui_out_redirect_pop (struct ui_out *uiout)
-+{
-+  return make_my_cleanup (&cleanup_chain, do_ui_out_redirect_pop, uiout);
-+}
-+
- static void
- do_free_section_addr_info (void *arg)
- {
---- gdb-7.2/gdb/testsuite/gdb.python/python.exp-orig	2010-08-09 21:23:00.000000000 +0200
-+++ gdb-7.2/gdb/testsuite/gdb.python/python.exp	2010-09-11 20:49:22.000000000 +0200
-@@ -110,3 +110,9 @@ gdb_test_multiple "python print \"\\n\" 
-     }
- }
- gdb_test "q" "Quit" "verify pagination afterwards: q"
-+
-+gdb_test_no_output "set height 0"
-+
-+gdb_test_no_output "python a = gdb.execute('help', to_string=True)" "collect help from uiout"
-+
-+gdb_test "python print a" ".*aliases -- Aliases of other commands.*" "verify help to uiout"
+Probably clear, I looked at making it using union instead of memcpy but that
+would be too ugly.
+
+No regressions on ppc64-fedorarawhide-linux-gnu only for gdb.base/*.exp.
+
+I will check it in.
 
 
+Thanks,
+Jan
 
-http://sourceware.org/ml/gdb-cvs/2011-02/msg00063.html
 
-### src/gdb/ChangeLog	2011/02/12 13:07:38	1.12557
-### src/gdb/ChangeLog	2011/02/13 09:09:33	1.12558
-## -1,3 +1,9 @@
-+2011-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
-+
-+	* symtab.c (find_pc_sect_line): New variable objfile, initialize it
-+	from S.  Iterate S using ALL_OBJFILE_SYMTABS.  Verify BV for each S.
-+	* symtab.h (struct symtab) <next>: Comment extension.
-+
- 2011-02-12  Yao Qi  <yao@codesourcery.com>
- 
- 	* Makefile.in (CLEANDIRS): Remove duplicated common dir.
---- src/gdb/symtab.c	2011/01/11 21:53:24	1.257
-+++ src/gdb/symtab.c	2011/02/13 09:09:36	1.258
-@@ -1904,6 +1904,7 @@
-   struct blockvector *bv;
-   struct minimal_symbol *msymbol;
-   struct minimal_symbol *mfunsym;
-+  struct objfile *objfile;
- 
-   /* Info on best line seen so far, and where it starts, and its file.  */
- 
-@@ -2031,13 +2032,17 @@
-     }
- 
-   bv = BLOCKVECTOR (s);
-+  objfile = s->objfile;
- 
-   /* Look at all the symtabs that share this blockvector.
-      They all have the same apriori range, that we found was right;
-      but they have different line tables.  */
- 
--  for (; s && BLOCKVECTOR (s) == bv; s = s->next)
-+  ALL_OBJFILE_SYMTABS (objfile, s)
+gdb/
+2012-02-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ppc-linux-nat.c (fetch_register, store_register): Fix GCC aliasing
+	compilation warning.
+
+--- a/gdb/ppc-linux-nat.c
++++ b/gdb/ppc-linux-nat.c
+@@ -593,9 +593,10 @@ fetch_register (struct regcache *regcache, int tid, int regno)
+        bytes_transferred < register_size (gdbarch, regno);
+        bytes_transferred += sizeof (long))
      {
-+      if (BLOCKVECTOR (s) != bv)
-+	continue;
++      long l;
 +
-       /* Find the best line in this symtab.  */
-       l = LINETABLE (s);
-       if (!l)
---- src/gdb/symtab.h	2011/01/11 21:53:25	1.168
-+++ src/gdb/symtab.h	2011/02/13 09:09:36	1.169
-@@ -738,8 +738,7 @@
- 
- struct symtab
- {
--
--  /* Chain of all existing symtabs.  */
-+  /* Unordered chain of all existing symtabs of this objfile.  */
- 
-   struct symtab *next;
- 
-
-
-
-http://sourceware.org/ml/gdb-cvs/2011-02/msg00064.html
-
-### src/gdb/ChangeLog	2011/02/13 09:09:33	1.12558
-### src/gdb/ChangeLog	2011/02/13 09:15:50	1.12559
-## -1,5 +1,12 @@
- 2011-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
- 
-+	Fix const/volatile qualifiers of C++ types, PR c++/12328.
-+	* c-typeprint.c (c_type_print_args): Update the function comment.  New
-+	variable param_type, initialize it.  Remove const/volatile qualifiers
-+	for language_cplus and !show_artificial.  Use param_type.
-+
-+2011-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
-+
- 	* symtab.c (find_pc_sect_line): New variable objfile, initialize it
- 	from S.  Iterate S using ALL_OBJFILE_SYMTABS.  Verify BV for each S.
- 	* symtab.h (struct symtab) <next>: Comment extension.
---- src/gdb/c-typeprint.c	2011/01/07 19:36:15	1.68
-+++ src/gdb/c-typeprint.c	2011/02/13 09:15:53	1.69
-@@ -371,9 +371,12 @@ c_type_print_modifier (struct type *type
- /* Print out the arguments of TYPE, which should have TYPE_CODE_METHOD
-    or TYPE_CODE_FUNC, to STREAM.  Artificial arguments, such as "this"
-    in non-static methods, are displayed if SHOW_ARTIFICIAL is
--   non-zero. LANGUAGE is the language in which TYPE was defined.  This is
--   a necessary evil since this code is used by the C, C++, and Java
--   backends. */
-+   non-zero.  If SHOW_ARTIFICIAL is zero and LANGUAGE is language_cplus
-+   the topmost parameter types get removed their possible const and volatile
-+   qualifiers to match demangled linkage name parameters part of such function
-+   type.  LANGUAGE is the language in which TYPE was defined.  This is
-+   a necessary evil since this code is used by the C, C++, and Java backends.
-+   */
- 
- void
- c_type_print_args (struct type *type, struct ui_file *stream,
-@@ -406,6 +409,8 @@
- 
-   for (i = 0; i < TYPE_NFIELDS (type); i++)
-     {
-+      struct type *param_type;
-+
-       if (TYPE_FIELD_ARTIFICIAL (type, i) && !show_artificial)
- 	continue;
- 
-@@ -398,10 +403,24 @@ c_type_print_args (struct type *type, st
- 	  wrap_here ("    ");
+       errno = 0;
+-      *(long *) &buf[bytes_transferred]
+-        = ptrace (PTRACE_PEEKUSER, tid, (PTRACE_TYPE_ARG3) regaddr, 0);
++      l = ptrace (PTRACE_PEEKUSER, tid, (PTRACE_TYPE_ARG3) regaddr, 0);
+       regaddr += sizeof (long);
+       if (errno != 0)
+ 	{
+@@ -604,6 +605,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
+ 		   gdbarch_register_name (gdbarch, regno), regno);
+ 	  perror_with_name (message);
  	}
- 
-+      param_type = TYPE_FIELD_TYPE (type, i);
-+
-+      if (language == language_cplus && !show_artificial)
-+	{
-+	  /* C++ standard, 13.1 Overloadable declarations, point 3, item:
-+	     - Parameter declarations that differ only in the presence or
-+	       absence of const and/or volatile are equivalent.
-+
-+	     And the const/volatile qualifiers are not present in the mangled
-+	     names as produced by GCC.  */
-+
-+	  param_type = make_cv_type (0, 0, param_type, NULL);
-+	}
-+
-       if (language == language_java)
--	java_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0);
-+	java_print_type (param_type, "", stream, -1, 0);
-       else
--	c_print_type (TYPE_FIELD_TYPE (type, i), "", stream, -1, 0);
-+	c_print_type (param_type, "", stream, -1, 0);
-       printed_any = 1;
++      memcpy (&buf[bytes_transferred], &l, sizeof (l));
      }
  
-### src/gdb/testsuite/ChangeLog	2011/02/08 13:30:08	1.2576
-### src/gdb/testsuite/ChangeLog	2011/02/13 09:15:53	1.2577
-## -1,3 +1,9 @@
-+2011-02-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
-+
-+	Fix const/volatile qualifiers of C++ types, PR c++/12328.
-+	* gdb.cp/overload-const.exp: New file.
-+	* gdb.cp/overload-const.cc: New file.
-+
- 2011-02-08  Ulrich Weigand  <uweigand@de.ibm.com>
+   /* Now supply the register.  Keep in mind that the regcache's idea
+@@ -1073,9 +1075,11 @@ store_register (const struct regcache *regcache, int tid, int regno)
  
- 	* gdb.opencl/callfuncs.cl: New file.
---- src/gdb/testsuite/gdb.cp/overload-const.cc
-+++ src/gdb/testsuite/gdb.cp/overload-const.cc	2011-02-13 09:24:14.258748000 +0000
-@@ -0,0 +1,28 @@
-+/* This test case is part of GDB, the GNU debugger.
+   for (i = 0; i < bytes_to_transfer; i += sizeof (long))
+     {
++      long l;
 +
-+   Copyright 2011 Free Software Foundation, Inc.
-+
-+   This program is free software; you can redistribute it and/or modify
-+   it under the terms of the GNU General Public License as published by
-+   the Free Software Foundation; either version 3 of the License, or
-+   (at your option) any later version.
-+
-+   This program is distributed in the hope that it will be useful,
-+   but WITHOUT ANY WARRANTY; without even the implied warranty of
-+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+   GNU General Public License for more details.
-+
-+   You should have received a copy of the GNU General Public License
-+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-+
-+class myclass
-+{
-+public:
-+  static void func(const int aa) {}
-+};
-+
-+int
-+main ()
-+{
-+  myclass::func (42);
-+}
---- src/gdb/testsuite/gdb.cp/overload-const.exp
-+++ src/gdb/testsuite/gdb.cp/overload-const.exp	2011-02-13 09:24:14.561175000 +0000
-@@ -0,0 +1,29 @@
-+# Copyright 2011 Free Software Foundation, Inc.
-+#
-+# This program is free software; you can redistribute it and/or modify
-+# it under the terms of the GNU General Public License as published by
-+# the Free Software Foundation; either version 3 of the License, or
-+# (at your option) any later version.
-+#
-+# This program is distributed in the hope that it will be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-+
-+# This file is part of the gdb testsuite.
-+
-+if {[skip_cplus_tests]} { continue }
-+
-+set testfile "overload-const"
-+if [prepare_for_testing $testfile $testfile $testfile.cc {c++ debug}] {
-+    return -1
-+}
-+
-+gdb_test_no_output "set language c++"
-+
-+if [gdb_breakpoint "myclass::func"] {
-+    pass "setting breakpoint at myclass::func"
-+}
++      memcpy (&l, &buf[i], sizeof (l));
+       errno = 0;
+-      ptrace (PTRACE_POKEUSER, tid, (PTRACE_TYPE_ARG3) regaddr,
+-	      *(long *) &buf[i]);
++      ptrace (PTRACE_POKEUSER, tid, (PTRACE_TYPE_ARG3) regaddr, l);
+       regaddr += sizeof (long);
+ 
+       if (errno == EIO 
 
-
-
-https://bugzilla.redhat.com/show_bug.cgi?id=678454
-http://sourceware.org/ml/gdb-cvs/2011-02/msg00133.html
-
-### src/gdb/ChangeLog	2011/02/18 16:43:50	1.12607
-### src/gdb/ChangeLog	2011/02/18 19:10:44	1.12608
-## -1,3 +1,10 @@
-+2011-02-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
-+	    Tom Tromey  <tromey@redhat.com>
-+
-+	* cp-support.c (make_symbol_overload_list_namespace): Do not call
-+	make_symbol_overload_list_block with NULL BLOCK.
-+	* valarith.c (unop_user_defined_p): Resolve also TYPE_CODE_TYPEDEF.
-+
- 2011-02-18  Pedro Alves  <pedro@codesourcery.com>
- 
- 	* breakpoint.c (get_number_trailer): No longer accept a NULL PP.
---- src/gdb/cp-support.c	2011/01/05 22:22:47	1.47
-+++ src/gdb/cp-support.c	2011/02/18 19:10:46	1.48
-@@ -778,11 +778,13 @@
- 
-   /* Look in the static block.  */
-   block = block_static_block (get_selected_block (0));
--  make_symbol_overload_list_block (name, block);
-+  if (block)
-+    make_symbol_overload_list_block (name, block);
- 
-   /* Look in the global block.  */
-   block = block_global_block (block);
--  make_symbol_overload_list_block (name, block);
-+  if (block)
-+    make_symbol_overload_list_block (name, block);
- 
- }
- 
---- src/gdb/valarith.c	2011/02/14 11:30:37	1.98
-+++ src/gdb/valarith.c	2011/02/18 19:10:46	1.99
-@@ -315,15 +315,9 @@
-   if (op == UNOP_ADDR)
-     return 0;
-   type1 = check_typedef (value_type (arg1));
--  for (;;)
--    {
--      if (TYPE_CODE (type1) == TYPE_CODE_STRUCT)
--	return 1;
--      else if (TYPE_CODE (type1) == TYPE_CODE_REF)
--	type1 = TYPE_TARGET_TYPE (type1);
--      else
--	return 0;
--    }
-+  if (TYPE_CODE (type1) == TYPE_CODE_REF)
-+    type1 = check_typedef (TYPE_TARGET_TYPE (type1));
-+  return TYPE_CODE (type1) == TYPE_CODE_STRUCT;
- }
- 
- /* Try to find an operator named OPERATOR which takes NARGS arguments
-### src/gdb/testsuite/ChangeLog	2011/02/17 22:08:12	1.2594
-### src/gdb/testsuite/ChangeLog	2011/02/18 19:10:46	1.2595
-## -1,3 +1,8 @@
-+2011-02-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
-+
-+	* gdb.cp/typedef-operator.exp: New file.
-+	* gdb.cp/typedef-operator.cc: New file.
-+
- 2011-02-17  Michael Snyder  <msnyder@vmware.com>
- 
- 	* gdb.threads/thread-find.exp: Fix regular expressions.
---- src/gdb/testsuite/gdb.cp/typedef-operator.cc
-+++ src/gdb/testsuite/gdb.cp/typedef-operator.cc	2011-02-21 17:18:30.419734000 +0000
-@@ -0,0 +1,31 @@
-+/* This test case is part of GDB, the GNU debugger.
-+
-+   Copyright 2011 Free Software Foundation, Inc.
-+
-+   This program is free software; you can redistribute it and/or modify
-+   it under the terms of the GNU General Public License as published by
-+   the Free Software Foundation; either version 3 of the License, or
-+   (at your option) any later version.
-+
-+   This program is distributed in the hope that it will be useful,
-+   but WITHOUT ANY WARRANTY; without even the implied warranty of
-+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+   GNU General Public License for more details.
-+
-+   You should have received a copy of the GNU General Public License
-+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-+
-+class C
-+{
-+public:
-+  int operator* () { return 42; }
-+};
-+typedef C D;
-+
-+D u;
-+D &v = u;
-+
-+int main ()
-+{
-+  return *v;
-+}
---- src/gdb/testsuite/gdb.cp/typedef-operator.exp
-+++ src/gdb/testsuite/gdb.cp/typedef-operator.exp	2011-02-21 17:18:30.916753000 +0000
-@@ -0,0 +1,33 @@
-+# Copyright 2011 Free Software Foundation, Inc.
-+#
-+# This program is free software; you can redistribute it and/or modify
-+# it under the terms of the GNU General Public License as published by
-+# the Free Software Foundation; either version 3 of the License, or
-+# (at your option) any later version.
-+#
-+# This program is distributed in the hope that it will be useful,
-+# but WITHOUT ANY WARRANTY; without even the implied warranty of
-+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+# GNU General Public License for more details.
-+#
-+# You should have received a copy of the GNU General Public License
-+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
-+
-+# This file is part of the gdb testsuite.
-+
-+if {[skip_cplus_tests]} { continue }
-+
-+set testfile "typedef-operator"
-+if [prepare_for_testing $testfile $testfile $testfile.cc {c++ debug}] {
-+    return -1
-+}
-+
-+gdb_test_no_output "set language c++"
-+
-+gdb_test "p *u" {You can't do that without a process to debug.} "test crash"
-+
-+if ![runto_main] {
-+    return -1
-+}
-+
-+gdb_test "p *v" " = 42" "test typedef"

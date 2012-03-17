@@ -18,13 +18,15 @@ Summary(tr.UTF-8):	C ve diğer diller için sembolik hata ayıklayıcı
 Summary(uk.UTF-8):	Символьний відладчик для С та інших мов
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
+%define		snap	20120120
 Name:		gdb
-Version:	7.3.1
-Release:	4
+Version:	7.4.50
+Release:	0.%{snap}.1
 License:	GPL v3+
 Group:		Development/Debuggers
-Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	b89a5fac359c618dda97b88645ceab47
+#Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
+Source0:	%{name}-%{version}.%{snap}.tar.bz2
+# Source0-md5:	9de84a22e4b96c08d8d31a72d7751c60
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -36,7 +38,6 @@ Source3:	%{name}-gstack.man
 Patch1:		%{name}-6.3-rh-dummykfail-20041202.patch
 Patch2:		%{name}-6.3-rh-testversion-20041202.patch
 Patch3:		%{name}-6.3-rh-testlibunwind-20041202.patch
-Patch104:	%{name}-6.3-ppcdotsolib-20041022.patch
 Patch105:	%{name}-6.3-ppc64syscall-20040622.patch
 Patch111:	%{name}-6.3-ppc64displaysymbol-20041124.patch
 Patch112:	%{name}-6.6-scheduler_locking-step-sw-watchpoints2.patch
@@ -49,8 +50,6 @@ Patch125:	%{name}-6.3-test-self-20050110.patch
 Patch133:	%{name}-6.3-test-dtorfix-20050121.patch
 Patch136:	%{name}-6.3-test-movedir-20050125.patch
 Patch140:	%{name}-6.3-gcore-thread-20050204.patch
-Patch141:	%{name}-6.6-step-thread-exit.patch
-Patch259:	%{name}-6.3-step-thread-exit-20050211-test.patch
 Patch145:	%{name}-6.3-threaded-watchpoints2-20050225.patch
 Patch153:	%{name}-6.3-ia64-gcore-page0-20050421.patch
 Patch157:	%{name}-6.3-security-errata-20050610.patch
@@ -74,7 +73,7 @@ Patch217:	%{name}-6.5-bz218379-solib-trampoline-lookup-lock-fix.patch
 Patch225:	%{name}-6.5-bz109921-DW_AT_decl_file-test.patch
 Patch229:	%{name}-6.3-bz140532-ppc-unwinding-test.patch
 Patch231:	%{name}-6.3-bz202689-exec-from-pthread-test.patch
-#Patch232: %{name}-upstream.patch
+Patch232:	%{name}-upstream.patch
 Patch234:	%{name}-6.6-bz230000-power6-disassembly-test.patch
 Patch235:	%{name}-6.3-bz231832-obstack-2gb.patch
 Patch245:	%{name}-6.6-bz229517-gcore-without-terminal.patch
@@ -82,13 +81,12 @@ Patch247:	%{name}-6.6-bz235197-fork-detach-info.patch
 Patch254:	%{name}-6.6-testsuite-timeouts.patch
 Patch258:	%{name}-6.6-bz237572-ppc-atomic-sequence-test.patch
 Patch263:	%{name}-6.3-attach-see-vdso-test.patch
-Patch265:	%{name}-6.6-bz247354-leader-exit-fix.patch
-Patch266:	%{name}-6.6-bz247354-leader-exit-test.patch
 Patch271:	%{name}-6.5-bz243845-stale-testing-zombie-test.patch
 Patch274:	%{name}-6.6-buildid-locate.patch
 Patch353:	%{name}-6.6-buildid-locate-rpm.patch
 Patch415:	%{name}-6.6-buildid-locate-core-as-arg.patch
 Patch519:	%{name}-6.6-buildid-locate-rpm-librpm-workaround.patch
+Patch276:	%{name}-6.6-bfd-vdso8k.patch
 Patch282:	%{name}-6.7-charsign-test.patch
 Patch284:	%{name}-6.7-ppc-clobbered-registers-O2-test.patch
 Patch287:	%{name}-6.7-testsuite-stable-results.patch
@@ -102,11 +100,9 @@ Patch311:	%{name}-6.3-focus-cmd-prev-test.patch
 Patch315:	%{name}-6.8-bz442765-threaded-exec-test.patch
 Patch317:	%{name}-6.8-sparc64-silence-memcpy-check.patch
 Patch320:	%{name}-6.5-section-num-fixup-test.patch
-Patch326:	%{name}-6.8-tui-singlebinary.patch
 Patch329:	%{name}-6.8-bz254229-gcore-prpsinfo.patch
 Patch330:	%{name}-6.8-bz436037-reg-no-longer-active.patch
 Patch331:	%{name}-6.8-quit-never-aborts.patch
-Patch337:	%{name}-6.8-attach-signalled-detach-stopped.patch
 Patch343:	%{name}-6.8-watchpoint-conditionals-test.patch
 Patch348:	%{name}-6.8-bz466901-backtrace-full-prelinked.patch
 Patch349:	%{name}-archer.patch
@@ -116,7 +112,6 @@ Patch382:	%{name}-core-open-vdso-warning.patch
 Patch391:	%{name}-x86_64-i386-syscall-restart.patch
 Patch392:	%{name}-bz533176-fortran-omp-step.patch
 Patch393:	%{name}-rhel5-gcc44.patch
-Patch335:	%{name}-rhel5-compat.patch
 Patch397:	%{name}-follow-child-stale-parent.patch
 Patch403:	%{name}-ccache-workaround.patch
 Patch404:	%{name}-fortran-common-reduce.patch
@@ -128,8 +123,8 @@ Patch417:	%{name}-bz541866-rwatch-before-run.patch
 Patch459:	%{name}-moribund-utrace-workaround.patch
 Patch470:	%{name}-archer-next-over-throw-cxx-exec.patch
 Patch475:	%{name}-bz601887-dwarf4-rh-test.patch
-Patch486:	%{name}-bz562763-pretty-print-2d-vectors.patch
-Patch487:	%{name}-bz562763-pretty-print-2d-vectors-libstdcxx.patch
+#Patch486:	%{name}-bz562763-pretty-print-2d-vectors.patch			BROKEN!
+#Patch487:	%{name}-bz562763-pretty-print-2d-vectors-libstdcxx.patch
 Patch490:	%{name}-test-bt-cfi-without-die.patch
 Patch491:	%{name}-gdb-add-index-script.patch
 Patch496:	%{name}-bz568248-oom-is-error.patch
@@ -137,28 +132,30 @@ Patch504:	%{name}-bz623749-gcore-relro.patch
 Patch510:	%{name}-bz592031-siginfo-lost-4of5.patch
 Patch511:	%{name}-bz592031-siginfo-lost-5of5.patch
 Patch526:	%{name}-bz634108-solib_address.patch
-Patch541:	%{name}-test-pp-hint-error.patch
 Patch542:	%{name}-test-pid0-core.patch
 Patch547:	%{name}-test-dw2-aranges.patch
 Patch548:	%{name}-test-expr-cumulative-archer.patch
-Patch555:	%{name}-gcc46-typedef.patch
-Patch556:	%{name}-gcc46-stdarg-prologue.patch
-Patch571:	%{name}-prelink-rela.patch
-Patch572:	%{name}-core-thread-internalerr-1of3.patch
-Patch573:	%{name}-core-thread-internalerr-2of3.patch
-Patch574:	%{name}-core-thread-internalerr-3of3.patch
 Patch579:	%{name}-7.2.50-sparc-add-workaround-to-broken-debug-files.patch
-Patch580:	%{name}-bz645773-case-insensitive-1of5.patch
-Patch581:	%{name}-bz645773-case-insensitive-2of5.patch
-Patch582:	%{name}-bz645773-case-insensitive-3of5.patch
-Patch583:	%{name}-bz645773-case-insensitive-4of5.patch
-Patch591:	%{name}-bz701131-readline62-1of3.patch
-Patch592:	%{name}-bz701131-readline62-2of3.patch
-Patch593:	%{name}-bz701131-readline62-3of3.patch
-Patch594:	%{name}-stap-double-free.patch
-Patch629:	%{name}-vla-frame-set.patch
-Patch630:	%{name}-implptr-64bit-1of2.patch
-Patch631:	%{name}-implptr-64bit-2of2.patch
+Patch618:	%{name}-dlopen-stap-probe.patch
+Patch619:	%{name}-dlopen-stap-probe-test.patch
+Patch627:	%{name}-glibc-vdso-workaround.patch
+Patch634:	%{name}-runtest-pie-override.patch
+#Patch642:	%{name}-readline62-ask-more-rh.patch
+Patch643:	%{name}-python-rdynamic.patch
+Patch644:	%{name}-expand-cxx-accel.patch
+Patch645:	%{name}-prologue-not-skipped.patch
+Patch646:	%{name}-exit-warning.patch
+Patch648:	%{name}-archer-vla-rhel5gcc.patch
+Patch649:	%{name}-attach-fail-reasons-1of5.patch
+Patch650:	%{name}-attach-fail-reasons-2of5.patch
+Patch651:	%{name}-attach-fail-reasons-3of5.patch
+Patch652:	%{name}-attach-fail-reasons-4of5.patch
+Patch653:	%{name}-attach-fail-reasons-5of5.patch
+Patch657:	%{name}-attach-fail-reasons-5of5configure.patch
+Patch654:	%{name}-x86-onstack-1of2.patch
+Patch658:	%{name}-x86-onstack-2of2.patch
+Patch655:	%{name}-die-cu-offset-1of2.patch
+Patch656:	%{name}-die-cu-offset-2of2.patch
 
 # PLD patches
 Patch1000:	%{name}-readline.patch
@@ -285,7 +282,7 @@ GDB in the form of a static library.
 GDB w postaci biblioteki statycznej.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}.%{snap}
 
 # Files have `# <number> <file>' statements breaking VPATH / find-debuginfo.sh .
 rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
@@ -297,12 +294,11 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 # Match the Fedora's version info.
 %patch2 -p1
 
-#patch232 -p1
+%patch232 -p1
 %patch349 -p1
 %patch1 -p1
 %patch3 -p1
 
-%patch104 -p1
 %patch105 -p1
 %patch111 -p1
 %patch112 -p1
@@ -312,8 +308,6 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch133 -p1
 %patch136 -p1
 %patch140 -p1
-%patch141 -p1
-%patch259 -p1
 %patch145 -p1
 %patch153 -p1
 %patch157 -p1
@@ -345,11 +339,10 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch258 -p1
 %patch260 -p1
 %patch263 -p1
-%patch265 -p1
-%patch266 -p1
 %patch271 -p1
 %patch274 -p1
 %patch353 -p1
+%patch276 -p1
 %patch282 -p1
 %patch284 -p1
 %patch287 -p1
@@ -363,11 +356,9 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch315 -p1
 %patch317 -p1
 %patch320 -p1
-%patch326 -p1
 %patch329 -p1
 %patch330 -p1
 %patch331 -p1
-%patch337 -p1
 %patch343 -p1
 %patch348 -p1
 %patch360 -p1
@@ -388,7 +379,6 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch459 -p1
 %patch470 -p1
 %patch475 -p1
-%patch486 -p1
 %patch415 -p1
 %patch519 -p1
 %patch490 -p1
@@ -398,31 +388,31 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch510 -p1
 %patch511 -p1
 %patch526 -p1
-%patch541 -p1
 %patch542 -p1
 %patch547 -p1
 %patch548 -p1
-%patch555 -p1
-%patch556 -p1
-%patch571 -p1
-%patch572 -p1
-%patch573 -p1
-%patch574 -p1
 %patch579 -p1
-%patch580 -p1
-%patch581 -p1
-%patch582 -p1
-%patch583 -p1
-%patch591 -p1
-%patch592 -p1
-%patch593 -p1
-%patch594 -p1
-%patch629 -p1
-%patch630 -p1
-%patch631 -p1
+%patch618 -p1
+%patch619 -p1
+%patch627 -p1
+%patch634 -p1
+%patch643 -p1
+%patch644 -p1
+%patch645 -p1
+%patch646 -p1
+%patch648 -p1
+%patch649 -p1
+%patch650 -p1
+%patch651 -p1
+%patch652 -p1
+%patch653 -p1
+%patch657 -p1
+%patch654 -p1
+%patch658 -p1
+%patch655 -p1
+%patch656 -p1
 
 %patch393 -p1
-%patch335 -p1
 
 # PLD patches
 %patch1000 -p1
@@ -485,6 +475,9 @@ cp -f /usr/share/automake/config.* .
 
 %{__make} -j1
 %{__make} -j1 info
+
+# gdb/ChangeLog: Build gdb directly from *.o files not using libgdb.a.
+%{__make} -j1 -C gdb libgdb.a
 
 %install
 rm -rf $RPM_BUILD_ROOT

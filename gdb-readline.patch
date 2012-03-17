@@ -26,145 +26,169 @@
  	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
  
  ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
---- gdb-6.7.org/Makefile.in	2007-10-10 19:09:32.000000000 +0200
-+++ gdb-6.7/Makefile.in	2007-10-10 21:10:23.310556251 +0200
-@@ -664,7 +664,6 @@
-     maybe-configure-perl \
-     maybe-configure-prms \
-     maybe-configure-rcs \
+--- gdb-7.4.50.20120120/Makefile.in.orig	2012-01-20 02:48:18.000000000 +0100
++++ gdb-7.4.50.20120120/Makefile.in	2012-03-17 10:35:14.194730128 +0100
+@@ -922,7 +922,6 @@
+     maybe-configure-libiberty \
+     maybe-configure-libiconv \
+     maybe-configure-m4 \
 -    maybe-configure-readline \
-     maybe-configure-release \
-     maybe-configure-recode \
-     maybe-configure-sed \
-@@ -812,7 +811,6 @@
- all-host: maybe-all-perl
- all-host: maybe-all-prms
- all-host: maybe-all-rcs
+     maybe-configure-sid \
+     maybe-configure-sim \
+     maybe-configure-texinfo \
+@@ -1057,7 +1056,6 @@
+ @endif libiberty-no-bootstrap
+ all-host: maybe-all-libiconv
+ all-host: maybe-all-m4
 -all-host: maybe-all-readline
- all-host: maybe-all-release
- all-host: maybe-all-recode
- all-host: maybe-all-sed
-@@ -927,7 +925,6 @@
- info-host: maybe-info-perl
- info-host: maybe-info-prms
- info-host: maybe-info-rcs
+ all-host: maybe-all-sid
+ all-host: maybe-all-sim
+ all-host: maybe-all-texinfo
+@@ -1149,7 +1147,6 @@
+ info-host: maybe-info-libiberty
+ info-host: maybe-info-libiconv
+ info-host: maybe-info-m4
 -info-host: maybe-info-readline
- info-host: maybe-info-release
- info-host: maybe-info-recode
- info-host: maybe-info-sed
-@@ -1033,7 +1030,6 @@
- dvi-host: maybe-dvi-perl
- dvi-host: maybe-dvi-prms
- dvi-host: maybe-dvi-rcs
+ info-host: maybe-info-sid
+ info-host: maybe-info-sim
+ info-host: maybe-info-texinfo
+@@ -1226,7 +1223,6 @@
+ dvi-host: maybe-dvi-libiberty
+ dvi-host: maybe-dvi-libiconv
+ dvi-host: maybe-dvi-m4
 -dvi-host: maybe-dvi-readline
- dvi-host: maybe-dvi-release
- dvi-host: maybe-dvi-recode
- dvi-host: maybe-dvi-sed
-@@ -1245,7 +1241,6 @@
- html-host: maybe-html-perl
- html-host: maybe-html-prms
- html-host: maybe-html-rcs
+ dvi-host: maybe-dvi-sid
+ dvi-host: maybe-dvi-sim
+ dvi-host: maybe-dvi-texinfo
+@@ -1303,7 +1299,6 @@
+ pdf-host: maybe-pdf-libiberty
+ pdf-host: maybe-pdf-libiconv
+ pdf-host: maybe-pdf-m4
+-pdf-host: maybe-pdf-readline
+ pdf-host: maybe-pdf-sid
+ pdf-host: maybe-pdf-sim
+ pdf-host: maybe-pdf-texinfo
+@@ -1380,7 +1375,6 @@
+ html-host: maybe-html-libiberty
+ html-host: maybe-html-libiconv
+ html-host: maybe-html-m4
 -html-host: maybe-html-readline
- html-host: maybe-html-release
- html-host: maybe-html-recode
- html-host: maybe-html-sed
-@@ -1351,7 +1346,6 @@
- TAGS-host: maybe-TAGS-perl
- TAGS-host: maybe-TAGS-prms
- TAGS-host: maybe-TAGS-rcs
--TAGS-host: maybe-TAGS-readline
- TAGS-host: maybe-TAGS-release
- TAGS-host: maybe-TAGS-recode
- TAGS-host: maybe-TAGS-sed
+ html-host: maybe-html-sid
+ html-host: maybe-html-sim
+ html-host: maybe-html-texinfo
 @@ -1457,7 +1451,6 @@
- install-info-host: maybe-install-info-perl
- install-info-host: maybe-install-info-prms
- install-info-host: maybe-install-info-rcs
+ TAGS-host: maybe-TAGS-libiberty
+ TAGS-host: maybe-TAGS-libiconv
+ TAGS-host: maybe-TAGS-m4
+-TAGS-host: maybe-TAGS-readline
+ TAGS-host: maybe-TAGS-sid
+ TAGS-host: maybe-TAGS-sim
+ TAGS-host: maybe-TAGS-texinfo
+@@ -1534,7 +1527,6 @@
+ install-info-host: maybe-install-info-libiberty
+ install-info-host: maybe-install-info-libiconv
+ install-info-host: maybe-install-info-m4
 -install-info-host: maybe-install-info-readline
- install-info-host: maybe-install-info-release
- install-info-host: maybe-install-info-recode
- install-info-host: maybe-install-info-sed
-@@ -1669,7 +1662,6 @@
- install-html-host: maybe-install-html-perl
- install-html-host: maybe-install-html-prms
- install-html-host: maybe-install-html-rcs
+ install-info-host: maybe-install-info-sid
+ install-info-host: maybe-install-info-sim
+ install-info-host: maybe-install-info-texinfo
+@@ -1611,7 +1603,6 @@
+ install-pdf-host: maybe-install-pdf-libiberty
+ install-pdf-host: maybe-install-pdf-libiconv
+ install-pdf-host: maybe-install-pdf-m4
+-install-pdf-host: maybe-install-pdf-readline
+ install-pdf-host: maybe-install-pdf-sid
+ install-pdf-host: maybe-install-pdf-sim
+ install-pdf-host: maybe-install-pdf-texinfo
+@@ -1688,7 +1679,6 @@
+ install-html-host: maybe-install-html-libiberty
+ install-html-host: maybe-install-html-libiconv
+ install-html-host: maybe-install-html-m4
 -install-html-host: maybe-install-html-readline
- install-html-host: maybe-install-html-release
- install-html-host: maybe-install-html-recode
- install-html-host: maybe-install-html-sed
-@@ -1775,7 +1767,6 @@
- installcheck-host: maybe-installcheck-perl
- installcheck-host: maybe-installcheck-prms
- installcheck-host: maybe-installcheck-rcs
+ install-html-host: maybe-install-html-sid
+ install-html-host: maybe-install-html-sim
+ install-html-host: maybe-install-html-texinfo
+@@ -1765,7 +1755,6 @@
+ installcheck-host: maybe-installcheck-libiberty
+ installcheck-host: maybe-installcheck-libiconv
+ installcheck-host: maybe-installcheck-m4
 -installcheck-host: maybe-installcheck-readline
- installcheck-host: maybe-installcheck-release
- installcheck-host: maybe-installcheck-recode
- installcheck-host: maybe-installcheck-sed
-@@ -1881,7 +1872,6 @@
- mostlyclean-host: maybe-mostlyclean-perl
- mostlyclean-host: maybe-mostlyclean-prms
- mostlyclean-host: maybe-mostlyclean-rcs
+ installcheck-host: maybe-installcheck-sid
+ installcheck-host: maybe-installcheck-sim
+ installcheck-host: maybe-installcheck-texinfo
+@@ -1842,7 +1831,6 @@
+ mostlyclean-host: maybe-mostlyclean-libiberty
+ mostlyclean-host: maybe-mostlyclean-libiconv
+ mostlyclean-host: maybe-mostlyclean-m4
 -mostlyclean-host: maybe-mostlyclean-readline
- mostlyclean-host: maybe-mostlyclean-release
- mostlyclean-host: maybe-mostlyclean-recode
- mostlyclean-host: maybe-mostlyclean-sed
-@@ -1987,7 +1977,6 @@
- clean-host: maybe-clean-perl
- clean-host: maybe-clean-prms
- clean-host: maybe-clean-rcs
+ mostlyclean-host: maybe-mostlyclean-sid
+ mostlyclean-host: maybe-mostlyclean-sim
+ mostlyclean-host: maybe-mostlyclean-texinfo
+@@ -1919,7 +1907,6 @@
+ clean-host: maybe-clean-libiberty
+ clean-host: maybe-clean-libiconv
+ clean-host: maybe-clean-m4
 -clean-host: maybe-clean-readline
- clean-host: maybe-clean-release
- clean-host: maybe-clean-recode
- clean-host: maybe-clean-sed
-@@ -2093,7 +2082,6 @@
- distclean-host: maybe-distclean-perl
- distclean-host: maybe-distclean-prms
- distclean-host: maybe-distclean-rcs
+ clean-host: maybe-clean-sid
+ clean-host: maybe-clean-sim
+ clean-host: maybe-clean-texinfo
+@@ -1996,7 +1983,6 @@
+ distclean-host: maybe-distclean-libiberty
+ distclean-host: maybe-distclean-libiconv
+ distclean-host: maybe-distclean-m4
 -distclean-host: maybe-distclean-readline
- distclean-host: maybe-distclean-release
- distclean-host: maybe-distclean-recode
- distclean-host: maybe-distclean-sed
-@@ -2199,7 +2187,6 @@
- maintainer-clean-host: maybe-maintainer-clean-perl
- maintainer-clean-host: maybe-maintainer-clean-prms
- maintainer-clean-host: maybe-maintainer-clean-rcs
+ distclean-host: maybe-distclean-sid
+ distclean-host: maybe-distclean-sim
+ distclean-host: maybe-distclean-texinfo
+@@ -2073,7 +2059,6 @@
+ maintainer-clean-host: maybe-maintainer-clean-libiberty
+ maintainer-clean-host: maybe-maintainer-clean-libiconv
+ maintainer-clean-host: maybe-maintainer-clean-m4
 -maintainer-clean-host: maybe-maintainer-clean-readline
- maintainer-clean-host: maybe-maintainer-clean-release
- maintainer-clean-host: maybe-maintainer-clean-recode
- maintainer-clean-host: maybe-maintainer-clean-sed
-@@ -2359,7 +2346,6 @@
-     maybe-check-perl \
-     maybe-check-prms \
-     maybe-check-rcs \
+ maintainer-clean-host: maybe-maintainer-clean-sid
+ maintainer-clean-host: maybe-maintainer-clean-sim
+ maintainer-clean-host: maybe-maintainer-clean-texinfo
+@@ -2205,7 +2190,6 @@
+     maybe-check-libiberty \
+     maybe-check-libiconv \
+     maybe-check-m4 \
 -    maybe-check-readline \
-     maybe-check-release \
-     maybe-check-recode \
-     maybe-check-sed \
-@@ -2491,7 +2477,6 @@
-     maybe-install-perl \
-     maybe-install-prms \
-     maybe-install-rcs \
+     maybe-check-sid \
+     maybe-check-sim \
+     maybe-check-texinfo \
+@@ -2308,7 +2292,6 @@
+     maybe-install-libiberty \
+     maybe-install-libiconv \
+     maybe-install-m4 \
 -    maybe-install-readline \
-     maybe-install-release \
-     maybe-install-recode \
-     maybe-install-sed \
-@@ -2564,7 +2549,6 @@
-     maybe-install-perl \
-     maybe-install-prms \
-     maybe-install-rcs \
+     maybe-install-sid \
+     maybe-install-sim \
+     maybe-install-texinfo \
+@@ -2354,7 +2337,6 @@
+     maybe-install-libiberty \
+     maybe-install-libiconv \
+     maybe-install-m4 \
 -    maybe-install-readline \
-     maybe-install-release \
-     maybe-install-recode \
-     maybe-install-sed \
-@@ -51494,7 +51478,6 @@
- all-gdb: maybe-all-intl
+     maybe-install-sid \
+     maybe-install-sim \
+     maybe-install-texinfo \
+@@ -2450,7 +2432,6 @@
+     maybe-install-strip-libiberty \
+     maybe-install-strip-libiconv \
+     maybe-install-strip-m4 \
+-    maybe-install-strip-readline \
+     maybe-install-strip-sid \
+     maybe-install-strip-sim \
+     maybe-install-strip-texinfo \
+@@ -42608,7 +42589,6 @@
  all-gdb: maybe-all-libiberty
+ all-gdb: maybe-all-libiconv
  all-gdb: maybe-all-opcodes
 -all-gdb: maybe-all-readline
  all-gdb: maybe-all-build-bison
- all-gdb: maybe-all-build-byacc
  all-gdb: maybe-all-sim
-@@ -51826,7 +51809,6 @@
+ all-gdb: maybe-all-libdecnumber
+@@ -42946,7 +42926,6 @@
  all-sim: maybe-all-libiberty
  all-sim: maybe-all-bfd
  all-sim: maybe-all-opcodes

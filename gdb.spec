@@ -171,6 +171,7 @@ BuildRequires:	bison
 BuildRequires:	expat-devel
 BuildRequires:	flex
 BuildRequires:	gettext-devel
+BuildRequires:	libselinux-devel
 BuildRequires:	libtool
 BuildRequires:	libunwind-devel >= 0.97
 BuildRequires:	ncurses-devel >= 5.2

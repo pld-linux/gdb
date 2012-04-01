@@ -95,3 +95,205 @@ gdb/
  
        if (errno == EIO 
 
+
+
+http://sourceware.org/ml/gdb-patches/2012-02/msg00409.html
+Subject: FYI: remove extraneous block from dw2_map_symtabs_matching_filename
+http://sourceware.org/ml/gdb-cvs/2012-02/msg00117.html
+commit 61d8161b33b1e7dbc80ba6f7a92500a1594da55c
+
+### src/gdb/ChangeLog	2012/02/20 09:42:34	1.13845
+### src/gdb/ChangeLog	2012/02/20 19:24:34	1.13846
+## -1,3 +1,8 @@
++2012-02-20  Tom Tromey  <tromey@redhat.com>
++
++	* dwarf2read.c (dw2_map_symtabs_matching_filename): Remove
++	extraneous block.
++
+ 2012-02-20  Tristan Gingold  <gingold@adacore.com>
+ 
+ 	* darwin-nat.h (enum darwin_msg_state): Add comments.
+--- src/gdb/dwarf2read.c	2012/02/07 04:48:19	1.612
++++ src/gdb/dwarf2read.c	2012/02/20 19:24:39	1.613
+@@ -2437,13 +2437,6 @@
+ 		return 1;
+ 	    }
+ 
+-	    {
+-	      if (dw2_map_expand_apply (objfile, per_cu,
+-					name, full_path, real_path,
+-					callback, data))
+-		return 1;
+-	    }
+-
+ 	  /* Before we invoke realpath, which can get expensive when many
+ 	     files are involved, do a quick comparison of the basenames.  */
+ 	  if (! basenames_may_differ
+
+
+
+FYI: fix some performance bugs with .gdb_index
+http://sourceware.org/ml/gdb-patches/2012-02/msg00413.html
+http://sourceware.org/ml/gdb-cvs/2012-02/msg00119.html
+
+### src/gdb/ChangeLog	2012/02/20 19:44:00	1.13847
+### src/gdb/ChangeLog	2012/02/20 20:56:12	1.13848
+## -1,3 +1,10 @@
++2012-02-20  Tom Tromey  <tromey@redhat.com>
++
++	PR gdb/13498:
++	* dwarf2read.c (dw2_expand_symtabs_matching): Only visit a
++	particular set of file names once.
++	(dw2_map_symbol_filenames): Likewise.
++
+ 2012-02-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+ 
+ 	Code cleanup.
+--- src/gdb/dwarf2read.c	2012/02/20 19:24:39	1.613
++++ src/gdb/dwarf2read.c	2012/02/20 20:56:12	1.614
+@@ -2700,32 +2700,63 @@
+   index = dwarf2_per_objfile->index_table;
+ 
+   if (file_matcher != NULL)
+-    for (i = 0; i < (dwarf2_per_objfile->n_comp_units
+-		     + dwarf2_per_objfile->n_type_units); ++i)
+-      {
+-	int j;
+-	struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+-	struct quick_file_names *file_data;
++    {
++      struct cleanup *cleanup;
++      htab_t visited_found, visited_not_found;
+ 
+-	per_cu->v.quick->mark = 0;
++      visited_found = htab_create_alloc (10,
++					 htab_hash_pointer, htab_eq_pointer,
++					 NULL, xcalloc, xfree);
++      cleanup = make_cleanup_htab_delete (visited_found);
++      visited_not_found = htab_create_alloc (10,
++					     htab_hash_pointer, htab_eq_pointer,
++					     NULL, xcalloc, xfree);
++      make_cleanup_htab_delete (visited_not_found);
+ 
+-	/* We only need to look at symtabs not already expanded.  */
+-	if (per_cu->v.quick->symtab)
+-	  continue;
++      for (i = 0; i < (dwarf2_per_objfile->n_comp_units
++		       + dwarf2_per_objfile->n_type_units); ++i)
++	{
++	  int j;
++	  struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
++	  struct quick_file_names *file_data;
++	  void **slot;
+ 
+-	file_data = dw2_get_file_names (objfile, per_cu);
+-	if (file_data == NULL)
+-	  continue;
++	  per_cu->v.quick->mark = 0;
+ 
+-	for (j = 0; j < file_data->num_file_names; ++j)
+-	  {
+-	    if (file_matcher (file_data->file_names[j], data))
+-	      {
+-		per_cu->v.quick->mark = 1;
+-		break;
+-	      }
+-	  }
+-      }
++	  /* We only need to look at symtabs not already expanded.  */
++	  if (per_cu->v.quick->symtab)
++	    continue;
++
++	  file_data = dw2_get_file_names (objfile, per_cu);
++	  if (file_data == NULL)
++	    continue;
++
++	  if (htab_find (visited_not_found, file_data) != NULL)
++	    continue;
++	  else if (htab_find (visited_found, file_data) != NULL)
++	    {
++	      per_cu->v.quick->mark = 1;
++	      continue;
++	    }
++
++	  for (j = 0; j < file_data->num_file_names; ++j)
++	    {
++	      if (file_matcher (file_data->file_names[j], data))
++		{
++		  per_cu->v.quick->mark = 1;
++		  break;
++		}
++	    }
++
++	  slot = htab_find_slot (per_cu->v.quick->mark
++				 ? visited_found
++				 : visited_not_found,
++				 file_data, INSERT);
++	  *slot = file_data;
++	}
++
++      do_cleanups (cleanup);
++    }
+ 
+   for (iter = 0; iter < index->symbol_table_slots; ++iter)
+     {
+@@ -2787,15 +2818,35 @@
+ 			  void *data, int need_fullname)
+ {
+   int i;
++  struct cleanup *cleanup;
++  htab_t visited = htab_create_alloc (10, htab_hash_pointer, htab_eq_pointer,
++				      NULL, xcalloc, xfree);
+ 
++  cleanup = make_cleanup_htab_delete (visited);
+   dw2_setup (objfile);
+ 
++  /* We can ignore file names coming from already-expanded CUs.  */
++  for (i = 0; i < (dwarf2_per_objfile->n_comp_units
++		   + dwarf2_per_objfile->n_type_units); ++i)
++    {
++      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
++
++      if (per_cu->v.quick->symtab)
++	{
++	  void **slot = htab_find_slot (visited, per_cu->v.quick->file_names,
++					INSERT);
++
++	  *slot = per_cu->v.quick->file_names;
++	}
++    }
++
+   for (i = 0; i < (dwarf2_per_objfile->n_comp_units
+ 		   + dwarf2_per_objfile->n_type_units); ++i)
+     {
+       int j;
+       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
+       struct quick_file_names *file_data;
++      void **slot;
+ 
+       /* We only need to look at symtabs not already expanded.  */
+       if (per_cu->v.quick->symtab)
+@@ -2805,6 +2856,14 @@
+       if (file_data == NULL)
+ 	continue;
+ 
++      slot = htab_find_slot (visited, file_data, INSERT);
++      if (*slot)
++	{
++	  /* Already visited.  */
++	  continue;
++	}
++      *slot = file_data;
++
+       for (j = 0; j < file_data->num_file_names; ++j)
+ 	{
+ 	  const char *this_real_name;
+@@ -2816,6 +2875,8 @@
+ 	  (*fun) (file_data->file_names[j], this_real_name, data);
+ 	}
+     }
++
++  do_cleanups (cleanup);
+ }
+ 
+ static int

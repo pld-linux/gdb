@@ -22,7 +22,7 @@ Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 ######		/home/users/pluto/rpm/packages/../rpm-build-tools/rpm.groups: no such file
 Name:		gdb
 Version:	7.5.0
-Release:	0.%{snap}.0.1
+Release:	0.%{snap}.1
 License:	GPL v3+
 Group:		Development/Debuggers
 #Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2

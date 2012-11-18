@@ -21,7 +21,7 @@ Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
 Version:	7.5.0
-Release:	0.%{snap}.1
+Release:	0.%{snap}.2
 License:	GPL v3+
 Group:		Development/Debuggers
 #Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -267,12 +267,15 @@ Summary:	GDB in the form of a static library
 Summary(pl.UTF-8):	GDB w postaci biblioteki statycznej
 Group:		Development/Debuggers
 # libraries that needs to be linked to fulfill libgdb.a symbol requirements
-Requires:	binutils-devel >= 2.17.50
-Requires:	expat-devel
-Requires:	ncurses-devel
-Requires:	python-devel
-Requires:	readline-devel
-Requires:	zlib-devel
+Requires:	binutils-static >= 2.17.50
+Requires:	expat-static
+Requires:	libselinux-static
+Requires:	libsepol-static
+Requires:	ncurses-static
+Requires:	python-static
+Requires:	readline-static
+Requires:	xz-static
+Requires:	zlib-static
 
 %description lib
 GDB in the form of a static library.

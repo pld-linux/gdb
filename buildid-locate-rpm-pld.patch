@@ -1,11 +1,11 @@
---- gdb-7.2/gdb/elfread.c.orig	2010-10-16 10:25:51.886687929 +0200
-+++ gdb-7.2/gdb/elfread.c	2010-10-16 10:26:30.752319402 +0200
+--- gdb-7.5.0.20120926/gdb/elfread.c.orig	2012-11-18 20:50:42.844619396 +0100
++++ gdb-7.5.0.20120926/gdb/elfread.c	2012-11-18 20:52:37.756554669 +0100
 @@ -2177,9 +2177,8 @@
  	fprintf_unfiltered (gdb_stdlog,
  			    _("Missing separate debuginfo for %s\n"), binary);
          if (debug != NULL)
 -	  fprintf_unfiltered (gdb_stdlog, _("Try: %s %s\n"),
--			      "yum --disablerepo='*' --enablerepo='*-debug*'"
+-			      "yum --disablerepo='*' --enablerepo='*debug*'"
 -			      " install", debug);
 +	  fprintf_unfiltered (gdb_stdlog, _("Try to install package that provides `%s' file\n"),
 +			      debug);

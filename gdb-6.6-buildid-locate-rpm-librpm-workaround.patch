@@ -1,6 +1,8 @@
---- ./gdb/elfread.c	2010-10-14 17:07:45.000000000 +0200
-+++ ./gdb/elfread.c	2010-10-14 17:06:30.000000000 +0200
-@@ -1382,6 +1382,18 @@ build_id_to_filename (struct build_id *b
+Index: gdb-7.4.50.20120602/gdb/elfread.c
+===================================================================
+--- gdb-7.4.50.20120602.orig/gdb/elfread.c	2012-06-02 21:35:09.669510757 +0200
++++ gdb-7.4.50.20120602/gdb/elfread.c	2012-06-02 21:35:31.106502660 +0200
+@@ -1658,6 +1658,19 @@ build_id_to_filename (struct build_id *b
  #include <dlfcn.h>
  #endif
  
@@ -10,6 +12,7 @@
 +   Enable or disable a signal handler.  SIGNUM: signal to enable (or disable
 +   if negative).  HANDLER: sa_sigaction handler (or NULL to use
 +   rpmsqHandler()).  Returns: no. of refs, -1 on error.  */
++extern int rpmsqEnable (int signum, /* rpmsqAction_t handler */ void *handler);
 +int
 +rpmsqEnable (int signum, /* rpmsqAction_t handler */ void *handler)
 +{
@@ -19,8 +22,10 @@
  /* This MISSING_RPM_HASH tracker is used to collect all the missing rpm files
     and avoid their duplicities during a single inferior run.  */
  
---- ./gdb/proc-service.list	2010-05-28 20:50:30.000000000 +0200
-+++ ./gdb/proc-service.list	2010-10-14 17:06:30.000000000 +0200
+Index: gdb-7.4.50.20120602/gdb/proc-service.list
+===================================================================
+--- gdb-7.4.50.20120602.orig/gdb/proc-service.list	2012-06-02 21:35:09.669510757 +0200
++++ gdb-7.4.50.20120602/gdb/proc-service.list	2012-06-02 21:35:14.296508989 +0200
 @@ -37,4 +37,7 @@
    ps_pstop;
    ps_ptread;

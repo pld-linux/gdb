@@ -19,7 +19,6 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
-######		/home/users/pluto/rpm/packages/../rpm-build-tools/rpm.groups: no such file
 Name:		gdb
 Version:	7.5.0
 Release:	0.%{snap}.1
@@ -244,7 +243,6 @@ verir.
 %package gdbserver
 Summary:	A standalone server for GDB (the GNU source-level debugger)
 Summary(pl.UTF-8):	Samodzielny serwer GDB (debuggera GNU)
-######		/home/users/pluto/rpm/packages/../rpm-build-tools/rpm.groups: no such file
 Group:		Development/Debuggers
 
 %description gdbserver
@@ -267,7 +265,6 @@ maszynie niż ta, na której działa śledzony program.
 %package lib
 Summary:	GDB in the form of a static library
 Summary(pl.UTF-8):	GDB w postaci biblioteki statycznej
-######		/home/users/pluto/rpm/packages/../rpm-build-tools/rpm.groups: no such file
 Group:		Development/Debuggers
 # libraries that needs to be linked to fulfill libgdb.a symbol requirements
 Requires:	binutils-devel >= 2.17.50

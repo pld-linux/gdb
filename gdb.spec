@@ -21,7 +21,7 @@ Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
 Version:	7.5.0
-Release:	0.%{snap}.2
+Release:	0.%{snap}.3
 License:	GPL v3+
 Group:		Development/Debuggers
 #Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -161,6 +161,8 @@ Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
 Patch1006:	buildid-locate-rpm-pld.patch
+Patch1007:	std_section.patch
+Patch1008:	stexinfo.patch
 
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.69
@@ -420,6 +422,8 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch1002 -p1
 %patch1005 -p1
 %patch1006 -p1
+%patch1007 -p1
+%patch1008 -p1
 
 # Change the version that gets printed at GDB startup, so it is PLD Linux specific.
 cat > gdb/version.in << EOF

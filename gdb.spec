@@ -162,7 +162,7 @@ Patch1002:	%{name}-passflags.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
 Patch1006:	buildid-locate-rpm-pld.patch
 Patch1007:	std_section.patch
-Patch1008:	stexinfo.patch
+Patch1008:	texinfo.patch
 
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.69

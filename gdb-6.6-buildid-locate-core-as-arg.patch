@@ -58,13 +58,13 @@ Http://sourceware.org/ml/gdb-patches/2010-01/msg00517.html
 	* exec.c (exec_file_attach): Print a more useful error message if the
 	user did "gdb core".
 
-Index: gdb-7.4.91.20120801/gdb/exceptions.h
+Index: gdb-7.5.91.20130323/gdb/exceptions.h
 ===================================================================
---- gdb-7.4.91.20120801.orig/gdb/exceptions.h	2012-01-04 09:17:01.000000000 +0100
-+++ gdb-7.4.91.20120801/gdb/exceptions.h	2012-08-01 18:43:39.806959992 +0200
-@@ -86,6 +86,9 @@ enum errors {
-   /* DW_OP_GNU_entry_value resolving failed.  */
-   NO_ENTRY_VALUE_ERROR,
+--- gdb-7.5.91.20130323.orig/gdb/exceptions.h	2013-03-22 21:41:45.000000000 +0100
++++ gdb-7.5.91.20130323/gdb/exceptions.h	2013-03-23 19:49:05.738459185 +0100
+@@ -90,6 +90,9 @@ enum errors {
+      aborted as the inferior state is no longer valid.  */
+   TARGET_CLOSE_ERROR,
  
 +  /* Attempt to load a core file as executable.  */
 +  IS_CORE_ERROR,
@@ -72,10 +72,10 @@ Index: gdb-7.4.91.20120801/gdb/exceptions.h
    /* Add more errors here.  */
    NR_ERRORS
  };
-Index: gdb-7.4.91.20120801/gdb/exec.c
+Index: gdb-7.5.91.20130323/gdb/exec.c
 ===================================================================
---- gdb-7.4.91.20120801.orig/gdb/exec.c	2012-08-01 18:36:51.000000000 +0200
-+++ gdb-7.4.91.20120801/gdb/exec.c	2012-08-01 18:44:39.928627287 +0200
+--- gdb-7.5.91.20130323.orig/gdb/exec.c	2013-01-31 19:37:37.000000000 +0100
++++ gdb-7.5.91.20130323/gdb/exec.c	2013-03-23 19:48:53.284575912 +0100
 @@ -34,6 +34,7 @@
  #include "gdbthread.h"
  #include "progspace.h"
@@ -84,7 +84,7 @@ Index: gdb-7.4.91.20120801/gdb/exec.c
  
  #include <fcntl.h>
  #include "readline/readline.h"
-@@ -242,12 +243,27 @@ exec_file_attach (char *filename, int fr
+@@ -240,12 +241,27 @@ exec_file_attach (char *filename, int fr
  
        if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
  	{
@@ -115,11 +115,11 @@ Index: gdb-7.4.91.20120801/gdb/exec.c
  	}
  
        /* FIXME - This should only be run for RS6000, but the ifdef is a poor
-Index: gdb-7.4.91.20120801/gdb/main.c
+Index: gdb-7.5.91.20130323/gdb/main.c
 ===================================================================
---- gdb-7.4.91.20120801.orig/gdb/main.c	2012-08-01 18:36:51.000000000 +0200
-+++ gdb-7.4.91.20120801/gdb/main.c	2012-08-01 18:43:39.810959970 +0200
-@@ -266,6 +266,36 @@ typedef struct cmdarg {
+--- gdb-7.5.91.20130323.orig/gdb/main.c	2013-03-23 19:48:18.000000000 +0100
++++ gdb-7.5.91.20130323/gdb/main.c	2013-03-23 19:48:53.285575901 +0100
+@@ -296,6 +296,36 @@ typedef struct cmdarg {
  /* Define type VEC (cmdarg_s).  */
  DEF_VEC_O (cmdarg_s);
  
@@ -156,7 +156,7 @@ Index: gdb-7.4.91.20120801/gdb/main.c
  static int
  captured_main (void *data)
  {
-@@ -762,6 +792,8 @@ captured_main (void *data)
+@@ -796,6 +826,8 @@ captured_main (void *data)
  	{
  	  symarg = argv[optind];
  	  execarg = argv[optind];
@@ -165,7 +165,7 @@ Index: gdb-7.4.91.20120801/gdb/main.c
  	  optind++;
  	}
  
-@@ -917,11 +949,25 @@ captured_main (void *data)
+@@ -951,11 +983,25 @@ captured_main (void *data)
        && symarg != NULL
        && strcmp (execarg, symarg) == 0)
      {

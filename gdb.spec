@@ -34,6 +34,8 @@ Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
 Patch102:	gdb-6.6-buildid-locate-rpm.patch
 Patch103:	gdb-6.6-buildid-locate-core-as-arg.patch
 Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
+Patch105:	gdb-6.3-gstack-20050411.patch
+Patch106:	gdb-gdb-add-index-script.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
@@ -172,6 +174,8 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch102 -p1
 %patch103 -p1
 %patch104 -p1
+%patch105 -p1
+%patch106 -p1
 
 %patch1000 -p1
 %patch1001 -p1
@@ -295,6 +299,8 @@ rm -rf $RPM_BUILD_ROOT
 %doc gdb/{ChangeLog,NEWS,PROBLEMS,README}
 %attr(755,root,root) %{_bindir}/gdb
 %attr(755,root,root) %{_bindir}/gdbtui
+%attr(755,root,root) %{_bindir}/gdb-add-index
+%attr(755,root,root) %{_bindir}/gstack
 %dir %{_datadir}/gdb
 %dir %{_datadir}/gdb/auto-load
 %dir %{_datadir}/gdb/auto-load%{_prefix}

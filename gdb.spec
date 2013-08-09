@@ -146,15 +146,15 @@ Summary:	GDB in the form of a static library
 Summary(pl.UTF-8):	GDB w postaci biblioteki statycznej
 Group:		Development/Debuggers
 # libraries that needs to be linked to fulfill libgdb.a symbol requirements
-Requires:	binutils-static >= 2.17.50
-Requires:	expat-static
-Requires:	libselinux-static
-Requires:	libsepol-static
-Requires:	ncurses-static
-Requires:	python-static
-Requires:	readline-static
-Requires:	xz-static
-Requires:	zlib-static
+Requires:	binutils-devel >= 2.17.50
+Requires:	expat-devel
+Requires:	libselinux-devel
+Requires:	libsepol-devel
+Requires:	ncurses-devel
+Requires:	python-devel
+Requires:	readline-devel
+Requires:	xz-devel
+Requires:	zlib-devel
 
 %description lib
 GDB in the form of a static library.

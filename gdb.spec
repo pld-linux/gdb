@@ -235,11 +235,11 @@ cp -f /usr/share/automake/config.* .
 	--without-included-regex \
 	--without-x
 
-%{__make} -j1
+%{__make}
 %{__make} -j1 info
 
 # gdb/ChangeLog: Build gdb directly from *.o files not using libgdb.a.
-%{__make} -j1 -C gdb libgdb.a
+%{__make} -C gdb libgdb.a
 
 %install
 rm -rf $RPM_BUILD_ROOT

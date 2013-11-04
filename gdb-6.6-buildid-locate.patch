@@ -23,7 +23,7 @@ Index: gdb-7.6/gdb/corelow.c
 +{
 +  CORE_ADDR at_entry;
 +  struct elf_build_id *build_id;
-+  char *exec_filename, *debug_filename;
++  char *execfilename, *debug_filename;
 +  char *build_id_filename;
 +  struct cleanup *back_to;
 +
@@ -44,14 +44,14 @@ Index: gdb-7.6/gdb/corelow.c
 +     file - such .eh_frame would not be found if SYMFILE_OBJFILE would refer
 +     directly to the separate debug info file.  */
 +
-+  exec_filename = build_id_to_filename (build_id, &build_id_filename, 0);
++  execfilename = build_id_to_filename (build_id, &build_id_filename, 0);
 +  make_cleanup (xfree, build_id_filename);
 +
-+  if (exec_filename != NULL)
++  if (execfilename != NULL)
 +    {
-+      make_cleanup (xfree, exec_filename);
-+      exec_file_attach (exec_filename, from_tty);
-+      symbol_file_add_main (exec_filename, from_tty);
++      make_cleanup (xfree, execfilename);
++      exec_file_attach (execfilename, from_tty);
++      symbol_file_add_main (execfilename, from_tty);
 +      if (symfile_objfile != NULL)
 +        symfile_objfile->flags |= OBJF_BUILD_ID_CORE_LOADED;
 +    }

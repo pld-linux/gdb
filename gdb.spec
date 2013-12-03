@@ -21,7 +21,7 @@ Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
 Version:	7.6.1
-Release:	1
+Release:	2
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
@@ -36,6 +36,7 @@ Patch103:	gdb-6.6-buildid-locate-core-as-arg.patch
 Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
 Patch105:	gdb-6.3-gstack-20050411.patch
 Patch106:	gdb-gdb-add-index-script.patch
+Patch107:	floatformat_ibm_long_double.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
@@ -176,6 +177,7 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch104 -p1
 %patch105 -p1
 %patch106 -p1
+%patch107 -p1
 
 %patch1000 -p1
 %patch1001 -p1

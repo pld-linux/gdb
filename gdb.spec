@@ -1,5 +1,4 @@
-# NOTE
-# - Do not remove -lib package, it is required by FPC
+# NOTE: -lib package is used by fpc.spec
 
 # TODO
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
@@ -20,12 +19,12 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
-Version:	7.6.1
-Release:	2
+Version:	7.6.2
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	fbc4dab4181e6e9937075b43a4ce2732
+# Source0-md5:	496399e96654fc0f899a5c964bc1f0f8
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -278,14 +277,12 @@ cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_mandir}/man1/gstack.1
 install libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
-# These are part of binutils
-rm -rf $RPM_BUILD_ROOT%{_localedir}
-rm -f $RPM_BUILD_ROOT%{_infodir}/bfd*
-rm -f $RPM_BUILD_ROOT%{_infodir}/standard*
-rm -f $RPM_BUILD_ROOT%{_infodir}/mmalloc*
-rm -f $RPM_BUILD_ROOT%{_infodir}/configure*
-rm -rf $RPM_BUILD_ROOT%{_includedir}
-rm -rf $RPM_BUILD_ROOT%{_libdir}/lib{bfd*,opcodes*,iberty*,mmalloc*}
+# These are part of binutils:
+%{__rm} $RPM_BUILD_ROOT%{_localedir}/*/LC_MESSAGES/{bfd,opcodes}.mo
+%{__rm} $RPM_BUILD_ROOT%{_infodir}/{bfd,configure,standards}.info*
+%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,dis-asm,symcat}.h
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.la
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,iberty,opcodes}.a
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -335,3 +332,4 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %{_libdir}/libdecnumber.a
 %{_libdir}/libgdb.a
+%{_includedir}/gdb

@@ -1,14 +1,14 @@
---- gdb-6.8.50.20081125/gdb/valprint.c~	2008-11-26 17:29:53.836145817 +0100
-+++ gdb-6.8.50.20081125/gdb/valprint.c	2008-11-26 17:31:59.193231994 +0100
-@@ -65,12 +65,12 @@
+--- gdb-7.7.1/gdb/valprint.c.orig	2014-06-04 16:13:46.353948386 +0200
++++ gdb-7.7.1/gdb/valprint.c	2014-06-04 16:15:55.599699077 +0200
+@@ -108,12 +108,12 @@
  struct value_print_options user_print_options =
  {
-   Val_pretty_default,		/* pretty */
--  0,				/* prettyprint_arrays */
--  0,				/* prettyprint_structs */
+   Val_prettyformat_default,	/* prettyformat */
+-  0,				/* prettyformat_arrays */
+-  0,				/* prettyformat_structs */
 -  0,				/* vtblprint */
-+  1,				/* prettyprint_arrays */
-+  1,				/* prettyprint_structs */
++  1,				/* prettyformat_arrays */
++  1,				/* prettyformat_structs */
 +  1,				/* vtblprint */
    1,				/* unionprint */
    1,				/* addressprint */

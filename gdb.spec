@@ -19,12 +19,12 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
-Version:	7.6.2
-Release:	1
+Version:	7.7.1
+Release:	0.1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	496399e96654fc0f899a5c964bc1f0f8
+# Source0-md5:	77b20b515e7c25f032cb9732a66620fe
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -33,9 +33,9 @@ Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
 Patch102:	gdb-6.6-buildid-locate-rpm.patch
 Patch103:	gdb-6.6-buildid-locate-core-as-arg.patch
 Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
-Patch105:	gdb-6.3-gstack-20050411.patch
-Patch106:	gdb-gdb-add-index-script.patch
-Patch107:	floatformat_ibm_long_double.patch
+Patch105:	gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
+Patch110:	gdb-6.3-gstack-20050411.patch
+Patch111:	gdb-gdb-add-index-script.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
@@ -175,8 +175,8 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch103 -p1
 %patch104 -p1
 %patch105 -p1
-%patch106 -p1
-%patch107 -p1
+%patch110 -p1
+%patch111 -p1
 
 %patch1000 -p1
 %patch1001 -p1
@@ -282,7 +282,7 @@ install libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 %{__rm} $RPM_BUILD_ROOT%{_infodir}/{bfd,configure,standards}.info*
 %{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,dis-asm,symcat}.h
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.la
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,iberty,opcodes}.a
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.a
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -300,6 +300,7 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/gdbtui
 %attr(755,root,root) %{_bindir}/gdb-add-index
 %attr(755,root,root) %{_bindir}/gstack
+%attr(755,root,root) %{_bindir}/gcore
 %dir %{_datadir}/gdb
 %dir %{_datadir}/gdb/auto-load
 %dir %{_datadir}/gdb/auto-load%{_prefix}
@@ -312,6 +313,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man1/gdb.1*
 %{_mandir}/man1/gdbtui.1*
 %{_mandir}/man1/gstack.1*
+%{_mandir}/man1/gcore.1*
 %lang(es) %{_mandir}/es/man1/*
 %lang(fr) %{_mandir}/fr/man1/*
 %lang(hu) %{_mandir}/hu/man1/*
@@ -319,7 +321,6 @@ rm -rf $RPM_BUILD_ROOT
 %lang(pl) %{_mandir}/pl/man1/*
 %{_infodir}/annotate.info*
 %{_infodir}/gdb.info*
-%{_infodir}/gdbint.info*
 %{_infodir}/stabs.info*
 
 %files gdbserver

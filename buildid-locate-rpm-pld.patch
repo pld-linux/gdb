@@ -1,6 +1,6 @@
---- gdb-7.5.0.20120926/gdb/elfread.c.orig	2012-11-18 20:50:42.844619396 +0100
-+++ gdb-7.5.0.20120926/gdb/elfread.c	2012-11-18 20:52:37.756554669 +0100
-@@ -2237,8 +2237,8 @@
+--- gdb-7.7.1/gdb/build-id.c.old	2014-06-05 14:31:11.000000000 +0200
++++ gdb-7.7.1/gdb/build-id.c	2014-06-05 14:33:12.248235380 +0200
+@@ -1190,8 +1190,8 @@
  	fprintf_unfiltered (gdb_stdlog,
  			    _("Missing separate debuginfo for %s\n"), binary);
          if (debug != NULL)

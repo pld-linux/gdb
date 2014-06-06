@@ -309,11 +309,13 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/gdb/auto-load%{_prefix}/lib64
 %endif
 %{_datadir}/gdb/syscalls
+%{_datadir}/gdb/system-gdbinit
 %{_datadir}/gdb/python
 %{_mandir}/man1/gdb.1*
 %{_mandir}/man1/gdbtui.1*
 %{_mandir}/man1/gstack.1*
 %{_mandir}/man1/gcore.1*
+%{_mandir}/man5/gdbinit.5*
 %lang(es) %{_mandir}/es/man1/*
 %lang(fr) %{_mandir}/fr/man1/*
 %lang(hu) %{_mandir}/hu/man1/*

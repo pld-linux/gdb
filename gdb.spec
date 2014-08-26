@@ -19,12 +19,12 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
-Version:	7.7.1
+Version:	7.8
 Release:	0.1
 License:	GPL v3+
 Group:		Development/Debuggers
-Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.bz2
-# Source0-md5:	77b20b515e7c25f032cb9732a66620fe
+Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
+# Source0-md5:	bd958fe9019d7c7896f29f6724a764ed
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -313,6 +313,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gdb/python
 %{_mandir}/man1/gdb.1*
 %{_mandir}/man1/gdbtui.1*
+%{_mandir}/man1/gdb-add-index.1*
 %{_mandir}/man1/gstack.1*
 %{_mandir}/man1/gcore.1*
 %{_mandir}/man5/gdbinit.5*

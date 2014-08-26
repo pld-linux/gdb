@@ -20,7 +20,7 @@ Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
 Version:	7.8
-Release:	0.1
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
@@ -36,6 +36,10 @@ Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
 Patch105:	gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
 Patch110:	gdb-6.3-gstack-20050411.patch
 Patch111:	gdb-gdb-add-index-script.patch
+Patch112:	gdb-archer-vla-tests.patch
+Patch113:	gdb-vla-intel.patch
+Patch114:	gdb-vla-intel-04of23-fix.patch
+Patch115:	gdb-vla-intel-stringbt-fix.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
@@ -177,6 +181,10 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch105 -p1
 %patch110 -p1
 %patch111 -p1
+%patch112 -p1
+%patch113 -p1
+%patch114 -p1
+%patch115 -p1
 
 %patch1000 -p1
 %patch1001 -p1

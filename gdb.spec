@@ -50,6 +50,7 @@ URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.69
 BuildRequires:	automake
 BuildRequires:	bison
+BuildRequires:	babeltrace-devel
 BuildRequires:	expat-devel
 BuildRequires:	flex
 BuildRequires:	gettext-devel

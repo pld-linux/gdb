@@ -4,6 +4,7 @@
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
 #
 # Conditional build:
+%bcond_without	guile		# Guile embedded scripting
 %bcond_without	python		# build without python support
 
 Summary:	A GNU source-level debugger for C, C++ and Fortran
@@ -52,6 +53,7 @@ BuildRequires:	bison
 BuildRequires:	expat-devel
 BuildRequires:	flex
 BuildRequires:	gettext-devel
+%{?with_guile:BuildRequires:	guile-devel >= 2.0}
 BuildRequires:	libselinux-devel
 BuildRequires:	libtool
 BuildRequires:	libunwind-devel >= 0.97
@@ -227,6 +229,11 @@ cp -f /usr/share/automake/config.* .
 %else
 	--without-python \
 %endif
+%if %{with guile}
+	--with-guile \
+%else
+	--without-guile \
+%endif
 	--disable-gdbtk \
 	--disable-shared \
 	--enable-gdbcli \
@@ -316,6 +323,7 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %{x8664}
 %dir %{_datadir}/gdb/auto-load%{_prefix}/lib64
 %endif
+%{?with_guile:%{_datadir}/gdb/guile}
 %{_datadir}/gdb/syscalls
 %{_datadir}/gdb/system-gdbinit
 %{_datadir}/gdb/python

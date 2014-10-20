@@ -72,6 +72,7 @@ Obsoletes:	python-gdb
 Requires:	python-modules
 %endif
 Requires:	libunwind >= 0.97
+%{?with_guile:Requires:	guile >= 2.0}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description

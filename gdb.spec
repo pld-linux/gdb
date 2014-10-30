@@ -20,12 +20,12 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
-Version:	7.8
+Version:	7.8.1
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	bd958fe9019d7c7896f29f6724a764ed
+# Source0-md5:	8072be87a94be0936bc3b4b6941b0862
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man

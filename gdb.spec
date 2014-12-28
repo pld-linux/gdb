@@ -53,7 +53,7 @@ BuildRequires:	bison
 BuildRequires:	babeltrace-devel
 BuildRequires:	expat-devel
 BuildRequires:	flex
-BuildRequires:	gettext-devel
+BuildRequires:	gettext-tools
 %{?with_guile:BuildRequires:	guile-devel >= 2.0}
 BuildRequires:	libselinux-devel
 BuildRequires:	libtool

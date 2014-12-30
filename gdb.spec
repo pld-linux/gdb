@@ -57,7 +57,6 @@ BuildRequires:	gettext-tools
 %{?with_guile:BuildRequires:	guile-devel >= 2.0}
 BuildRequires:	libselinux-devel
 BuildRequires:	libtool
-BuildRequires:	libunwind-devel >= 0.97
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel

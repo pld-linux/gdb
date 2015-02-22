@@ -20,12 +20,12 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
-Version:	7.8.1
+Version:	7.9
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	8072be87a94be0936bc3b4b6941b0862
+# Source0-md5:	e6279f26559d839f0b4218a482bcb43e
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -41,6 +41,7 @@ Patch112:	gdb-archer-vla-tests.patch
 Patch113:	gdb-vla-intel.patch
 Patch114:	gdb-vla-intel-04of23-fix.patch
 Patch115:	gdb-vla-intel-stringbt-fix.patch
+Patch116:	gdb-vla-intel-logical-not.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
@@ -187,6 +188,7 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch113 -p1
 %patch114 -p1
 %patch115 -p1
+%patch116 -p1
 
 %patch1000 -p1
 %patch1001 -p1
@@ -294,8 +296,8 @@ install libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
 # These are part of binutils:
 %{__rm} $RPM_BUILD_ROOT%{_localedir}/*/LC_MESSAGES/{bfd,opcodes}.mo
-%{__rm} $RPM_BUILD_ROOT%{_infodir}/{bfd,configure,standards}.info*
-%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,dis-asm,symcat}.h
+%{__rm} $RPM_BUILD_ROOT%{_infodir}/bfd.info*
+%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,dis-asm,symcat,plugin-api}.h
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.la
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.a
 

@@ -31,11 +31,11 @@ Jan
 Content-Type: text/plain; charset=us-ascii
 Content-Disposition: inline; filename="vlastringonly.patch"
 
-diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
-index 53cae2c..cf7ac26 100644
---- a/gdb/gdbtypes.c
-+++ b/gdb/gdbtypes.c
-@@ -1659,6 +1659,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
+Index: gdb-7.8.50.20141228/gdb/gdbtypes.c
+===================================================================
+--- gdb-7.8.50.20141228.orig/gdb/gdbtypes.c	2015-01-08 18:15:18.475682523 +0100
++++ gdb-7.8.50.20141228/gdb/gdbtypes.c	2015-01-08 18:39:01.423134700 +0100
+@@ -1684,6 +1684,7 @@ is_dynamic_type_internal (struct type *t
        return !has_static_range (TYPE_RANGE_DATA (type));
  
      case TYPE_CODE_ARRAY:
@@ -43,11 +43,18 @@ index 53cae2c..cf7ac26 100644
        {
  	gdb_assert (TYPE_NFIELDS (type) == 1);
  
-diff --git a/gdb/testsuite/gdb.fortran/dynamic-other-frame-stub.f90 b/gdb/testsuite/gdb.fortran/dynamic-other-frame-stub.f90
-new file mode 100644
-index 0000000..261ce17
---- /dev/null
-+++ b/gdb/testsuite/gdb.fortran/dynamic-other-frame-stub.f90
+@@ -1992,6 +1993,7 @@ resolve_dynamic_type_internal (struct ty
+ 	  }
+ 
+ 	case TYPE_CODE_ARRAY:
++	case TYPE_CODE_STRING:
+ 	  resolved_type = resolve_dynamic_array (type, addr);
+ 	  break;
+ 
+Index: gdb-7.8.50.20141228/gdb/testsuite/gdb.fortran/dynamic-other-frame-stub.f90
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-7.8.50.20141228/gdb/testsuite/gdb.fortran/dynamic-other-frame-stub.f90	2015-01-08 18:15:18.897684435 +0100
 @@ -0,0 +1,24 @@
 +! Copyright 2010 Free Software Foundation, Inc.
 +!
@@ -73,11 +80,10 @@ index 0000000..261ce17
 +  real :: dummy
 +  dummy = 1
 +end subroutine bar
-diff --git a/gdb/testsuite/gdb.fortran/dynamic-other-frame.exp b/gdb/testsuite/gdb.fortran/dynamic-other-frame.exp
-new file mode 100644
-index 0000000..570a28c
---- /dev/null
-+++ b/gdb/testsuite/gdb.fortran/dynamic-other-frame.exp
+Index: gdb-7.8.50.20141228/gdb/testsuite/gdb.fortran/dynamic-other-frame.exp
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-7.8.50.20141228/gdb/testsuite/gdb.fortran/dynamic-other-frame.exp	2015-01-08 18:15:18.897684435 +0100
 @@ -0,0 +1,39 @@
 +# Copyright 2010 Free Software Foundation, Inc.
 +
@@ -118,11 +124,10 @@ index 0000000..570a28c
 +}
 +
 +gdb_test "bt" {foo \(string='hello'.*}
-diff --git a/gdb/testsuite/gdb.fortran/dynamic-other-frame.f90 b/gdb/testsuite/gdb.fortran/dynamic-other-frame.f90
-new file mode 100644
-index 0000000..2bc637d
---- /dev/null
-+++ b/gdb/testsuite/gdb.fortran/dynamic-other-frame.f90
+Index: gdb-7.8.50.20141228/gdb/testsuite/gdb.fortran/dynamic-other-frame.f90
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-7.8.50.20141228/gdb/testsuite/gdb.fortran/dynamic-other-frame.f90	2015-01-08 18:15:18.897684435 +0100
 @@ -0,0 +1,36 @@
 +! Copyright 2010 Free Software Foundation, Inc.
 +!
@@ -160,6 +165,3 @@ index 0000000..2bc637d
 +  end interface
 +  call foo ('hello')
 +end
-
---FCuugMFkClbJLl1L--
-

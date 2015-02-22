@@ -58,24 +58,10 @@ Http://sourceware.org/ml/gdb-patches/2010-01/msg00517.html
 	* exec.c (exec_file_attach): Print a more useful error message if the
 	user did "gdb core".
 
-Index: gdb-7.7.50.20140609/gdb/exceptions.h
+Index: gdb-7.8.50.20141228/gdb/exec.c
 ===================================================================
---- gdb-7.7.50.20140609.orig/gdb/exceptions.h	2014-06-13 20:26:46.988804553 +0200
-+++ gdb-7.7.50.20140609/gdb/exceptions.h	2014-06-13 20:27:01.930820057 +0200
-@@ -100,6 +100,9 @@ enum errors {
-   /* Requested feature, method, mechanism, etc. is not supported.  */
-   NOT_SUPPORTED_ERROR,
- 
-+  /* Attempt to load a core file as executable.  */
-+  IS_CORE_ERROR,
-+
-   /* Add more errors here.  */
-   NR_ERRORS
- };
-Index: gdb-7.7.50.20140609/gdb/exec.c
-===================================================================
---- gdb-7.7.50.20140609.orig/gdb/exec.c	2014-06-13 20:26:44.831802315 +0200
-+++ gdb-7.7.50.20140609/gdb/exec.c	2014-06-13 20:27:17.282836454 +0200
+--- gdb-7.8.50.20141228.orig/gdb/exec.c	2015-01-03 23:18:38.097427908 +0100
++++ gdb-7.8.50.20141228/gdb/exec.c	2015-01-03 23:19:02.448556391 +0100
 @@ -35,6 +35,7 @@
  #include "progspace.h"
  #include "gdb_bfd.h"
@@ -84,7 +70,7 @@ Index: gdb-7.7.50.20140609/gdb/exec.c
  
  #include <fcntl.h>
  #include "readline/readline.h"
-@@ -231,12 +232,27 @@ exec_file_attach (char *filename, int fr
+@@ -222,12 +223,27 @@ exec_file_attach (const char *filename,
  
        if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
  	{
@@ -115,11 +101,11 @@ Index: gdb-7.7.50.20140609/gdb/exec.c
  	}
  
        if (build_section_table (exec_bfd, &sections, &sections_end))
-Index: gdb-7.7.50.20140609/gdb/main.c
+Index: gdb-7.8.50.20141228/gdb/main.c
 ===================================================================
---- gdb-7.7.50.20140609.orig/gdb/main.c	2014-06-13 20:26:44.831802315 +0200
-+++ gdb-7.7.50.20140609/gdb/main.c	2014-06-13 20:26:46.990804555 +0200
-@@ -341,6 +341,36 @@ typedef struct cmdarg {
+--- gdb-7.8.50.20141228.orig/gdb/main.c	2015-01-03 23:18:38.098427913 +0100
++++ gdb-7.8.50.20141228/gdb/main.c	2015-01-03 23:22:10.157546792 +0100
+@@ -426,6 +426,36 @@ typedef struct cmdarg {
  /* Define type VEC (cmdarg_s).  */
  DEF_VEC_O (cmdarg_s);
  
@@ -128,7 +114,7 @@ Index: gdb-7.7.50.20140609/gdb/main.c
 +   core_file_command failed to find a matching executable.  */
 +
 +static void
-+exec_or_core_file_attach (char *filename, int from_tty)
++exec_or_core_file_attach (const char *filename, int from_tty)
 +{
 +  volatile struct gdb_exception e;
 +
@@ -142,7 +128,7 @@ Index: gdb-7.7.50.20140609/gdb/main.c
 +    {
 +      if (e.error == IS_CORE_ERROR)
 +	{
-+	  core_file_command (filename, from_tty);
++	  core_file_command ((char *) filename, from_tty);
 +
 +	  /* Iff the core file found its executable suppress the error message
 +	     from exec_file_attach.  */
@@ -156,7 +142,7 @@ Index: gdb-7.7.50.20140609/gdb/main.c
  static int
  captured_main (void *data)
  {
-@@ -854,6 +884,8 @@ captured_main (void *data)
+@@ -910,6 +940,8 @@ captured_main (void *data)
  	{
  	  symarg = argv[optind];
  	  execarg = argv[optind];
@@ -165,11 +151,11 @@ Index: gdb-7.7.50.20140609/gdb/main.c
  	  optind++;
  	}
  
-@@ -1017,11 +1049,25 @@ captured_main (void *data)
+@@ -1069,11 +1101,26 @@ captured_main (void *data)
        && symarg != NULL
        && strcmp (execarg, symarg) == 0)
      {
-+      catch_command_errors_ftype *func;
++      catch_command_errors_const_ftype *func;
 +
 +      /* Call exec_or_core_file_attach only if the file was specified as
 +	 a command line argument (and not an a command line option).  */
@@ -184,13 +170,28 @@ Index: gdb-7.7.50.20140609/gdb/main.c
        /* The exec file and the symbol-file are the same.  If we can't
           open it, better only print one error message.
 -         catch_command_errors returns non-zero on success!  */
--      if (catch_command_errors (exec_file_attach, execarg,
--				!batch_flag, RETURN_MASK_ALL))
+-      if (catch_command_errors_const (exec_file_attach, execarg,
+-				      !batch_flag, RETURN_MASK_ALL))
 +         catch_command_errors returns non-zero on success!
 +	 Do not load EXECARG as a symbol file if it has been already processed
 +	 as a core file.  */
-+      if (catch_command_errors (func, execarg, !batch_flag, RETURN_MASK_ALL)
++      if (catch_command_errors_const (func, execarg, !batch_flag,
++				      RETURN_MASK_ALL)
 +	  && core_bfd == NULL)
  	catch_command_errors_const (symbol_file_add_main, symarg,
  				    !batch_flag, RETURN_MASK_ALL);
      }
+Index: gdb-7.8.50.20141228/gdb/common/common-exceptions.h
+===================================================================
+--- gdb-7.8.50.20141228.orig/gdb/common/common-exceptions.h	2015-01-03 23:18:38.097427908 +0100
++++ gdb-7.8.50.20141228/gdb/common/common-exceptions.h	2015-01-03 23:19:02.449556396 +0100
+@@ -99,6 +99,9 @@ enum errors {
+   /* Requested feature, method, mechanism, etc. is not supported.  */
+   NOT_SUPPORTED_ERROR,
+ 
++  /* Attempt to load a core file as executable.  */
++  IS_CORE_ERROR,
++
+   /* Add more errors here.  */
+   NR_ERRORS
+ };

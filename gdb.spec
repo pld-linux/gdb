@@ -21,7 +21,7 @@ Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
 Version:	7.9
-Release:	2
+Release:	3
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
@@ -279,7 +279,7 @@ rm -f $RPM_BUILD_ROOT%{_mandir}/README.gdb-non-english-man-pages
 
 %if %{with python}
 # Temporarily now:
-for LIB in lib lib64; do
+for LIB in lib lib64 libx32; do
 	LIBPATH="$RPM_BUILD_ROOT%{_datadir}/gdb/auto-load%{_prefix}/$LIB"
 	install -d $LIBPATH
 done
@@ -322,8 +322,9 @@ rm -rf $RPM_BUILD_ROOT
 %dir %{_datadir}/gdb/auto-load
 %dir %{_datadir}/gdb/auto-load%{_prefix}
 %dir %{_datadir}/gdb/auto-load%{_prefix}/lib
-%ifarch %{x8664}
+%ifarch %{x8664} x32
 %dir %{_datadir}/gdb/auto-load%{_prefix}/lib64
+%dir %{_datadir}/gdb/auto-load%{_prefix}/libx32
 %endif
 %{?with_guile:%{_datadir}/gdb/guile}
 %{_datadir}/gdb/syscalls

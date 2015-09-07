@@ -15,10 +15,10 @@ Comments by Sergio Durigan Junior <sergiodj@redhat.com>:
   NULL after it is free'd, otherwise the code below thinks that it is still
   valid and doesn't print the necessary warning ("Try: yum install ...").
 
-Index: gdb-7.7/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
+Index: gdb-7.9.90.20150709/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
 ===================================================================
---- /dev/null
-+++ gdb-7.7/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ gdb-7.9.90.20150709/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp	2015-07-09 22:22:26.278304653 +0200
 @@ -0,0 +1,97 @@
 +#   Copyright (C) 2014  Free Software Foundation, Inc.
 +
@@ -75,7 +75,7 @@ Index: gdb-7.7/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.
 +# Move the binfile to a temporary name
 +remote_exec build "mv $binfile ${binfile}.old"
 +
-+# Reinitialize GDB and see if we get a yum warning
++# Reinitialize GDB and see if we get a yum/dnf warning
 +gdb_exit
 +gdb_start
 +gdb_reinitialize_dir $srcdir/$subdir
@@ -88,8 +88,8 @@ Index: gdb-7.7/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.
 +	"set debug-file-directory"
 +
 +    gdb_test "core-file ${objdir}/${subdir}/gcore.test" \
-+	"Missing separate debuginfo for the main executable file\r\nTry: yum --enablerepo='\\*debug\\*' install $objdir/$subdir/$build_id_without_debug\r\n.*" \
-+	"test first yum warning"
++	"Missing separate debuginfo for the main executable file\r\nTry: (yum|dnf) --enablerepo='\\*debug\\*' install $objdir/$subdir/$build_id_without_debug\r\n.*" \
++	"test first yum/dnf warning"
 +}
 +
 +# Now we define and create our .build-id
@@ -98,7 +98,7 @@ Index: gdb-7.7/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.
 +# exist.
 +remote_exec build "ln -s $binfile ${objdir}/${subdir}/${build_id_without_debug}"
 +
-+# Reinitialize GDB to get the second yum warning
++# Reinitialize GDB to get the second yum/dnf warning
 +gdb_exit
 +gdb_start
 +gdb_reinitialize_dir $srcdir/$subdir
@@ -111,21 +111,25 @@ Index: gdb-7.7/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.
 +	"set debug-file-directory"
 +
 +    gdb_test "core-file ${objdir}/${subdir}/gcore.test" \
-+	"Missing separate debuginfo for the main executable file\r\nTry: yum --enablerepo='\\*debug\\*' install $binfile\r\n.*" \
-+	"test second yum warning"
++	"Missing separate debuginfo for the main executable file\r\nTry: (yum|dnf) --enablerepo='\\*debug\\*' install $binfile\r\n.*" \
++	"test second yum/dnf warning"
 +}
 +
 +# Leaving the link there will cause breakage in the next run.
 +remote_exec build "rm -f ${objdir}/${subdir}/${build_id_without_debug}"
-Index: gdb-7.7/gdb/build-id.c
+Index: gdb-7.9.90.20150709/gdb/build-id.c
 ===================================================================
---- gdb-7.7.orig/gdb/build-id.c
-+++ gdb-7.7/gdb/build-id.c
-@@ -588,6 +588,7 @@ build_id_to_debug_bfd (size_t build_id_l
- 	  if (abfd == NULL)
- 	    {
- 	      xfree (filename);
-+	      filename = NULL;
- 	      continue;
- 	    }
+--- gdb-7.9.90.20150709.orig/gdb/build-id.c	2015-07-09 22:22:26.278304653 +0200
++++ gdb-7.9.90.20150709/gdb/build-id.c	2015-07-09 22:22:51.398502329 +0200
+@@ -589,7 +589,10 @@ build_id_to_debug_bfd (size_t build_id_l
+ 	  do_cleanups (inner);
  
+ 	  if (abfd == NULL)
+-	    continue;
++	    {
++	      filename = NULL;
++	      continue;
++	    }
+ 
+ 	  if (build_id_verify (abfd, build_id_len, build_id))
+ 	    break;

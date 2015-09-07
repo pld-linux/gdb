@@ -58,10 +58,10 @@ Http://sourceware.org/ml/gdb-patches/2010-01/msg00517.html
 	* exec.c (exec_file_attach): Print a more useful error message if the
 	user did "gdb core".
 
-Index: gdb-7.8.50.20141228/gdb/exec.c
+Index: gdb-7.9.50.20150531/gdb/exec.c
 ===================================================================
---- gdb-7.8.50.20141228.orig/gdb/exec.c	2015-01-03 23:18:38.097427908 +0100
-+++ gdb-7.8.50.20141228/gdb/exec.c	2015-01-03 23:19:02.448556391 +0100
+--- gdb-7.9.50.20150531.orig/gdb/exec.c	2015-05-31 03:48:29.000000000 +0200
++++ gdb-7.9.50.20150531/gdb/exec.c	2015-05-31 20:07:35.092878685 +0200
 @@ -35,6 +35,7 @@
  #include "progspace.h"
  #include "gdb_bfd.h"
@@ -70,7 +70,7 @@ Index: gdb-7.8.50.20141228/gdb/exec.c
  
  #include <fcntl.h>
  #include "readline/readline.h"
-@@ -222,12 +223,27 @@ exec_file_attach (const char *filename,
+@@ -298,12 +299,27 @@ exec_file_attach (const char *filename,
  
        if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
  	{
@@ -101,11 +101,11 @@ Index: gdb-7.8.50.20141228/gdb/exec.c
  	}
  
        if (build_section_table (exec_bfd, &sections, &sections_end))
-Index: gdb-7.8.50.20141228/gdb/main.c
+Index: gdb-7.9.50.20150531/gdb/main.c
 ===================================================================
---- gdb-7.8.50.20141228.orig/gdb/main.c	2015-01-03 23:18:38.098427913 +0100
-+++ gdb-7.8.50.20141228/gdb/main.c	2015-01-03 23:22:10.157546792 +0100
-@@ -426,6 +426,36 @@ typedef struct cmdarg {
+--- gdb-7.9.50.20150531.orig/gdb/main.c	2015-05-31 20:07:34.183872824 +0200
++++ gdb-7.9.50.20150531/gdb/main.c	2015-05-31 20:10:05.095845935 +0200
+@@ -435,6 +435,37 @@ typedef struct cmdarg {
  /* Define type VEC (cmdarg_s).  */
  DEF_VEC_O (cmdarg_s);
  
@@ -120,11 +120,11 @@ Index: gdb-7.8.50.20141228/gdb/main.c
 +
 +  gdb_assert (exec_bfd == NULL);
 +
-+  TRY_CATCH (e, RETURN_MASK_ALL)
++  TRY
 +    {
 +      exec_file_attach (filename, from_tty);
 +    }
-+  if (e.reason < 0)
++  CATCH (e, RETURN_MASK_ALL)
 +    {
 +      if (e.error == IS_CORE_ERROR)
 +	{
@@ -137,12 +137,13 @@ Index: gdb-7.8.50.20141228/gdb/main.c
 +	}
 +      throw_exception (e);
 +    }
++  END_CATCH
 +}
 +
  static int
  captured_main (void *data)
  {
-@@ -910,6 +940,8 @@ captured_main (void *data)
+@@ -923,6 +954,8 @@ captured_main (void *data)
  	{
  	  symarg = argv[optind];
  	  execarg = argv[optind];
@@ -151,7 +152,7 @@ Index: gdb-7.8.50.20141228/gdb/main.c
  	  optind++;
  	}
  
-@@ -1069,11 +1101,26 @@ captured_main (void *data)
+@@ -1080,11 +1113,25 @@ captured_main (void *data)
        && symarg != NULL
        && strcmp (execarg, symarg) == 0)
      {
@@ -171,23 +172,22 @@ Index: gdb-7.8.50.20141228/gdb/main.c
           open it, better only print one error message.
 -         catch_command_errors returns non-zero on success!  */
 -      if (catch_command_errors_const (exec_file_attach, execarg,
--				      !batch_flag, RETURN_MASK_ALL))
+-				      !batch_flag))
 +         catch_command_errors returns non-zero on success!
 +	 Do not load EXECARG as a symbol file if it has been already processed
 +	 as a core file.  */
-+      if (catch_command_errors_const (func, execarg, !batch_flag,
-+				      RETURN_MASK_ALL)
++      if (catch_command_errors_const (func, execarg, !batch_flag)
 +	  && core_bfd == NULL)
  	catch_command_errors_const (symbol_file_add_main, symarg,
- 				    !batch_flag, RETURN_MASK_ALL);
+ 				    !batch_flag);
      }
-Index: gdb-7.8.50.20141228/gdb/common/common-exceptions.h
+Index: gdb-7.9.50.20150531/gdb/common/common-exceptions.h
 ===================================================================
---- gdb-7.8.50.20141228.orig/gdb/common/common-exceptions.h	2015-01-03 23:18:38.097427908 +0100
-+++ gdb-7.8.50.20141228/gdb/common/common-exceptions.h	2015-01-03 23:19:02.449556396 +0100
-@@ -99,6 +99,9 @@ enum errors {
-   /* Requested feature, method, mechanism, etc. is not supported.  */
-   NOT_SUPPORTED_ERROR,
+--- gdb-7.9.50.20150531.orig/gdb/common/common-exceptions.h	2015-05-31 03:48:29.000000000 +0200
++++ gdb-7.9.50.20150531/gdb/common/common-exceptions.h	2015-05-31 20:07:35.093878692 +0200
+@@ -105,6 +105,9 @@ enum errors {
+      "_ERROR" is appended to the name.  */
+   MAX_COMPLETIONS_REACHED_ERROR,
  
 +  /* Attempt to load a core file as executable.  */
 +  IS_CORE_ERROR,

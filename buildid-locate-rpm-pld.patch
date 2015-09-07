@@ -1,11 +1,16 @@
 --- gdb-7.7.1/gdb/build-id.c.old	2014-06-05 14:31:11.000000000 +0200
 +++ gdb-7.7.1/gdb/build-id.c	2014-06-05 14:33:12.248235380 +0200
-@@ -1190,8 +1190,8 @@
+@@ -1190,13 +1190,8 @@
  	fprintf_unfiltered (gdb_stdlog,
  			    _("Missing separate debuginfo for %s\n"), binary);
          if (debug != NULL)
 -	  fprintf_unfiltered (gdb_stdlog, _("Try: %s %s\n"),
--			      "yum --enablerepo='*debug*' install", debug);
+-#ifdef DNF_DEBUGINFO_INSTALL
+-			      "dnf"
+-#else
+-			      "yum"
+-#endif
+-			      " --enablerepo='*debug*' install", debug);
 +	  fprintf_unfiltered (gdb_stdlog, _("Try to install package that provides `%s' file\n"),
 +			      debug);
        }

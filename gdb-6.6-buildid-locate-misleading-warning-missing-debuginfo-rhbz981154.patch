@@ -15,10 +15,10 @@ Comments by Sergio Durigan Junior <sergiodj@redhat.com>:
   NULL after it is free'd, otherwise the code below thinks that it is still
   valid and doesn't print the necessary warning ("Try: yum install ...").
 
-Index: gdb-7.9.90.20150709/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
+Index: gdb-7.10.90.20160211/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.9.90.20150709/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp	2015-07-09 22:22:26.278304653 +0200
++++ gdb-7.10.90.20160211/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp	2016-02-15 23:31:06.327941085 +0100
 @@ -0,0 +1,97 @@
 +#   Copyright (C) 2014  Free Software Foundation, Inc.
 +
@@ -51,9 +51,9 @@ Index: gdb-7.9.90.20150709/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-inst
 +}
 +
 +# We first need to generate a corefile
-+set escapedfilename [string_to_regexp ${objdir}/${subdir}/gcore.test]
++set escapedfilename [string_to_regexp [standard_output_file gcore.test]]
 +set core_supported 0
-+gdb_test_multiple "gcore ${objdir}/${subdir}/gcore.test" \
++gdb_test_multiple "gcore [standard_output_file gcore.test]" \
 +	"save a corefile" \
 +{
 +  -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
@@ -84,19 +84,19 @@ Index: gdb-7.9.90.20150709/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-inst
 +    gdb_test "set build-id-verbose 1" "" \
 +	"set build-id-verbose"
 +
-+    gdb_test "set debug-file-directory ${objdir}/${subdir}" "" \
++    gdb_test "set debug-file-directory [file dirname [standard_output_file gcore.test]]" "" \
 +	"set debug-file-directory"
 +
-+    gdb_test "core-file ${objdir}/${subdir}/gcore.test" \
-+	"Missing separate debuginfo for the main executable file\r\nTry: (yum|dnf) --enablerepo='\\*debug\\*' install $objdir/$subdir/$build_id_without_debug\r\n.*" \
++    gdb_test "core-file [standard_output_file gcore.test]" \
++	"Missing separate debuginfo for the main executable file\r\nTry: (yum|dnf) --enablerepo='\\*debug\\*' install [standard_output_file $build_id_without_debug]\r\n.*" \
 +	"test first yum/dnf warning"
 +}
 +
 +# Now we define and create our .build-id
-+file mkdir [file dirname ${objdir}/${subdir}/${build_id_without_debug}]
++file mkdir [file dirname [standard_output_file ${build_id_without_debug}]]
 +# Cannot use "file link" (from TCL) because it requires the target file to
 +# exist.
-+remote_exec build "ln -s $binfile ${objdir}/${subdir}/${build_id_without_debug}"
++remote_exec build "ln -s $binfile [standard_output_file ${build_id_without_debug}]"
 +
 +# Reinitialize GDB to get the second yum/dnf warning
 +gdb_exit
@@ -107,21 +107,21 @@ Index: gdb-7.9.90.20150709/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-inst
 +    gdb_test "set build-id-verbose 1" "" \
 +	"set build-id-verbose"
 +
-+    gdb_test "set debug-file-directory ${objdir}/${subdir}" "" \
++    gdb_test "set debug-file-directory [file dirname [standard_output_file gcore.test]]" "" \
 +	"set debug-file-directory"
 +
-+    gdb_test "core-file ${objdir}/${subdir}/gcore.test" \
++    gdb_test "core-file [standard_output_file gcore.test]" \
 +	"Missing separate debuginfo for the main executable file\r\nTry: (yum|dnf) --enablerepo='\\*debug\\*' install $binfile\r\n.*" \
 +	"test second yum/dnf warning"
 +}
 +
 +# Leaving the link there will cause breakage in the next run.
-+remote_exec build "rm -f ${objdir}/${subdir}/${build_id_without_debug}"
-Index: gdb-7.9.90.20150709/gdb/build-id.c
++remote_exec build "rm -f [standard_output_file ${build_id_without_debug}]"
+Index: gdb-7.10.90.20160211/gdb/build-id.c
 ===================================================================
---- gdb-7.9.90.20150709.orig/gdb/build-id.c	2015-07-09 22:22:26.278304653 +0200
-+++ gdb-7.9.90.20150709/gdb/build-id.c	2015-07-09 22:22:51.398502329 +0200
-@@ -589,7 +589,10 @@ build_id_to_debug_bfd (size_t build_id_l
+--- gdb-7.10.90.20160211.orig/gdb/build-id.c	2016-02-15 23:30:55.389863424 +0100
++++ gdb-7.10.90.20160211/gdb/build-id.c	2016-02-15 23:30:55.778866186 +0100
+@@ -589,7 +589,10 @@
  	  do_cleanups (inner);
  
  	  if (abfd == NULL)

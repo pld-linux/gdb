@@ -165,17 +165,3 @@ Index: gdb-7.9.50.20150520/gdb/testsuite/gdb.fortran/dynamic-other-frame.f90
 +  end interface
 +  call foo ('hello')
 +end
-Index: gdb-7.9.50.20150520/gdb/testsuite/gdb.fortran/vla-strings.exp
-===================================================================
---- gdb-7.9.50.20150520.orig/gdb/testsuite/gdb.fortran/vla-strings.exp	2015-05-31 16:14:04.167533854 +0200
-+++ gdb-7.9.50.20150520/gdb/testsuite/gdb.fortran/vla-strings.exp	2015-05-31 16:14:31.073718201 +0200
-@@ -33,9 +33,6 @@ gdb_continue_to_breakpoint "var_char-all
- gdb_test "print var_char" \
-   " = \\(PTR TO -> \\( character\\*10 \\)\\) ${hex}" \
-   "print var_char after allocated first time"
--gdb_test "print *var_char" \
--  " = '\\\\000\\\\000\\\\000\\\\000\\\\000\\\\000\\\\000\\\\000\\\\000\\\\000'" \
--  "print *var_char after allocated first time"
- gdb_test "whatis var_char" "type = PTR TO -> \\( character\\*10 \\)" \
-   "whatis var_char first time"
- gdb_test "ptype var_char" "type = PTR TO -> \\( character\\*10 \\)" \

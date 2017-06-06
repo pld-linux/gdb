@@ -29,10 +29,7 @@ Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
-# https://sourceware.org/bugzilla/show_bug.cgi?id=20287
-Patch0:		gdb-bug-20287.patch
-# https://sourceware.org/bugzilla/show_bug.cgi?id=20413
-Patch1:		gdb-bug-20413.patch
+Patch0:		x32.patch
 Patch100:	gdb-6.6-buildid-locate.patch
 Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
 Patch102:	gdb-6.6-buildid-locate-rpm.patch

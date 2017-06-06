@@ -20,12 +20,12 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 %define		snap	20120926
 Name:		gdb
-Version:	7.11.1
-Release:	3
+Version:	8.0
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	5aa71522e488e358243917967db87476
+# Source0-md5:	c3d35cd949084be53b92cc1e03485f88
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -39,13 +39,14 @@ Patch102:	gdb-6.6-buildid-locate-rpm.patch
 Patch103:	gdb-6.6-buildid-locate-core-as-arg.patch
 Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
 Patch105:	gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
+Patch106:	gdb-6.6-buildid-locate-rpm-scl.patch
 Patch110:	gdb-6.3-gstack-20050411.patch
 Patch111:	gdb-gdb-add-index-script.patch
 Patch112:	gdb-archer-vla-tests.patch
-Patch113:	gdb-vla-intel.patch
-Patch114:	gdb-vla-intel-04of23-fix.patch
-Patch115:	gdb-vla-intel-stringbt-fix.patch
-Patch116:	gdb-vla-intel-logical-not.patch
+Patch113:	gdb-vla-intel-fortran-strides.patch
+Patch114:	gdb-vla-intel-stringbt-fix.patch
+Patch115:	gdb-vla-intel-fortran-vla-strings.patch
+Patch116:	gdb-vla-intel-tests.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
@@ -57,7 +58,7 @@ BuildRequires:	automake
 BuildRequires:	bison
 BuildRequires:	babeltrace-devel
 BuildRequires:	expat-devel
-BuildRequires:	flex
+BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools
 %{?with_guile:BuildRequires:	guile-devel >= 2.0}
 BuildRequires:	libselinux-devel
@@ -176,9 +177,6 @@ GDB w postaci biblioteki statycznej.
 %prep
 %setup -q
 
-%patch0 -p1
-%patch1 -p1
-
 # Files have `# <number> <file>' statements breaking VPATH / find-debuginfo.sh .
 rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
@@ -189,6 +187,7 @@ rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
 %patch103 -p1
 %patch104 -p1
 %patch105 -p1
+%patch106 -p1
 %patch110 -p1
 %patch111 -p1
 %patch112 -p1

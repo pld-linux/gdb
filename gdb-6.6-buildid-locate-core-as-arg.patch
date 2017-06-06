@@ -58,10 +58,10 @@ Http://sourceware.org/ml/gdb-patches/2010-01/msg00517.html
 	* exec.c (exec_file_attach): Print a more useful error message if the
 	user did "gdb core".
 
-Index: gdb-7.9.50.20150531/gdb/exec.c
+Index: gdb-7.12.50.20170226/gdb/exec.c
 ===================================================================
---- gdb-7.9.50.20150531.orig/gdb/exec.c	2015-05-31 03:48:29.000000000 +0200
-+++ gdb-7.9.50.20150531/gdb/exec.c	2015-05-31 20:07:35.092878685 +0200
+--- gdb-7.12.50.20170226.orig/gdb/exec.c	2017-02-27 22:18:00.945026211 +0100
++++ gdb-7.12.50.20170226/gdb/exec.c	2017-02-27 22:18:08.111076350 +0100
 @@ -35,6 +35,7 @@
  #include "progspace.h"
  #include "gdb_bfd.h"
@@ -70,7 +70,7 @@ Index: gdb-7.9.50.20150531/gdb/exec.c
  
  #include <fcntl.h>
  #include "readline/readline.h"
-@@ -298,12 +299,27 @@ exec_file_attach (const char *filename,
+@@ -359,12 +360,27 @@
  
        if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
  	{
@@ -101,13 +101,13 @@ Index: gdb-7.9.50.20150531/gdb/exec.c
  	}
  
        if (build_section_table (exec_bfd, &sections, &sections_end))
-Index: gdb-7.9.50.20150531/gdb/main.c
+Index: gdb-7.12.50.20170226/gdb/main.c
 ===================================================================
---- gdb-7.9.50.20150531.orig/gdb/main.c	2015-05-31 20:07:34.183872824 +0200
-+++ gdb-7.9.50.20150531/gdb/main.c	2015-05-31 20:10:05.095845935 +0200
-@@ -435,6 +435,37 @@ typedef struct cmdarg {
- /* Define type VEC (cmdarg_s).  */
- DEF_VEC_O (cmdarg_s);
+--- gdb-7.12.50.20170226.orig/gdb/main.c	2017-02-27 22:18:00.945026211 +0100
++++ gdb-7.12.50.20170226/gdb/main.c	2017-02-27 22:18:08.112076357 +0100
+@@ -459,6 +459,37 @@
+   char *string;
+ };
  
 +/* Call exec_file_attach.  If it detected FILENAME is a core file call
 +   core_file_command.  Print the original exec_file_attach error only if
@@ -140,10 +140,10 @@ Index: gdb-7.9.50.20150531/gdb/main.c
 +  END_CATCH
 +}
 +
- static int
- captured_main (void *data)
+ static void
+ captured_main_1 (struct captured_main_args *context, int &python_script)
  {
-@@ -923,6 +954,8 @@ captured_main (void *data)
+@@ -910,6 +941,8 @@
  	{
  	  symarg = argv[optind];
  	  execarg = argv[optind];
@@ -152,7 +152,7 @@ Index: gdb-7.9.50.20150531/gdb/main.c
  	  optind++;
  	}
  
-@@ -1080,11 +1113,25 @@ captured_main (void *data)
+@@ -1060,11 +1093,25 @@
        && symarg != NULL
        && strcmp (execarg, symarg) == 0)
      {
@@ -178,14 +178,14 @@ Index: gdb-7.9.50.20150531/gdb/main.c
 +	 as a core file.  */
 +      if (catch_command_errors_const (func, execarg, !batch_flag)
 +	  && core_bfd == NULL)
- 	catch_command_errors_const (symbol_file_add_main, symarg,
+ 	catch_command_errors_const (symbol_file_add_main_adapter, symarg,
  				    !batch_flag);
      }
-Index: gdb-7.9.50.20150531/gdb/common/common-exceptions.h
+Index: gdb-7.12.50.20170226/gdb/common/common-exceptions.h
 ===================================================================
---- gdb-7.9.50.20150531.orig/gdb/common/common-exceptions.h	2015-05-31 03:48:29.000000000 +0200
-+++ gdb-7.9.50.20150531/gdb/common/common-exceptions.h	2015-05-31 20:07:35.093878692 +0200
-@@ -105,6 +105,9 @@ enum errors {
+--- gdb-7.12.50.20170226.orig/gdb/common/common-exceptions.h	2017-02-27 22:18:00.946026218 +0100
++++ gdb-7.12.50.20170226/gdb/common/common-exceptions.h	2017-02-27 22:18:08.112076357 +0100
+@@ -106,6 +106,9 @@
       "_ERROR" is appended to the name.  */
    MAX_COMPLETIONS_REACHED_ERROR,
  

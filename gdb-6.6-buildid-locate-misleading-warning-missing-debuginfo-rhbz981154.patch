@@ -15,10 +15,10 @@ Comments by Sergio Durigan Junior <sergiodj@redhat.com>:
   NULL after it is free'd, otherwise the code below thinks that it is still
   valid and doesn't print the necessary warning ("Try: yum install ...").
 
-Index: gdb-7.10.90.20160211/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
+Index: gdb-7.12.50.20170207/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
 ===================================================================
 --- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.10.90.20160211/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp	2016-02-15 23:31:06.327941085 +0100
++++ gdb-7.12.50.20170207/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp	2017-02-26 19:14:58.492609659 +0100
 @@ -0,0 +1,97 @@
 +#   Copyright (C) 2014  Free Software Foundation, Inc.
 +
@@ -117,10 +117,10 @@ Index: gdb-7.10.90.20160211/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-ins
 +
 +# Leaving the link there will cause breakage in the next run.
 +remote_exec build "rm -f [standard_output_file ${build_id_without_debug}]"
-Index: gdb-7.10.90.20160211/gdb/build-id.c
+Index: gdb-7.12.50.20170207/gdb/build-id.c
 ===================================================================
---- gdb-7.10.90.20160211.orig/gdb/build-id.c	2016-02-15 23:30:55.389863424 +0100
-+++ gdb-7.10.90.20160211/gdb/build-id.c	2016-02-15 23:30:55.778866186 +0100
+--- gdb-7.12.50.20170207.orig/gdb/build-id.c	2017-02-26 19:14:51.943562799 +0100
++++ gdb-7.12.50.20170207/gdb/build-id.c	2017-02-26 19:14:58.492609659 +0100
 @@ -589,7 +589,10 @@
  	  do_cleanups (inner);
  
@@ -131,5 +131,5 @@ Index: gdb-7.10.90.20160211/gdb/build-id.c
 +	      continue;
 +	    }
  
- 	  if (build_id_verify (abfd, build_id_len, build_id))
+ 	  if (build_id_verify (abfd.get(), build_id_len, build_id))
  	    break;

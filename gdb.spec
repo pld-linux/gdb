@@ -1,6 +1,7 @@
 # NOTE: -lib package is used by fpc.spec
 
 # TODO
+# - rpm5 librpm support (gdb/configure.ac checks for 4.x or so)
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
 #
 # Conditional build:
@@ -53,18 +54,21 @@ URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.69
 BuildRequires:	automake
 BuildRequires:	bison
-BuildRequires:	babeltrace-devel
+BuildRequires:	babeltrace-devel >= 1.1.0
 BuildRequires:	expat-devel
 BuildRequires:	flex >= 2.6.4
-BuildRequires:	gettext-tools
+BuildRequires:	gettext-tools >= 0.12.1
 %{?with_guile:BuildRequires:	guile-devel >= 2.0}
 BuildRequires:	libselinux-devel
+BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	libtool
+BuildRequires:	make >= 3.81
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.219
 BuildRequires:	texinfo >= 4.4
+BuildRequires:	xz-devel
 BuildRequires:	zlib-devel
 %if %{with python}
 BuildRequires:	python-devel
@@ -271,16 +275,17 @@ install -d $RPM_BUILD_ROOT%{_infodir}
 %{__make} -j1 install install-info \
 	DESTDIR=$RPM_BUILD_ROOT
 
-# gdbtui seems all identical to gdb except when invoked as gdbtio, ncurses
+cp -a gdb/libgdb.a $RPM_BUILD_ROOT%{_libdir}
+
+# gdbtui seems all identical to gdb except when invoked as gdbtui, ncurses
 # window is created too.
 echo ".so gdb.1" > $RPM_BUILD_ROOT%{_mandir}/man1/gdbtui.1
 ln -f $RPM_BUILD_ROOT%{_bindir}/{gdb,gdbtui}
 
 bzip2 -dc %{SOURCE1} | tar xf - -C $RPM_BUILD_ROOT%{_mandir}
-cp -a gdb/libgdb.a $RPM_BUILD_ROOT%{_libdir}
+%{__rm} $RPM_BUILD_ROOT%{_mandir}/README.gdb-non-english-man-pages
 
 rm -f $RPM_BUILD_ROOT%{_infodir}/dir
-rm -f $RPM_BUILD_ROOT%{_mandir}/README.gdb-non-english-man-pages
 
 %if %{with python}
 # Temporarily now:

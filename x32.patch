@@ -20,8 +20,8 @@
  #else
    init_registers_amd64_linux ();
    init_registers_amd64_avx_linux ();
---- /home/users/baggins/devel/PLD/rpm/BUILD/gdb-8.0/gdb/gdbserver/configure.srv~	2017-06-04 17:51:26.000000000 +0200
-+++ /home/users/baggins/devel/PLD/rpm/BUILD/gdb-8.0/gdb/gdbserver/configure.srv	2017-06-08 07:56:18.541252390 +0200
+--- gdb-8.0/gdb/gdbserver/configure.srv~	2017-06-04 17:51:26.000000000 +0200
++++ gdb-8.0/gdb/gdbserver/configure.srv	2017-06-08 07:56:18.541252390 +0200
 @@ -31,6 +31,7 @@
  
  ipa_i386_linux_regobj="i386-linux-ipa.o i386-avx-linux-ipa.o  i386-avx-mpx-linux-ipa.o i386-avx-avx512-linux-ipa.o i386-avx-mpx-avx512-pku-linux-ipa.o i386-mpx-linux-ipa.o i386-mmx-linux-ipa.o"

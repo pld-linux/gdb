@@ -77,7 +77,7 @@ Obsoletes:	python-gdb
 # for traceback module
 Requires:	python-modules
 %endif
-%{?with_guile:Requires:	guile >= 2.0}
+%{?with_guile:Requires:	guile >= 2.0.12}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description

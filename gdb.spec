@@ -29,7 +29,6 @@ Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
-Patch0:		x32.patch
 Patch100:	gdb-6.6-buildid-locate.patch
 Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
 Patch102:	gdb-6.6-buildid-locate-rpm.patch
@@ -176,8 +175,6 @@ GDB w postaci biblioteki statycznej.
 
 %prep
 %setup -q
-
-%patch0 -p1
 
 # Files have `# <number> <file>' statements breaking VPATH / find-debuginfo.sh .
 rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c

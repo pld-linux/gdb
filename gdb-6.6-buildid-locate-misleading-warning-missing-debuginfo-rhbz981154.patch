@@ -1,3 +1,15 @@
+From FEDORA_PATCHES Mon Sep 17 00:00:00 2001
+From: Fedora GDB patches <invalid@email.com>
+Date: Fri, 27 Oct 2017 21:07:50 +0200
+Subject: 
+ gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
+
+FileName: gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
+
+;; Fix 'gdb gives highly misleading error when debuginfo pkg is present,
+;; but not corresponding binary pkg' (RH BZ 981154).
+;;=push+jan
+
 Comments by Sergio Durigan Junior <sergiodj@redhat.com>:
 
   This is the fix for RH BZ #981154
@@ -14,11 +26,33 @@ Comments by Sergio Durigan Junior <sergiodj@redhat.com>:
   and had a little thinko there.  The variable 'filename' needs to be set to
   NULL after it is free'd, otherwise the code below thinks that it is still
   valid and doesn't print the necessary warning ("Try: yum install ...").
+---
+ gdb/build-id.c                                     |  5 +-
+ .../rhbz981154-misleading-yum-install-warning.exp  | 97 ++++++++++++++++++++++
+ 2 files changed, 101 insertions(+), 1 deletion(-)
+ create mode 100644 gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
 
-Index: gdb-7.12.50.20170207/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.12.50.20170207/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp	2017-02-26 19:14:58.492609659 +0100
+diff --git a/gdb/build-id.c b/gdb/build-id.c
+index 409a5b8c54..e2c1e81266 100644
+--- a/gdb/build-id.c
++++ b/gdb/build-id.c
+@@ -592,7 +592,10 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id,
+ 	  do_cleanups (inner);
+ 
+ 	  if (abfd == NULL)
+-	    continue;
++	    {
++	      filename = NULL;
++	      continue;
++	    }
+ 
+ 	  if (build_id_verify (abfd.get(), build_id_len, build_id))
+ 	    break;
+diff --git a/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp b/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
+new file mode 100644
+index 0000000000..bb70c5cf44
+--- /dev/null
++++ b/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
 @@ -0,0 +1,97 @@
 +#   Copyright (C) 2014  Free Software Foundation, Inc.
 +
@@ -117,19 +151,6 @@ Index: gdb-7.12.50.20170207/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-ins
 +
 +# Leaving the link there will cause breakage in the next run.
 +remote_exec build "rm -f [standard_output_file ${build_id_without_debug}]"
-Index: gdb-7.12.50.20170207/gdb/build-id.c
-===================================================================
---- gdb-7.12.50.20170207.orig/gdb/build-id.c	2017-02-26 19:14:51.943562799 +0100
-+++ gdb-7.12.50.20170207/gdb/build-id.c	2017-02-26 19:14:58.492609659 +0100
-@@ -589,7 +589,10 @@
- 	  do_cleanups (inner);
- 
- 	  if (abfd == NULL)
--	    continue;
-+	    {
-+	      filename = NULL;
-+	      continue;
-+	    }
- 
- 	  if (build_id_verify (abfd.get(), build_id_len, build_id))
- 	    break;
+-- 
+2.14.3
+

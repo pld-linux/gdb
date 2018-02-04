@@ -1,5 +1,14 @@
+From FEDORA_PATCHES Mon Sep 17 00:00:00 2001
+From: Fedora GDB patches <invalid@email.com>
+Date: Fri, 27 Oct 2017 21:07:50 +0200
+Subject: RFC: add DWARF index support
+
+FileName: gdb-gdb-add-index-script.patch
+
+;; Provide /usr/bin/gdb-add-index for rpm-build (Tom Tromey).
+;;=push: Re-check against the upstream version.
+
 http://sourceware.org/ml/gdb-patches/2010-07/msg00184.html
-Subject: Re: [0/4] RFC: add DWARF index support
 
 Jan Kratochvil: Fixed $d -> $dir.
 Jan Kratochvil: Remove /dev/null redirection.
@@ -30,21 +39,17 @@ From: Tom Tromey <tromey@redhat.com>
 Date: Fri, 9 Jul 2010 11:17:54 -0600
 Subject: [PATCH 4/4] add gdb-add-index
 Subject: [PATCH 4/4] add gdb-add-index
-
 ---
- gdb/ChangeLog       |    5 +++++
- gdb/Makefile.in     |   11 ++++++++++-
- gdb/doc/ChangeLog   |    4 ++++
- gdb/doc/gdb.texinfo |    8 ++++++++
- gdb/gdb-add-index   |   30 ++++++++++++++++++++++++++++++
- 5 files changed, 57 insertions(+), 1 deletions(-)
- create mode 100755 gdb/gdb-add-index
+ gdb/Makefile.in     |  9 +++++++++
+ gdb/doc/Makefile.in |  9 ++++++++-
+ gdb/doc/gdb.texinfo | 57 +++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 74 insertions(+), 1 deletion(-)
 
-Index: gdb-7.6.90.20140127/gdb/Makefile.in
-===================================================================
---- gdb-7.6.90.20140127.orig/gdb/Makefile.in	2014-02-06 17:37:54.555975958 +0100
-+++ gdb-7.6.90.20140127/gdb/Makefile.in	2014-02-06 17:38:52.110038415 +0100
-@@ -1093,6 +1093,15 @@ install-only: install-gstack $(CONFIG_IN
+diff --git a/gdb/Makefile.in b/gdb/Makefile.in
+index e77d6a5c03..3142ad6af1 100644
+--- a/gdb/Makefile.in
++++ b/gdb/Makefile.in
+@@ -1770,6 +1770,15 @@ install-only: install-gstack $(CONFIG_INSTALL)
  		  $(INSTALL_SCRIPT) gcore \
  			  $(DESTDIR)$(bindir)/$$transformed_name; \
  	fi
@@ -60,11 +65,38 @@ Index: gdb-7.6.90.20140127/gdb/Makefile.in
  	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
  
  install-strip:
-Index: gdb-7.6.90.20140127/gdb/doc/gdb.texinfo
-===================================================================
---- gdb-7.6.90.20140127.orig/gdb/doc/gdb.texinfo	2014-02-06 17:37:50.822971940 +0100
-+++ gdb-7.6.90.20140127/gdb/doc/gdb.texinfo	2014-02-06 17:37:54.565975968 +0100
-@@ -17749,6 +17749,14 @@ There are currently some limitation on i
+diff --git a/gdb/doc/Makefile.in b/gdb/doc/Makefile.in
+index eafadee899..0323bc4ecb 100644
+--- a/gdb/doc/Makefile.in
++++ b/gdb/doc/Makefile.in
+@@ -174,7 +174,7 @@ POD2MAN5 = pod2man --center="GNU Development Tools" \
+ 		   --release="gdb-`sed q version.subst`" --section=5
+ 
+ # List of man pages generated from gdb.texi
+-MAN1S = gdb.1 gdbserver.1 gcore.1
++MAN1S = gdb.1 gdbserver.1 gcore.1 gdb-add-index.1
+ MAN5S = gdbinit.5
+ MANS = $(MAN1S) $(MAN5S)
+ 
+@@ -633,6 +633,13 @@ gcore.1: $(GDB_DOC_FILES)
+ 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+ 	rm -f gcore.pod
+ 
++gdb-add-index.1: $(GDB_DOC_FILES)
++	touch $@
++	-$(TEXI2POD) $(MANCONF) -Dgdb-add-index < $(srcdir)/gdb.texinfo > gdb-add-index.pod
++	-($(POD2MAN1) gdb-add-index.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
++		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
++	rm -f gdb-add-index.pod
++
+ gdbinit.5: $(GDB_DOC_FILES)
+ 	touch $@
+ 	-$(TEXI2POD) $(MANCONF) -Dgdbinit < $(srcdir)/gdb.texinfo > gdbinit.pod
+diff --git a/gdb/doc/gdb.texinfo b/gdb/doc/gdb.texinfo
+index 2f2cbd3dea..7b99ae1551 100644
+--- a/gdb/doc/gdb.texinfo
++++ b/gdb/doc/gdb.texinfo
+@@ -19796,6 +19796,14 @@ There are currently some limitation on indices.  They only work when
  for DWARF debugging information, not stabs.  And, they do not
  currently work for programs using Ada.
  
@@ -79,7 +111,7 @@ Index: gdb-7.6.90.20140127/gdb/doc/gdb.texinfo
  @node Symbol Errors
  @section Errors Reading Symbol Files
  
-@@ -43878,6 +43886,7 @@ switch (die->tag)
+@@ -42759,6 +42767,7 @@ switch (die->tag)
  * gdbserver man::               Remote Server for the GNU Debugger man page
  * gcore man::                   Generate a core file of a running program
  * gdbinit man::                 gdbinit scripts
@@ -87,22 +119,10 @@ Index: gdb-7.6.90.20140127/gdb/doc/gdb.texinfo
  @end menu
  
  @node gdb man
-@@ -44530,6 +44539,54 @@ gdb(1), @code{info -f gdb -n Startup}
- The full documentation for @value{GDBN} is maintained as a Texinfo manual.
- If the @code{info} and @code{gdb} programs and @value{GDBN}'s Texinfo
- documentation are properly installed at your site, the command
-+
-+@smallexample
-+info gdb
-+@end smallexample
-+
-+should give you access to the complete manual.
-+
-+@cite{Using GDB: A Guide to the GNU Source-Level Debugger},
-+Richard M. Stallman and Roland H. Pesch, July 1991.
-+@end ifset
-+@c man end
-+
+@@ -43435,6 +43444,54 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
+ @end ifset
+ @c man end
+ 
 +@node gdb-add-index man
 +@heading gdb-add-index
 +
@@ -139,33 +159,21 @@ Index: gdb-7.6.90.20140127/gdb/doc/gdb.texinfo
 +The full documentation for @value{GDBN} is maintained as a Texinfo manual.
 +If the @code{info} and @code{gdb} programs and @value{GDBN}'s Texinfo
 +documentation are properly installed at your site, the command
- 
- @smallexample
- info gdb
-Index: gdb-7.6.90.20140127/gdb/doc/Makefile.in
-===================================================================
---- gdb-7.6.90.20140127.orig/gdb/doc/Makefile.in	2014-02-06 17:37:50.824971942 +0100
-+++ gdb-7.6.90.20140127/gdb/doc/Makefile.in	2014-02-06 17:37:54.565975968 +0100
-@@ -165,7 +165,7 @@ POD2MAN5 = pod2man --center="GNU Develop
- 		   --release="gdb-`sed q version.subst`" --section=5
- 
- # List of man pages generated from gdb.texi
--MAN1S = gdb.1 gdbserver.1 gcore.1
-+MAN1S = gdb.1 gdbserver.1 gcore.1 gdb-add-index.1
- MAN5S = gdbinit.5
- MANS = $(MAN1S) $(MAN5S)
- 
-@@ -590,6 +590,13 @@ gcore.1: $(GDB_DOC_FILES)
- 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
- 	rm -f gcore.pod
- 
-+gdb-add-index.1: $(GDB_DOC_FILES)
-+	touch $@
-+	-$(TEXI2POD) $(MANCONF) -Dgdb-add-index < $(srcdir)/gdb.texinfo > gdb-add-index.pod
-+	-($(POD2MAN1) gdb-add-index.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
-+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
-+	rm -f gdb-add-index.pod
 +
- gdbinit.5: $(GDB_DOC_FILES)
- 	touch $@
- 	-$(TEXI2POD) $(MANCONF) -Dgdbinit < $(srcdir)/gdb.texinfo > gdbinit.pod
++@smallexample
++info gdb
++@end smallexample
++
++should give you access to the complete manual.
++
++@cite{Using GDB: A Guide to the GNU Source-Level Debugger},
++Richard M. Stallman and Roland H. Pesch, July 1991.
++@end ifset
++@c man end
++
+ @include gpl.texi
+ 
+ @node GNU Free Documentation License
+-- 
+2.14.3
+

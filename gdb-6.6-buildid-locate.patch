@@ -1,352 +1,34 @@
-Index: gdb-7.99.90.20170420/gdb/corelow.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/corelow.c	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/corelow.c	2017-04-20 23:00:43.358629183 +0200
-@@ -45,6 +45,10 @@
- #include "gdb_bfd.h"
- #include "completer.h"
- #include "filestuff.h"
-+#include "auxv.h"
-+#include "elf/common.h"
-+#include "gdbcmd.h"
-+#include "build-id.h"
- 
- #ifndef O_LARGEFILE
- #define O_LARGEFILE 0
-@@ -266,6 +270,54 @@
-     inferior_ptid = ptid;			/* Yes, make it current.  */
- }
- 
-+static int build_id_core_loads = 1;
-+
-+static void
-+build_id_locate_exec (int from_tty)
-+{
-+  CORE_ADDR at_entry;
-+  struct bfd_build_id *build_id;
-+  char *execfilename, *debug_filename;
-+  char *build_id_filename;
-+  struct cleanup *back_to;
-+
-+  if (exec_bfd != NULL || symfile_objfile != NULL)
-+    return;
-+
-+  if (target_auxv_search (&current_target, AT_ENTRY, &at_entry) <= 0)
-+    return;
-+
-+  build_id = build_id_addr_get (at_entry);
-+  if (build_id == NULL)
-+    return;
-+  back_to = make_cleanup (xfree, build_id);
-+
-+  /* SYMFILE_OBJFILE should refer to the main executable (not only to its
-+     separate debug info file).  gcc44+ keeps .eh_frame only in the main
-+     executable without its duplicate .debug_frame in the separate debug info
-+     file - such .eh_frame would not be found if SYMFILE_OBJFILE would refer
-+     directly to the separate debug info file.  */
-+
-+  execfilename = build_id_to_filename (build_id, &build_id_filename);
-+  make_cleanup (xfree, build_id_filename);
-+
-+  if (execfilename != NULL)
-+    {
-+      make_cleanup (xfree, execfilename);
-+      exec_file_attach (execfilename, from_tty);
-+      symbol_file_add_main (execfilename,
-+			    symfile_add_flag (!from_tty ? 0 : SYMFILE_VERBOSE));
-+      if (symfile_objfile != NULL)
-+        symfile_objfile->flags |= OBJF_BUILD_ID_CORE_LOADED;
-+    }
-+  else
-+    debug_print_missing (_("the main executable file"), build_id_filename);
-+
-+  do_cleanups (back_to);
-+
-+  /* No automatic SOLIB_ADD as the libraries would get read twice.  */
-+}
-+
- /* This routine opens and sets up the core file bfd.  */
- 
- static void
-@@ -402,6 +454,14 @@
- 	switch_to_thread (thread->ptid);
-     }
- 
-+  /* Find the build_id identifiers.  If it gets executed after
-+     POST_CREATE_INFERIOR we would clash with asking to discard the already
-+     loaded VDSO symbols.  If it gets executed before bfd_map_over_sections
-+     INFERIOR_PTID is still not set and libthread_db initialization crashes on
-+     PID == 0 in ps_pglobal_lookup.  */
-+  if (build_id_core_loads != 0)
-+    build_id_locate_exec (from_tty);
-+
-   post_create_inferior (&core_ops, from_tty);
- 
-   /* Now go through the target stack looking for threads since there
-@@ -1079,4 +1139,11 @@
-   init_core_ops ();
- 
-   add_target_with_completer (&core_ops, filename_completer);
-+
-+  add_setshow_boolean_cmd ("build-id-core-loads", class_files,
-+			   &build_id_core_loads, _("\
-+Set whether CORE-FILE loads the build-id associated files automatically."), _("\
-+Show whether CORE-FILE loads the build-id associated files automatically."),
-+			   NULL, NULL, NULL,
-+			   &setlist, &showlist);
- }
-Index: gdb-7.99.90.20170420/gdb/doc/gdb.texinfo
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/doc/gdb.texinfo	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/doc/gdb.texinfo	2017-04-20 23:00:43.366629228 +0200
-@@ -18987,6 +18987,27 @@
- 
- @end table
- 
-+You can also adjust the current verbosity of the @dfn{build id} locating.
-+
-+@table @code
-+
-+@kindex set build-id-verbose
-+@item set build-id-verbose 0
-+No additional messages are printed.
-+
-+@item set build-id-verbose 1
-+Missing separate debug filenames are printed.
-+
-+@item set build-id-verbose 2
-+Missing separate debug filenames are printed and also all the parsing of the
-+binaries to find their @dfn{build id} content is printed.
-+
-+@kindex show build-id-verbose
-+@item show build-id-verbose
-+Show the current verbosity value for the @dfn{build id} content locating.
-+
-+@end table
-+
- @cindex @code{.gnu_debuglink} sections
- @cindex debug link sections
- A debug link is a special section of the executable file named
-Index: gdb-7.99.90.20170420/gdb/solib-svr4.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/solib-svr4.c	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/solib-svr4.c	2017-04-20 23:00:43.367629234 +0200
-@@ -45,6 +45,7 @@
- #include "auxv.h"
- #include "gdb_bfd.h"
- #include "probe.h"
-+#include "build-id.h"
- 
- static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
- static int svr4_have_link_map_offsets (void);
-@@ -1420,9 +1421,52 @@
- 	  continue;
- 	}
- 
--      strncpy (newobj->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
--      newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
--      strcpy (newobj->so_original_name, newobj->so_name);
-+      {
-+	struct bfd_build_id *build_id;
-+
-+	strncpy (newobj->so_original_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
-+	newobj->so_original_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-+	/* May get overwritten below.  */
-+	strcpy (newobj->so_name, newobj->so_original_name);
-+
-+	build_id = build_id_addr_get (newobj->lm_info->l_ld);
-+	if (build_id != NULL)
-+	  {
-+	    char *name, *build_id_filename;
-+
-+	    /* Missing the build-id matching separate debug info file
-+	       would be handled while SO_NAME gets loaded.  */
-+	    name = build_id_to_filename (build_id, &build_id_filename);
-+	    if (name != NULL)
-+	      {
-+		strncpy (newobj->so_name, name, SO_NAME_MAX_PATH_SIZE - 1);
-+		newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
-+		xfree (name);
-+	      }
-+	    else
-+	      {
-+		debug_print_missing (newobj->so_name, build_id_filename);
-+
-+		/* In the case the main executable was found according to
-+		   its build-id (from a core file) prevent loading
-+		   a different build of a library with accidentally the
-+		   same SO_NAME.
-+
-+		   It suppresses bogus backtraces (and prints "??" there
-+		   instead) if the on-disk files no longer match the
-+		   running program version.  */
-+
-+		if (symfile_objfile != NULL
-+		    && (symfile_objfile->flags
-+			& OBJF_BUILD_ID_CORE_LOADED) != 0)
-+		  newobj->so_name[0] = 0;
-+	      }
-+
-+	    xfree (build_id_filename);
-+	    xfree (build_id);
-+	  }
-+      }
-+
-       xfree (buffer);
- 
-       /* If this entry has no name, or its name matches the name
-Index: gdb-7.99.90.20170420/gdb/elfread.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/elfread.c	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/elfread.c	2017-04-20 23:00:43.367629234 +0200
-@@ -1265,8 +1265,9 @@
- 	   && objfile->separate_debug_objfile == NULL
- 	   && objfile->separate_debug_objfile_backlink == NULL)
-     {
-+      gdb::unique_xmalloc_ptr<char> build_id_filename;
-       gdb::unique_xmalloc_ptr<char> debugfile
--	(find_separate_debug_file_by_buildid (objfile));
-+	(find_separate_debug_file_by_buildid (objfile, &build_id_filename));
- 
-       if (debugfile == NULL)
- 	debugfile.reset (find_separate_debug_file_by_debuglink (objfile));
-@@ -1278,6 +1279,10 @@
- 	  symbol_file_add_separate (abfd.get (), debugfile.get (),
- 				    symfile_flags, objfile);
- 	}
-+      /* Check if any separate debug info has been extracted out.  */
-+      else if (bfd_get_section_by_name (objfile->obfd, ".gnu_debuglink")
-+	       != NULL)
-+	debug_print_missing (objfile_name (objfile), build_id_filename.get ());
-     }
- }
- 
-Index: gdb-7.99.90.20170420/gdb/symfile.h
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/symfile.h	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/symfile.h	2017-04-20 23:00:43.368629240 +0200
-@@ -567,6 +567,10 @@
- void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
- 			   int need_fullname);
- 
-+/* build-id support.  */
-+extern struct bfd_build_id *build_id_addr_get (CORE_ADDR addr);
-+extern void debug_print_missing (const char *binary, const char *debug);
-+
- /* From dwarf2read.c */
- 
- /* Names for a dwarf2 debugging section.  The field NORMAL is the normal
-Index: gdb-7.99.90.20170420/gdb/testsuite/lib/gdb.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/lib/gdb.exp	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/lib/gdb.exp	2017-04-20 23:00:43.369629245 +0200
-@@ -1646,6 +1646,16 @@
- 	    warning "Couldn't set the width to 0."
- 	}
-     }
-+    # Turn off the missing warnings as the testsuite does not expect it.
-+    send_gdb "set build-id-verbose 0\n"
-+    gdb_expect 10 {
-+	-re "$gdb_prompt $" {
-+	    verbose "Disabled the missing debug infos warnings." 2
-+	}
-+	timeout {
-+	    warning "Could not disable the missing debug infos warnings.."
-+	}
-+    }
-     return 0
- }
- 
-Index: gdb-7.99.90.20170420/gdb/testsuite/lib/mi-support.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/lib/mi-support.exp	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/lib/mi-support.exp	2017-04-20 23:00:43.369629245 +0200
-@@ -309,6 +309,16 @@
- 	    warning "Couldn't set the width to 0."
- 	}
-     }
-+    # Turn off the missing warnings as the testsuite does not expect it.
-+    send_gdb "190-gdb-set build-id-verbose 0\n"
-+    gdb_expect 10 {
-+	-re ".*190-gdb-set build-id-verbose 0\r\n190\\\^done\r\n$mi_gdb_prompt$" {
-+	    verbose "Disabled the missing debug infos warnings." 2
-+	}
-+	timeout {
-+	    warning "Could not disable the missing debug infos warnings.."
-+	}
-+    }
- 
-     if { $separate_inferior_pty } {
- 	mi_create_inferior_pty
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.base/new-ui-pending-input.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/gdb.base/new-ui-pending-input.exp	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.base/new-ui-pending-input.exp	2017-04-20 23:00:43.369629245 +0200
-@@ -62,6 +62,7 @@
-     set options ""
-     append options " -iex \"set height 0\""
-     append options " -iex \"set width 0\""
-+    append options " -iex \"set build-id-verbose 0\""
-     append options " -iex \"new-ui console $extra_tty_name\""
-     append options " -ex \"b $bpline\""
-     append options " -ex \"run\""
-Index: gdb-7.99.90.20170420/gdb/objfiles.h
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/objfiles.h	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/objfiles.h	2017-04-20 23:00:43.370629251 +0200
-@@ -444,6 +444,10 @@
-   htab_t static_links;
- };
- 
-+/* This file was loaded according to the BUILD_ID_CORE_LOADS rules.  */
-+
-+#define OBJF_BUILD_ID_CORE_LOADED static_cast<enum objfile_flag>(1 << 12)
-+
- /* Declarations for functions defined in objfiles.c */
- 
- extern struct objfile *allocate_objfile (bfd *, const char *name,
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.base/corefile.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/gdb.base/corefile.exp	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.base/corefile.exp	2017-04-20 23:00:43.370629251 +0200
-@@ -293,3 +293,33 @@
- 	pass $test
-     }
- }
-+
-+
-+# Test auto-loading of binary files through build-id from the core file.
-+set buildid [build_id_debug_filename_get $binfile]
-+set wholetest "binfile found by build-id"
-+if {$buildid == ""} {
-+    untested "$wholetest (binary has no build-id)"
-+} else {
-+    gdb_exit
-+    gdb_start
-+
-+    regsub {\.debug$} $buildid {} buildid
-+    set debugdir [standard_output_file ${testfile}-debugdir]
-+    file delete -force -- $debugdir
-+    file mkdir $debugdir/[file dirname $buildid]
-+    file copy $binfile $debugdir/$buildid
-+
-+    set test "show debug-file-directory"
-+    gdb_test_multiple $test $test {
-+	-re "The directory where separate debug symbols are searched for is \"(.*)\"\\.\r\n$gdb_prompt $" {
-+	    set debugdir_orig $expect_out(1,string)
-+	    pass $test
-+	}
-+    }
-+    gdb_test_no_output "set debug-file-directory $debugdir:$debugdir_orig" "set debug-file-directory"
-+    gdb_test "show build-id-core-loads" {Whether CORE-FILE loads the build-id associated files automatically is on\.}
-+    gdb_test "core-file $corefile" "\r\nProgram terminated with .*" "core-file without executable"
-+    gdb_test "info files" "Local exec file:\r\n\[ \t\]*`[string_to_regexp $debugdir/$buildid]', file type .*"
-+    pass $wholetest
-+}
-Index: gdb-7.99.90.20170420/gdb/build-id.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/build-id.c	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/build-id.c	2017-04-20 23:03:00.060399474 +0200
+From FEDORA_PATCHES Mon Sep 17 00:00:00 2001
+From: Fedora GDB patches <invalid@email.com>
+Date: Fri, 27 Oct 2017 21:07:50 +0200
+Subject: gdb-6.6-buildid-locate.patch
+
+FileName: gdb-6.6-buildid-locate.patch
+
+;; New locating of the matching binaries from the pure core file (build-id).
+;;=push+jan
+---
+ gdb/build-id.c                                  | 753 +++++++++++++++++++++++-
+ gdb/build-id.h                                  |  15 +-
+ gdb/coffread.c                                  |   2 +-
+ gdb/corelow.c                                   |  67 +++
+ gdb/doc/gdb.texinfo                             |  21 +
+ gdb/dwarf2read.c                                |   2 +-
+ gdb/elfread.c                                   |   7 +-
+ gdb/objfiles.h                                  |   4 +
+ gdb/python/py-objfile.c                         |   4 +-
+ gdb/solib-svr4.c                                |  50 +-
+ gdb/symfile.h                                   |   4 +
+ gdb/testsuite/gdb.base/corefile.exp             |  30 +
+ gdb/testsuite/gdb.base/new-ui-pending-input.exp |   1 +
+ gdb/testsuite/lib/gdb.exp                       |  10 +
+ gdb/testsuite/lib/mi-support.exp                |  10 +
+ 15 files changed, 940 insertions(+), 40 deletions(-)
+
+diff --git a/gdb/build-id.c b/gdb/build-id.c
+index 945da4f3cf..5740628386 100644
+--- a/gdb/build-id.c
++++ b/gdb/build-id.c
 @@ -26,11 +26,67 @@
  #include "objfiles.h"
  #include "filenames.h"
@@ -416,7 +98,7 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
  {
    if (!bfd_check_format (abfd, bfd_object))
      return NULL;
-@@ -42,6 +98,348 @@
+@@ -42,6 +98,348 @@ build_id_bfd_get (bfd *abfd)
    return NULL;
  }
  
@@ -765,7 +447,7 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
  /* See build-id.h.  */
  
  int
-@@ -50,7 +448,7 @@
+@@ -50,7 +448,7 @@ build_id_verify (bfd *abfd, size_t check_len, const bfd_byte *check)
    const struct bfd_build_id *found;
    int retval = 0;
  
@@ -774,7 +456,7 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
  
    if (found == NULL)
      warning (_("File \"%s\" has no build-id, file skipped"),
-@@ -65,23 +463,54 @@
+@@ -65,23 +463,54 @@ build_id_verify (bfd *abfd, size_t check_len, const bfd_byte *check)
    return retval;
  }
  
@@ -836,7 +518,7 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
  
    /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
       cause "/.build-id/..." lookups.  */
-@@ -94,9 +523,12 @@
+@@ -94,9 +523,12 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
        size_t debugdir_len = strlen (debugdir);
        const gdb_byte *data = build_id;
        size_t size = build_id_len;
@@ -850,18 +532,22 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
  
        memcpy (link, debugdir, debugdir_len);
        s = &link[debugdir_len];
-@@ -110,45 +542,290 @@
+@@ -110,52 +542,299 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id)
  	*s++ = '/';
        while (size-- > 0)
  	s += sprintf (s, "%02x", (unsigned) *data++);
 -      strcpy (s, ".debug");
-+      for (seqno = 0;; seqno++)
-+	{
-+	  char *s2;
+ 
+       if (separate_debug_file_debug)
+ 	printf_unfiltered (_("  Trying %s\n"), link);
  
 -      /* lrealpath() is expensive even for the usually non-existent files.  */
 -      if (access (link, F_OK) == 0)
 -	filename = lrealpath (link);
++      for (seqno = 0;; seqno++)
++	{
++	  char *s2;
++
 +	  if (seqno)
 +	    {
 +	      /* There can be multiple build-id symlinks pointing to real files
@@ -903,25 +589,17 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
 +
 +	  if (abfd == NULL)
 +	    continue;
- 
--      if (filename == NULL)
--	continue;
++
 +	  if (build_id_verify (abfd.get(), build_id_len, build_id))
 +	    break;
- 
--      /* We expect to be silent on the non-existing files.  */
--      inner = make_cleanup (xfree, filename);
--      abfd = gdb_bfd_open (filename, gnutarget, -1);
--      do_cleanups (inner);
++
 +	  abfd.release ();
- 
--      if (abfd == NULL)
--	continue;
++
 +	  filename = NULL;
 +	}
  
--      if (build_id_verify (abfd.get(), build_id_len, build_id))
--	break;
+-      if (filename == NULL)
+-	continue;
 +      if (filename != NULL)
 +	{
 +	  /* LINK_ALL is not used below in this non-NULL FILENAME case.  */
@@ -929,22 +607,30 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
 +	  break;
 +	}
  
--      abfd.release ();
+-      /* We expect to be silent on the non-existing files.  */
+-      inner = make_cleanup (xfree, filename);
+-      abfd = gdb_bfd_open (filename, gnutarget, -1);
+-      do_cleanups (inner);
 +      /* If the symlink has target request to install the target.
 +         BASE-debuginfo.rpm contains the symlink but BASE.rpm may be missing.
 +         https://bugzilla.redhat.com/show_bug.cgi?id=981154  */
 +      link0_resolved = link_resolve (link0, 0);
 +      xfree (link0);
-+
+ 
+-      if (abfd == NULL)
+-	continue;
 +      if (link_all == NULL)
 +	link_all = link0_resolved;
 +      else
 +	{
 +	  size_t len_orig = strlen (link_all);
-+
+ 
+-      if (build_id_verify (abfd.get(), build_id_len, build_id))
+-	break;
 +	  link_all = (char *) xrealloc (link_all,
 +					len_orig + 1 + strlen (link0_resolved) + 1);
-+
+ 
+-      abfd.release ();
 +	  /* Use whitespace instead of DIRNAME_SEPARATOR to be compatible with
 +	     its possible use as an argument for installation command.  */
 +	  link_all[len_orig] = ' ';
@@ -1141,6 +827,10 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
 +  build_id = build_id_bfd_shdr_get (objfile->obfd);
    if (build_id != NULL)
      {
+       if (separate_debug_file_debug)
+ 	printf_unfiltered (_("\nLooking for separate debug info (build-id) for "
+ 			     "%s\n"), objfile_name (objfile));
+ 
 +      char *build_id_filename_cstr = NULL;
        gdb_bfd_ref_ptr abfd (build_id_to_debug_bfd (build_id->size,
 -						   build_id->data));
@@ -1156,10 +846,11 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
 +	      build_id_filename_cstr = NULL;
 +	    }
 +	}
++
        /* Prevent looping on a stripped .debug file.  */
        if (abfd != NULL
  	  && filename_cmp (bfd_get_filename (abfd.get ()),
-@@ -160,3 +837,21 @@
+@@ -167,3 +846,21 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
      }
    return NULL;
  }
@@ -1181,10 +872,10 @@ Index: gdb-7.99.90.20170420/gdb/build-id.c
 +
 +  observer_attach_executable_changed (debug_print_executable_changed);
 +}
-Index: gdb-7.99.90.20170420/gdb/build-id.h
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/build-id.h	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/build-id.h	2017-04-20 23:00:43.371629257 +0200
+diff --git a/gdb/build-id.h b/gdb/build-id.h
+index 0f13c7d4cf..2d105dba88 100644
+--- a/gdb/build-id.h
++++ b/gdb/build-id.h
 @@ -22,9 +22,10 @@
  
  #include "gdb_bfd.h"
@@ -1198,7 +889,7 @@ Index: gdb-7.99.90.20170420/gdb/build-id.h
  
  /* Return true if ABFD has NT_GNU_BUILD_ID matching the CHECK value.
     Otherwise, issue a warning and return false.  */
-@@ -38,13 +39,19 @@
+@@ -38,13 +39,19 @@ extern int build_id_verify (bfd *abfd,
     the caller.  */
  
  extern gdb_bfd_ref_ptr build_id_to_debug_bfd (size_t build_id_len,
@@ -1220,46 +911,11 @@ Index: gdb-7.99.90.20170420/gdb/build-id.h
 +		       gdb::unique_xmalloc_ptr<char> *build_id_filename_return);
  
  #endif /* BUILD_ID_H */
-Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/dwarf2read.c	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/dwarf2read.c	2017-04-20 23:00:43.375629279 +0200
-@@ -2671,7 +2671,7 @@
-     }
- 
-   if (dwz_bfd == NULL)
--    dwz_bfd = build_id_to_debug_bfd (buildid_len, buildid);
-+    dwz_bfd = build_id_to_debug_bfd (buildid_len, buildid, NULL, 1);
- 
-   if (dwz_bfd == NULL)
-     error (_("could not find '.gnu_debugaltlink' file for %s"),
-Index: gdb-7.99.90.20170420/gdb/python/py-objfile.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/python/py-objfile.c	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/python/py-objfile.c	2017-04-20 23:00:43.375629279 +0200
-@@ -137,7 +137,7 @@
- 
-   TRY
-     {
--      build_id = build_id_bfd_get (objfile->obfd);
-+      build_id = build_id_bfd_shdr_get (objfile->obfd);
-     }
-   CATCH (except, RETURN_MASK_ALL)
-     {
-@@ -544,7 +544,7 @@
-       /* Don't return separate debug files.  */
-       if (objfile->separate_debug_objfile_backlink != NULL)
- 	continue;
--      obfd_build_id = build_id_bfd_get (objfile->obfd);
-+      obfd_build_id = build_id_bfd_shdr_get (objfile->obfd);
-       if (obfd_build_id == NULL)
- 	continue;
-       if (objfpy_build_id_matches (obfd_build_id, build_id))
-Index: gdb-7.99.90.20170420/gdb/coffread.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/coffread.c	2017-04-20 23:00:35.415584426 +0200
-+++ gdb-7.99.90.20170420/gdb/coffread.c	2017-04-20 23:00:43.376629285 +0200
-@@ -734,7 +734,7 @@
+diff --git a/gdb/coffread.c b/gdb/coffread.c
+index fbbbb68f71..9698ec2191 100644
+--- a/gdb/coffread.c
++++ b/gdb/coffread.c
+@@ -735,7 +735,7 @@ coff_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
      {
        char *debugfile;
  
@@ -1268,3 +924,386 @@ Index: gdb-7.99.90.20170420/gdb/coffread.c
  
        if (debugfile == NULL)
  	debugfile = find_separate_debug_file_by_debuglink (objfile);
+diff --git a/gdb/corelow.c b/gdb/corelow.c
+index 3a5256cb17..c5b642db81 100644
+--- a/gdb/corelow.c
++++ b/gdb/corelow.c
+@@ -45,6 +45,10 @@
+ #include "gdb_bfd.h"
+ #include "completer.h"
+ #include "filestuff.h"
++#include "auxv.h"
++#include "elf/common.h"
++#include "gdbcmd.h"
++#include "build-id.h"
+ 
+ #ifndef O_LARGEFILE
+ #define O_LARGEFILE 0
+@@ -264,6 +268,54 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
+     inferior_ptid = ptid;			/* Yes, make it current.  */
+ }
+ 
++static int build_id_core_loads = 1;
++
++static void
++build_id_locate_exec (int from_tty)
++{
++  CORE_ADDR at_entry;
++  struct bfd_build_id *build_id;
++  char *execfilename, *debug_filename;
++  char *build_id_filename;
++  struct cleanup *back_to;
++
++  if (exec_bfd != NULL || symfile_objfile != NULL)
++    return;
++
++  if (target_auxv_search (&current_target, AT_ENTRY, &at_entry) <= 0)
++    return;
++
++  build_id = build_id_addr_get (at_entry);
++  if (build_id == NULL)
++    return;
++  back_to = make_cleanup (xfree, build_id);
++
++  /* SYMFILE_OBJFILE should refer to the main executable (not only to its
++     separate debug info file).  gcc44+ keeps .eh_frame only in the main
++     executable without its duplicate .debug_frame in the separate debug info
++     file - such .eh_frame would not be found if SYMFILE_OBJFILE would refer
++     directly to the separate debug info file.  */
++
++  execfilename = build_id_to_filename (build_id, &build_id_filename);
++  make_cleanup (xfree, build_id_filename);
++
++  if (execfilename != NULL)
++    {
++      make_cleanup (xfree, execfilename);
++      exec_file_attach (execfilename, from_tty);
++      symbol_file_add_main (execfilename,
++			    symfile_add_flag (!from_tty ? 0 : SYMFILE_VERBOSE));
++      if (symfile_objfile != NULL)
++        symfile_objfile->flags |= OBJF_BUILD_ID_CORE_LOADED;
++    }
++  else
++    debug_print_missing (_("the main executable file"), build_id_filename);
++
++  do_cleanups (back_to);
++
++  /* No automatic SOLIB_ADD as the libraries would get read twice.  */
++}
++
+ /* This routine opens and sets up the core file bfd.  */
+ 
+ static void
+@@ -391,6 +443,14 @@ core_open (const char *arg, int from_tty)
+ 	switch_to_thread (thread->ptid);
+     }
+ 
++  /* Find the build_id identifiers.  If it gets executed after
++     POST_CREATE_INFERIOR we would clash with asking to discard the already
++     loaded VDSO symbols.  If it gets executed before bfd_map_over_sections
++     INFERIOR_PTID is still not set and libthread_db initialization crashes on
++     PID == 0 in ps_pglobal_lookup.  */
++  if (build_id_core_loads != 0)
++    build_id_locate_exec (from_tty);
++
+   post_create_inferior (&core_ops, from_tty);
+ 
+   /* Now go through the target stack looking for threads since there
+@@ -1040,4 +1100,11 @@ _initialize_corelow (void)
+   init_core_ops ();
+ 
+   add_target_with_completer (&core_ops, filename_completer);
++
++  add_setshow_boolean_cmd ("build-id-core-loads", class_files,
++			   &build_id_core_loads, _("\
++Set whether CORE-FILE loads the build-id associated files automatically."), _("\
++Show whether CORE-FILE loads the build-id associated files automatically."),
++			   NULL, NULL, NULL,
++			   &setlist, &showlist);
+ }
+diff --git a/gdb/doc/gdb.texinfo b/gdb/doc/gdb.texinfo
+index 8bdafb0ba4..2f2cbd3dea 100644
+--- a/gdb/doc/gdb.texinfo
++++ b/gdb/doc/gdb.texinfo
+@@ -19447,6 +19447,27 @@ information files.
+ 
+ @end table
+ 
++You can also adjust the current verbosity of the @dfn{build id} locating.
++
++@table @code
++
++@kindex set build-id-verbose
++@item set build-id-verbose 0
++No additional messages are printed.
++
++@item set build-id-verbose 1
++Missing separate debug filenames are printed.
++
++@item set build-id-verbose 2
++Missing separate debug filenames are printed and also all the parsing of the
++binaries to find their @dfn{build id} content is printed.
++
++@kindex show build-id-verbose
++@item show build-id-verbose
++Show the current verbosity value for the @dfn{build id} content locating.
++
++@end table
++
+ @cindex @code{.gnu_debuglink} sections
+ @cindex debug link sections
+ A debug link is a special section of the executable file named
+diff --git a/gdb/dwarf2read.c b/gdb/dwarf2read.c
+index 98e7d842f0..c8db955f2f 100644
+--- a/gdb/dwarf2read.c
++++ b/gdb/dwarf2read.c
+@@ -2907,7 +2907,7 @@ dwarf2_get_dwz_file (void)
+     }
+ 
+   if (dwz_bfd == NULL)
+-    dwz_bfd = build_id_to_debug_bfd (buildid_len, buildid);
++    dwz_bfd = build_id_to_debug_bfd (buildid_len, buildid, NULL, 1);
+ 
+   if (dwz_bfd == NULL)
+     error (_("could not find '.gnu_debugaltlink' file for %s"),
+diff --git a/gdb/elfread.c b/gdb/elfread.c
+index 103b2144c3..fb32e03af5 100644
+--- a/gdb/elfread.c
++++ b/gdb/elfread.c
+@@ -1259,8 +1259,9 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
+ 	   && objfile->separate_debug_objfile == NULL
+ 	   && objfile->separate_debug_objfile_backlink == NULL)
+     {
++      gdb::unique_xmalloc_ptr<char> build_id_filename;
+       gdb::unique_xmalloc_ptr<char> debugfile
+-	(find_separate_debug_file_by_buildid (objfile));
++	(find_separate_debug_file_by_buildid (objfile, &build_id_filename));
+ 
+       if (debugfile == NULL)
+ 	debugfile.reset (find_separate_debug_file_by_debuglink (objfile));
+@@ -1272,6 +1273,10 @@ elf_symfile_read (struct objfile *objfile, symfile_add_flags symfile_flags)
+ 	  symbol_file_add_separate (abfd.get (), debugfile.get (),
+ 				    symfile_flags, objfile);
+ 	}
++      /* Check if any separate debug info has been extracted out.  */
++      else if (bfd_get_section_by_name (objfile->obfd, ".gnu_debuglink")
++	       != NULL)
++	debug_print_missing (objfile_name (objfile), build_id_filename.get ());
+     }
+ }
+ 
+diff --git a/gdb/objfiles.h b/gdb/objfiles.h
+index 28e66eca36..5ab0e33fb6 100644
+--- a/gdb/objfiles.h
++++ b/gdb/objfiles.h
+@@ -470,6 +470,10 @@ struct objfile
+   htab_t static_links {};
+ };
+ 
++/* This file was loaded according to the BUILD_ID_CORE_LOADS rules.  */
++
++#define OBJF_BUILD_ID_CORE_LOADED static_cast<enum objfile_flag>(1 << 12)
++
+ /* Declarations for functions defined in objfiles.c */
+ 
+ extern struct gdbarch *get_objfile_arch (const struct objfile *);
+diff --git a/gdb/python/py-objfile.c b/gdb/python/py-objfile.c
+index c2b40ff535..112cbf6560 100644
+--- a/gdb/python/py-objfile.c
++++ b/gdb/python/py-objfile.c
+@@ -137,7 +137,7 @@ objfpy_get_build_id (PyObject *self, void *closure)
+ 
+   TRY
+     {
+-      build_id = build_id_bfd_get (objfile->obfd);
++      build_id = build_id_bfd_shdr_get (objfile->obfd);
+     }
+   CATCH (except, RETURN_MASK_ALL)
+     {
+@@ -544,7 +544,7 @@ objfpy_lookup_objfile_by_build_id (const char *build_id)
+       /* Don't return separate debug files.  */
+       if (objfile->separate_debug_objfile_backlink != NULL)
+ 	continue;
+-      obfd_build_id = build_id_bfd_get (objfile->obfd);
++      obfd_build_id = build_id_bfd_shdr_get (objfile->obfd);
+       if (obfd_build_id == NULL)
+ 	continue;
+       if (objfpy_build_id_matches (obfd_build_id, build_id))
+diff --git a/gdb/solib-svr4.c b/gdb/solib-svr4.c
+index 4973cc2f25..a3399ad8f7 100644
+--- a/gdb/solib-svr4.c
++++ b/gdb/solib-svr4.c
+@@ -45,6 +45,7 @@
+ #include "auxv.h"
+ #include "gdb_bfd.h"
+ #include "probe.h"
++#include "build-id.h"
+ 
+ static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
+ static int svr4_have_link_map_offsets (void);
+@@ -1385,9 +1386,52 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
+ 	  continue;
+ 	}
+ 
+-      strncpy (newobj->so_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
+-      newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
+-      strcpy (newobj->so_original_name, newobj->so_name);
++      {
++	struct bfd_build_id *build_id;
++
++	strncpy (newobj->so_original_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
++	newobj->so_original_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
++	/* May get overwritten below.  */
++	strcpy (newobj->so_name, newobj->so_original_name);
++
++	build_id = build_id_addr_get (newobj->lm_info->l_ld);
++	if (build_id != NULL)
++	  {
++	    char *name, *build_id_filename;
++
++	    /* Missing the build-id matching separate debug info file
++	       would be handled while SO_NAME gets loaded.  */
++	    name = build_id_to_filename (build_id, &build_id_filename);
++	    if (name != NULL)
++	      {
++		strncpy (newobj->so_name, name, SO_NAME_MAX_PATH_SIZE - 1);
++		newobj->so_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
++		xfree (name);
++	      }
++	    else
++	      {
++		debug_print_missing (newobj->so_name, build_id_filename);
++
++		/* In the case the main executable was found according to
++		   its build-id (from a core file) prevent loading
++		   a different build of a library with accidentally the
++		   same SO_NAME.
++
++		   It suppresses bogus backtraces (and prints "??" there
++		   instead) if the on-disk files no longer match the
++		   running program version.  */
++
++		if (symfile_objfile != NULL
++		    && (symfile_objfile->flags
++			& OBJF_BUILD_ID_CORE_LOADED) != 0)
++		  newobj->so_name[0] = 0;
++	      }
++
++	    xfree (build_id_filename);
++	    xfree (build_id);
++	  }
++      }
++
+       xfree (buffer);
+ 
+       /* If this entry has no name, or its name matches the name
+diff --git a/gdb/symfile.h b/gdb/symfile.h
+index 7c3fd8240a..0d51f46d78 100644
+--- a/gdb/symfile.h
++++ b/gdb/symfile.h
+@@ -543,6 +543,10 @@ void expand_symtabs_matching
+ void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
+ 			   int need_fullname);
+ 
++/* build-id support.  */
++extern struct bfd_build_id *build_id_addr_get (CORE_ADDR addr);
++extern void debug_print_missing (const char *binary, const char *debug);
++
+ /* From dwarf2read.c */
+ 
+ /* Names for a dwarf2 debugging section.  The field NORMAL is the normal
+diff --git a/gdb/testsuite/gdb.base/corefile.exp b/gdb/testsuite/gdb.base/corefile.exp
+index 63a7fa8e5b..8a4fab77df 100644
+--- a/gdb/testsuite/gdb.base/corefile.exp
++++ b/gdb/testsuite/gdb.base/corefile.exp
+@@ -311,3 +311,33 @@ gdb_test_multiple "core-file $corefile" $test {
+ 	pass $test
+     }
+ }
++
++
++# Test auto-loading of binary files through build-id from the core file.
++set buildid [build_id_debug_filename_get $binfile]
++set wholetest "binfile found by build-id"
++if {$buildid == ""} {
++    untested "$wholetest (binary has no build-id)"
++} else {
++    gdb_exit
++    gdb_start
++
++    regsub {\.debug$} $buildid {} buildid
++    set debugdir [standard_output_file ${testfile}-debugdir]
++    file delete -force -- $debugdir
++    file mkdir $debugdir/[file dirname $buildid]
++    file copy $binfile $debugdir/$buildid
++
++    set test "show debug-file-directory"
++    gdb_test_multiple $test $test {
++	-re "The directory where separate debug symbols are searched for is \"(.*)\"\\.\r\n$gdb_prompt $" {
++	    set debugdir_orig $expect_out(1,string)
++	    pass $test
++	}
++    }
++    gdb_test_no_output "set debug-file-directory $debugdir:$debugdir_orig" "set debug-file-directory"
++    gdb_test "show build-id-core-loads" {Whether CORE-FILE loads the build-id associated files automatically is on\.}
++    gdb_test "core-file $corefile" "\r\nProgram terminated with .*" "core-file without executable"
++    gdb_test "info files" "Local exec file:\r\n\[ \t\]*`[string_to_regexp $debugdir/$buildid]', file type .*"
++    pass $wholetest
++}
+diff --git a/gdb/testsuite/gdb.base/new-ui-pending-input.exp b/gdb/testsuite/gdb.base/new-ui-pending-input.exp
+index a6dc14e3c9..54a10df155 100644
+--- a/gdb/testsuite/gdb.base/new-ui-pending-input.exp
++++ b/gdb/testsuite/gdb.base/new-ui-pending-input.exp
+@@ -62,6 +62,7 @@ proc test_command_line_new_ui_pending_input {} {
+     set options ""
+     append options " -iex \"set height 0\""
+     append options " -iex \"set width 0\""
++    append options " -iex \"set build-id-verbose 0\""
+     append options " -iex \"new-ui console $extra_tty_name\""
+     append options " -ex \"b $bpline\""
+     append options " -ex \"run\""
+diff --git a/gdb/testsuite/lib/gdb.exp b/gdb/testsuite/lib/gdb.exp
+index 7702d9c238..a165bf0938 100644
+--- a/gdb/testsuite/lib/gdb.exp
++++ b/gdb/testsuite/lib/gdb.exp
+@@ -1694,6 +1694,16 @@ proc default_gdb_start { } {
+ 	    warning "Couldn't set the width to 0."
+ 	}
+     }
++    # Turn off the missing warnings as the testsuite does not expect it.
++    send_gdb "set build-id-verbose 0\n"
++    gdb_expect 10 {
++	-re "$gdb_prompt $" {
++	    verbose "Disabled the missing debug infos warnings." 2
++	}
++	timeout {
++	    warning "Could not disable the missing debug infos warnings.."
++	}
++    }
+     return 0
+ }
+ 
+diff --git a/gdb/testsuite/lib/mi-support.exp b/gdb/testsuite/lib/mi-support.exp
+index 2846da74e4..004c3e6c1c 100644
+--- a/gdb/testsuite/lib/mi-support.exp
++++ b/gdb/testsuite/lib/mi-support.exp
+@@ -309,6 +309,16 @@ proc default_mi_gdb_start { args } {
+ 	    warning "Couldn't set the width to 0."
+ 	}
+     }
++    # Turn off the missing warnings as the testsuite does not expect it.
++    send_gdb "190-gdb-set build-id-verbose 0\n"
++    gdb_expect 10 {
++	-re ".*190-gdb-set build-id-verbose 0\r\n190\\\^done\r\n$mi_gdb_prompt$" {
++	    verbose "Disabled the missing debug infos warnings." 2
++	}
++	timeout {
++	    warning "Could not disable the missing debug infos warnings.."
++	}
++    }
+ 
+     if { $separate_inferior_pty } {
+ 	mi_create_inferior_pty
+-- 
+2.14.3
+

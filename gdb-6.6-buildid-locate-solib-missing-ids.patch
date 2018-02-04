@@ -1,11 +1,32 @@
+From FEDORA_PATCHES Mon Sep 17 00:00:00 2001
+From: Fedora GDB patches <invalid@email.com>
+Date: Fri, 27 Oct 2017 21:07:50 +0200
+Subject: gdb-6.6-buildid-locate-solib-missing-ids.patch
+
+FileName: gdb-6.6-buildid-locate-solib-missing-ids.patch
+
+;; Fix loading of core files without build-ids but with build-ids in executables.
+;; Load strictly build-id-checked core files only if no executable is specified
+;; (Jan Kratochvil, RH BZ 1339862).
+;;=push+jan
+
 gdb returns an incorrect back trace when applying a debuginfo
 https://bugzilla.redhat.com/show_bug.cgi?id=1339862
+---
+ gdb/solib-svr4.c                                   |  35 ++++---
+ .../gcore-buildid-exec-but-not-solib-lib.c         |  21 +++++
+ .../gcore-buildid-exec-but-not-solib-main.c        |  25 +++++
+ .../gdb.base/gcore-buildid-exec-but-not-solib.exp  | 105 +++++++++++++++++++++
+ 4 files changed, 167 insertions(+), 19 deletions(-)
+ create mode 100644 gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-lib.c
+ create mode 100644 gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-main.c
+ create mode 100644 gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib.exp
 
-Index: gdb-7.9.90.20150709/gdb/solib-svr4.c
-===================================================================
---- gdb-7.9.90.20150709.orig/gdb/solib-svr4.c	2015-07-09 18:18:54.526417766 +0200
-+++ gdb-7.9.90.20150709/gdb/solib-svr4.c	2015-07-09 18:19:33.074746586 +0200
-@@ -1381,14 +1381,27 @@ svr4_read_so_list (CORE_ADDR lm, CORE_AD
+diff --git a/gdb/solib-svr4.c b/gdb/solib-svr4.c
+index a3399ad8f7..d7eeb6350d 100644
+--- a/gdb/solib-svr4.c
++++ b/gdb/solib-svr4.c
+@@ -1387,14 +1387,27 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
  	}
  
        {
@@ -31,11 +52,11 @@ Index: gdb-7.9.90.20150709/gdb/solib-svr4.c
 +	   to the only existing file loaded that time - the executable.  */
 +	if (symfile_objfile != NULL
 +	    && (symfile_objfile->flags & OBJF_BUILD_ID_CORE_LOADED) != 0)
-+	  build_id = build_id_addr_get (newobj->lm_info->l_ld);
++	  build_id = build_id_addr_get (li->l_ld);
  	if (build_id != NULL)
  	  {
  	    char *name, *build_id_filename;
-@@ -1403,23 +1416,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_AD
+@@ -1409,23 +1422,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
  		xfree (name);
  	      }
  	    else
@@ -60,8 +81,69 @@ Index: gdb-7.9.90.20150709/gdb/solib-svr4.c
  
  	    xfree (build_id_filename);
  	    xfree (build_id);
---- /dev/null	2016-07-02 20:29:01.679404943 +0200
-+++ gdb-7.11.50.20160721/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib.exp	2016-07-31 23:04:49.062753722 +0200
+diff --git a/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-lib.c b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-lib.c
+new file mode 100644
+index 0000000000..d74b690c73
+--- /dev/null
++++ b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-lib.c
+@@ -0,0 +1,21 @@
++/* Copyright 2010 Free Software Foundation, Inc.
++
++   This file is part of GDB.
++
++   This program is free software; you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++void
++lib (void)
++{
++}
+diff --git a/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-main.c b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-main.c
+new file mode 100644
+index 0000000000..46b9dfe161
+--- /dev/null
++++ b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-main.c
+@@ -0,0 +1,25 @@
++/* Copyright 2010 Free Software Foundation, Inc.
++
++   This file is part of GDB.
++
++   This program is free software; you can redistribute it and/or modify
++   it under the terms of the GNU General Public License as published by
++   the Free Software Foundation; either version 3 of the License, or
++   (at your option) any later version.
++
++   This program is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++   GNU General Public License for more details.
++
++   You should have received a copy of the GNU General Public License
++   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
++
++extern void lib (void);
++
++int
++main (void)
++{
++  lib ();
++  return 0;
++}
+diff --git a/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib.exp b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib.exp
+new file mode 100644
+index 0000000000..0c46489f31
+--- /dev/null
++++ b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib.exp
 @@ -0,0 +1,105 @@
 +# Copyright 2016 Free Software Foundation, Inc.
 +
@@ -168,55 +250,6 @@ Index: gdb-7.9.90.20150709/gdb/solib-svr4.c
 +
 +gdb_test "bt"
 +gdb_test "info shared"
---- /dev/null	2016-07-02 20:29:01.679404943 +0200
-+++ gdb-7.11.50.20160721/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-main.c	2016-07-28 21:06:40.977786922 +0200
-@@ -0,0 +1,25 @@
-+/* Copyright 2010 Free Software Foundation, Inc.
-+
-+   This file is part of GDB.
-+
-+   This program is free software; you can redistribute it and/or modify
-+   it under the terms of the GNU General Public License as published by
-+   the Free Software Foundation; either version 3 of the License, or
-+   (at your option) any later version.
-+
-+   This program is distributed in the hope that it will be useful,
-+   but WITHOUT ANY WARRANTY; without even the implied warranty of
-+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+   GNU General Public License for more details.
-+
-+   You should have received a copy of the GNU General Public License
-+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-+
-+extern void lib (void);
-+
-+int
-+main (void)
-+{
-+  lib ();
-+  return 0;
-+}
---- /dev/null	2016-07-02 20:29:01.679404943 +0200
-+++ gdb-7.11.50.20160721/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-lib.c	2016-07-28 21:06:40.977786922 +0200
-@@ -0,0 +1,21 @@
-+/* Copyright 2010 Free Software Foundation, Inc.
-+
-+   This file is part of GDB.
-+
-+   This program is free software; you can redistribute it and/or modify
-+   it under the terms of the GNU General Public License as published by
-+   the Free Software Foundation; either version 3 of the License, or
-+   (at your option) any later version.
-+
-+   This program is distributed in the hope that it will be useful,
-+   but WITHOUT ANY WARRANTY; without even the implied warranty of
-+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+   GNU General Public License for more details.
-+
-+   You should have received a copy of the GNU General Public License
-+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-+
-+void
-+lib (void)
-+{
-+}
+-- 
+2.14.3
+

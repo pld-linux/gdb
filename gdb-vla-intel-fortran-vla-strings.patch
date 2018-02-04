@@ -1,3 +1,12 @@
+From FEDORA_PATCHES Mon Sep 17 00:00:00 2001
+From: Fedora GDB patches <invalid@email.com>
+Date: Fri, 27 Oct 2017 21:07:50 +0200
+Subject: gdb-vla-intel-fortran-vla-strings.patch
+
+FileName: gdb-vla-intel-fortran-vla-strings.patch
+
+;;=push
+
 git diff --stat -p gdb/master...gdb/users/bheckel/fortran-vla-strings
 0ad7d8d1a3a36c6e04e3b6d37d8825f18d595723
 
@@ -22,25 +31,51 @@ git diff --stat -p gdb/master...gdb/users/bheckel/fortran-vla-strings
  gdb/valops.c                              |  16 ++-
  gdb/valprint.c                            |   6 --
  20 files changed, 827 insertions(+), 110 deletions(-)
+---
+ gdb/NEWS                                  |   2 +
+ gdb/c-valprint.c                          |  22 ++++
+ gdb/dwarf2read.c                          | 163 +++++++++++++++++++++++++-----
+ gdb/f-typeprint.c                         |  93 +++++++++--------
+ gdb/gdbtypes.c                            |  40 +++++++-
+ gdb/testsuite/gdb.cp/vla-cxx.cc           |   9 ++
+ gdb/testsuite/gdb.cp/vla-cxx.exp          |   9 ++
+ gdb/testsuite/gdb.fortran/pointers.exp    | 143 ++++++++++++++++++++++++++
+ gdb/testsuite/gdb.fortran/pointers.f90    | 109 ++++++++++++++++++++
+ gdb/testsuite/gdb.fortran/print_type.exp  | 100 ++++++++++++++++++
+ gdb/testsuite/gdb.fortran/vla-ptype.exp   |  12 +--
+ gdb/testsuite/gdb.fortran/vla-strings.exp | 103 +++++++++++++++++++
+ gdb/testsuite/gdb.fortran/vla-strings.f90 |  39 +++++++
+ gdb/testsuite/gdb.fortran/vla-type.exp    |   7 +-
+ gdb/testsuite/gdb.fortran/vla-value.exp   |   4 +-
+ gdb/testsuite/gdb.mi/mi-vla-fortran.exp   |   8 +-
+ gdb/typeprint.c                           |  19 ++++
+ gdb/valops.c                              |  16 ++-
+ gdb/valprint.c                            |   6 --
+ 19 files changed, 807 insertions(+), 97 deletions(-)
+ create mode 100644 gdb/testsuite/gdb.fortran/pointers.exp
+ create mode 100644 gdb/testsuite/gdb.fortran/pointers.f90
+ create mode 100644 gdb/testsuite/gdb.fortran/print_type.exp
+ create mode 100644 gdb/testsuite/gdb.fortran/vla-strings.exp
+ create mode 100644 gdb/testsuite/gdb.fortran/vla-strings.f90
 
-Index: gdb-7.99.90.20170420/gdb/NEWS
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/NEWS	2017-04-20 22:27:47.076032111 +0200
-+++ gdb-7.99.90.20170420/gdb/NEWS	2017-04-20 22:27:49.946050236 +0200
-@@ -1,6 +1,8 @@
- 		What has changed in GDB?
- 	     (Organized release by release)
+diff --git a/gdb/NEWS b/gdb/NEWS
+index 6c9a2ecefd..f40eb6c390 100644
+--- a/gdb/NEWS
++++ b/gdb/NEWS
+@@ -3,6 +3,8 @@
+ 
+ *** Changes in GDB 8.1
  
 +* Fortran: Support pointers to dynamic types.
 +
- *** Changes in GDB 8.0
- 
- * GDB now supports access to the PKU register on GNU/Linux. The register is
-Index: gdb-7.99.90.20170420/gdb/c-valprint.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/c-valprint.c	2017-04-20 22:27:47.077032118 +0200
-+++ gdb-7.99.90.20170420/gdb/c-valprint.c	2017-04-20 22:27:49.947050243 +0200
-@@ -650,6 +650,28 @@
+ * GDB now supports dynamically creating arbitrary register groups specified
+   in XML target descriptions.  This allows for finer grain grouping of
+   registers on systems with a large amount of registers.
+diff --git a/gdb/c-valprint.c b/gdb/c-valprint.c
+index c4c0918e26..3904fab260 100644
+--- a/gdb/c-valprint.c
++++ b/gdb/c-valprint.c
+@@ -653,6 +653,28 @@ c_value_print (struct value *val, struct ui_file *stream,
        else
  	{
  	  /* normal case */
@@ -69,11 +104,11 @@ Index: gdb-7.99.90.20170420/gdb/c-valprint.c
  	  fprintf_filtered (stream, "(");
  	  type_print (value_type (val), "", stream, -1);
  	  fprintf_filtered (stream, ") ");
-Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/dwarf2read.c	2017-04-20 22:27:47.091032206 +0200
-+++ gdb-7.99.90.20170420/gdb/dwarf2read.c	2017-04-20 22:28:28.878296105 +0200
-@@ -1872,7 +1872,8 @@
+diff --git a/gdb/dwarf2read.c b/gdb/dwarf2read.c
+index 8fc1f7ec45..98e7d842f0 100644
+--- a/gdb/dwarf2read.c
++++ b/gdb/dwarf2read.c
+@@ -2077,7 +2077,8 @@ static void read_signatured_type (struct signatured_type *);
  
  static int attr_to_dynamic_prop (const struct attribute *attr,
  				 struct die_info *die, struct dwarf2_cu *cu,
@@ -83,7 +118,7 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
  
  /* memory allocation interface */
  
-@@ -11557,7 +11558,7 @@
+@@ -13745,7 +13746,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
      {
        newobj->static_link
  	= XOBNEW (&objfile->objfile_obstack, struct dynamic_prop);
@@ -92,16 +127,26 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
      }
  
    cu->list_in_scope = &local_symbols;
-@@ -14791,29 +14792,94 @@
+@@ -16327,7 +16328,8 @@ read_array_type (struct die_info *die, struct dwarf2_cu *cu)
+ 
+       byte_stride_prop
+ 	= (struct dynamic_prop *) alloca (sizeof (struct dynamic_prop));
+-      stride_ok = attr_to_dynamic_prop (attr, die, cu, byte_stride_prop);
++      stride_ok = attr_to_dynamic_prop (attr, die, cu, byte_stride_prop,
++					NULL, 0);
+       if (!stride_ok)
+ 	{
+ 	  complaint (&symfile_complaints,
+@@ -17075,29 +17077,94 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
    struct gdbarch *gdbarch = get_objfile_arch (objfile);
    struct type *type, *range_type, *index_type, *char_type;
    struct attribute *attr;
 -  unsigned int length;
 +  unsigned int length = UINT_MAX;
- 
++
 +  index_type = objfile_type (objfile)->builtin_int;
 +  range_type = create_static_range_type (NULL, index_type, 1, length);
-+
+ 
 +  /* If DW_AT_string_length is defined, the length is stored in memory.  */
    attr = dwarf2_attr (die, DW_AT_string_length, cu);
    if (attr)
@@ -198,7 +243,7 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
    char_type = language_string_char_type (cu->language_defn, gdbarch);
    type = create_string_type (NULL, char_type, range_type);
  
-@@ -15163,7 +15229,8 @@
+@@ -17446,7 +17513,8 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
  
  static int
  attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
@@ -208,7 +253,7 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
  {
    struct dwarf2_property_baton *baton;
    struct obstack *obstack = &cu->objfile->objfile_obstack;
-@@ -15173,14 +15240,33 @@
+@@ -17456,14 +17524,33 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
  
    if (attr_form_is_block (attr))
      {
@@ -246,7 +291,7 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
      }
    else if (attr_form_is_ref (attr))
      {
-@@ -15213,8 +15299,28 @@
+@@ -17496,8 +17583,28 @@ attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
  		baton = XOBNEW (obstack, struct dwarf2_property_baton);
  		baton->referenced_type = die_type (target_die, target_cu);
  		baton->locexpr.per_cu = cu->per_cu;
@@ -277,7 +322,7 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
  		prop->data.baton = baton;
  		prop->kind = PROP_LOCEXPR;
  		gdb_assert (prop->data.baton != NULL);
-@@ -15325,24 +15431,24 @@
+@@ -17608,24 +17715,24 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
  
    attr = dwarf2_attr (die, DW_AT_byte_stride, cu);
    if (attr)
@@ -306,7 +351,7 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
  	{
  	  /* If bounds are constant do the final calculation here.  */
  	  if (low.kind == PROP_CONST && high.kind == PROP_CONST)
-@@ -22967,7 +23073,7 @@
+@@ -25223,7 +25330,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
    attr = dwarf2_attr (die, DW_AT_allocated, cu);
    if (attr_form_is_block (attr))
      {
@@ -315,7 +360,7 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
          add_dyn_prop (DYN_PROP_ALLOCATED, prop, type, objfile);
      }
    else if (attr != NULL)
-@@ -22982,7 +23088,7 @@
+@@ -25238,7 +25345,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
    attr = dwarf2_attr (die, DW_AT_associated, cu);
    if (attr_form_is_block (attr))
      {
@@ -324,7 +369,7 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
          add_dyn_prop (DYN_PROP_ASSOCIATED, prop, type, objfile);
      }
    else if (attr != NULL)
-@@ -22995,7 +23101,7 @@
+@@ -25251,7 +25358,7 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
  
    /* Read DW_AT_data_location and set in type.  */
    attr = dwarf2_attr (die, DW_AT_data_location, cu);
@@ -333,11 +378,11 @@ Index: gdb-7.99.90.20170420/gdb/dwarf2read.c
      add_dyn_prop (DYN_PROP_DATA_LOCATION, prop, type, objfile);
  
    if (dwarf2_per_objfile->die_type_hash == NULL)
-Index: gdb-7.99.90.20170420/gdb/f-typeprint.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/f-typeprint.c	2017-04-20 22:27:26.288900835 +0200
-+++ gdb-7.99.90.20170420/gdb/f-typeprint.c	2017-04-20 22:27:49.953050280 +0200
-@@ -37,7 +37,7 @@
+diff --git a/gdb/f-typeprint.c b/gdb/f-typeprint.c
+index f14f1811f4..4f6a0ed09a 100644
+--- a/gdb/f-typeprint.c
++++ b/gdb/f-typeprint.c
+@@ -37,7 +37,7 @@ static void f_type_print_args (struct type *, struct ui_file *);
  #endif
  
  static void f_type_print_varspec_suffix (struct type *, struct ui_file *, int,
@@ -346,7 +391,7 @@ Index: gdb-7.99.90.20170420/gdb/f-typeprint.c
  
  void f_type_print_varspec_prefix (struct type *, struct ui_file *,
  				  int, int);
-@@ -53,18 +53,6 @@
+@@ -53,18 +53,6 @@ f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
  {
    enum type_code code;
  
@@ -365,7 +410,7 @@ Index: gdb-7.99.90.20170420/gdb/f-typeprint.c
    f_type_print_base (type, stream, show, level);
    code = TYPE_CODE (type);
    if ((varstring != NULL && *varstring != '\0')
-@@ -89,7 +77,7 @@
+@@ -89,7 +77,7 @@ f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
  
        demangled_args = (*varstring != '\0'
  			&& varstring[strlen (varstring) - 1] == ')');
@@ -374,7 +419,7 @@ Index: gdb-7.99.90.20170420/gdb/f-typeprint.c
     }
  }
  
-@@ -159,7 +147,7 @@
+@@ -159,7 +147,7 @@ f_type_print_varspec_prefix (struct type *type, struct ui_file *stream,
  static void
  f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
  			     int show, int passed_a_ptr, int demangled_args,
@@ -383,7 +428,7 @@ Index: gdb-7.99.90.20170420/gdb/f-typeprint.c
  {
    int upper_bound, lower_bound;
  
-@@ -183,34 +171,50 @@
+@@ -183,34 +171,50 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
  	fprintf_filtered (stream, "(");
  
        if (type_not_associated (type))
@@ -460,7 +505,7 @@ Index: gdb-7.99.90.20170420/gdb/f-typeprint.c
        if (arrayprint_recurse_level == 1)
  	fprintf_filtered (stream, ")");
        else
-@@ -221,13 +225,14 @@
+@@ -221,13 +225,14 @@ f_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
      case TYPE_CODE_PTR:
      case TYPE_CODE_REF:
        f_type_print_varspec_suffix (TYPE_TARGET_TYPE (type), stream, 0, 1, 0,
@@ -477,7 +522,7 @@ Index: gdb-7.99.90.20170420/gdb/f-typeprint.c
        if (passed_a_ptr)
  	fprintf_filtered (stream, ")");
  
-@@ -378,7 +383,7 @@
+@@ -383,7 +388,7 @@ f_type_print_base (struct type *type, struct ui_file *stream, int show,
  	      fputs_filtered (" :: ", stream);
  	      fputs_filtered (TYPE_FIELD_NAME (type, index), stream);
  	      f_type_print_varspec_suffix (TYPE_FIELD_TYPE (type, index),
@@ -486,11 +531,11 @@ Index: gdb-7.99.90.20170420/gdb/f-typeprint.c
  	      fputs_filtered ("\n", stream);
  	    }
  	  fprintfi_filtered (level, stream, "End Type ");
-Index: gdb-7.99.90.20170420/gdb/gdbtypes.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/gdbtypes.c	2017-04-20 22:27:47.093032219 +0200
-+++ gdb-7.99.90.20170420/gdb/gdbtypes.c	2017-04-20 22:27:49.954050287 +0200
-@@ -1840,7 +1840,8 @@
+diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
+index a72e2b3e0a..cb5524023f 100644
+--- a/gdb/gdbtypes.c
++++ b/gdb/gdbtypes.c
+@@ -1915,7 +1915,8 @@ is_dynamic_type_internal (struct type *type, int top_level)
    type = check_typedef (type);
  
    /* We only want to recognize references at the outermost level.  */
@@ -500,7 +545,7 @@ Index: gdb-7.99.90.20170420/gdb/gdbtypes.c
      type = check_typedef (TYPE_TARGET_TYPE (type));
  
    /* Types that have a dynamic TYPE_DATA_LOCATION are considered
-@@ -1874,6 +1875,7 @@
+@@ -1949,6 +1950,7 @@ is_dynamic_type_internal (struct type *type, int top_level)
        }
  
      case TYPE_CODE_ARRAY:
@@ -508,9 +553,9 @@ Index: gdb-7.99.90.20170420/gdb/gdbtypes.c
        {
  	gdb_assert (TYPE_NFIELDS (type) == 1);
  
-@@ -1986,7 +1988,8 @@
-   struct type *ary_dim;
+@@ -2067,7 +2069,8 @@ resolve_dynamic_array (struct type *type,
    struct dynamic_prop *prop;
+   unsigned int bit_stride = 0;
  
 -  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY);
 +  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY
@@ -518,7 +563,7 @@ Index: gdb-7.99.90.20170420/gdb/gdbtypes.c
  
    type = copy_type (type);
  
-@@ -2011,13 +2014,17 @@
+@@ -2092,11 +2095,15 @@ resolve_dynamic_array (struct type *type,
  
    ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
  
@@ -529,17 +574,13 @@ Index: gdb-7.99.90.20170420/gdb/gdbtypes.c
    else
      elt_type = TYPE_TARGET_TYPE (type);
  
--  return create_array_type_with_stride (type, elt_type, range_type,
--                                        TYPE_FIELD_BITSIZE (type, 0));
 +  if (TYPE_CODE (type) == TYPE_CODE_STRING)
 +    return create_string_type (type, elt_type, range_type);
-+  else
-+    return create_array_type_with_stride (type, elt_type, range_type,
-+					  TYPE_FIELD_BITSIZE (type, 0));
- }
- 
- /* Resolve dynamic bounds of members of the union TYPE to static
-@@ -2147,6 +2154,28 @@
++
+   prop = get_dyn_prop (DYN_PROP_BYTE_STRIDE, type);
+   if (prop != NULL)
+     {
+@@ -2251,6 +2258,28 @@ resolve_dynamic_struct (struct type *type,
    return resolved_type;
  }
  
@@ -568,7 +609,7 @@ Index: gdb-7.99.90.20170420/gdb/gdbtypes.c
  /* Worker for resolved_dynamic_type.  */
  
  static struct type *
-@@ -2195,7 +2224,12 @@
+@@ -2299,7 +2328,12 @@ resolve_dynamic_type_internal (struct type *type,
  	    break;
  	  }
  
@@ -581,10 +622,10 @@ Index: gdb-7.99.90.20170420/gdb/gdbtypes.c
  	  resolved_type = resolve_dynamic_array (type, addr_stack);
  	  break;
  
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.cp/vla-cxx.cc
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/gdb.cp/vla-cxx.cc	2017-04-20 22:27:47.094032225 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.cp/vla-cxx.cc	2017-04-20 22:27:49.955050293 +0200
+diff --git a/gdb/testsuite/gdb.cp/vla-cxx.cc b/gdb/testsuite/gdb.cp/vla-cxx.cc
+index 1b5b27bf3d..06198b41e0 100644
+--- a/gdb/testsuite/gdb.cp/vla-cxx.cc
++++ b/gdb/testsuite/gdb.cp/vla-cxx.cc
 @@ -15,6 +15,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
@@ -596,7 +637,7 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.cp/vla-cxx.cc
  struct container;
  
  struct element
-@@ -40,11 +44,16 @@
+@@ -40,11 +44,16 @@ int main(int argc, char **argv)
    typedef typeof (vla) &vlareftypedef;
    vlareftypedef vlaref2 (vla);
    container c;
@@ -613,11 +654,11 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.cp/vla-cxx.cc
 +
    return vla[2];
  }
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.cp/vla-cxx.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/gdb.cp/vla-cxx.exp	2017-04-20 22:27:47.094032225 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.cp/vla-cxx.exp	2017-04-20 22:27:49.955050293 +0200
-@@ -23,6 +23,12 @@
+diff --git a/gdb/testsuite/gdb.cp/vla-cxx.exp b/gdb/testsuite/gdb.cp/vla-cxx.exp
+index ac87499d49..dacbfb6ca0 100644
+--- a/gdb/testsuite/gdb.cp/vla-cxx.exp
++++ b/gdb/testsuite/gdb.cp/vla-cxx.exp
+@@ -23,6 +23,12 @@ if ![runto_main] {
      return -1
  }
  
@@ -630,17 +671,18 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.cp/vla-cxx.exp
  gdb_breakpoint [gdb_get_line_number "vlas_filled"]
  gdb_continue_to_breakpoint "vlas_filled"
  
-@@ -33,3 +39,6 @@
+@@ -33,3 +39,6 @@ gdb_test "print vlaref" " = \\(int \\(&\\)\\\[3\\\]\\) @$hex: \\{5, 7, 9\\}"
  # bug being tested, it's better not to depend on the exact spelling.
  gdb_test "print vlaref2" " = \\(.*\\) @$hex: \\{5, 7, 9\\}"
  gdb_test "print c" " = \\{e = \\{c = @$hex\\}\\}"
 +gdb_test "ptype ptr" "int \\(\\*\\)\\\[3\\\]"
 +gdb_test "print ptr" "\\(int \\(\\*\\)\\\[3\\\]\\) $hex"
 +gdb_test "print *ptr" " = \\{5, 7, 9\\}"
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/pointers.exp
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/pointers.exp	2017-04-20 22:27:49.955050293 +0200
+diff --git a/gdb/testsuite/gdb.fortran/pointers.exp b/gdb/testsuite/gdb.fortran/pointers.exp
+new file mode 100644
+index 0000000000..67cf99989d
+--- /dev/null
++++ b/gdb/testsuite/gdb.fortran/pointers.exp
 @@ -0,0 +1,143 @@
 +# Copyright 2016 Free Software Foundation, Inc.
 +
@@ -785,10 +827,11 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/pointers.exp
 +gdb_test "print *((integer*) &inta + 2)" "= 3" "print temporary pointer, array"
 +gdb_test "print *((integer*) &intvla + 3)" "= 4" "print temporary pointer, allocated vla"
 +gdb_test "print \$pc" "= \\(PTR TO -> \\( void \\(\\)\\(\\)\\)\\) $hex <pointers\\+\\d+>" "Print program counter"
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/pointers.f90
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/pointers.f90	2017-04-20 22:27:49.955050293 +0200
+diff --git a/gdb/testsuite/gdb.fortran/pointers.f90 b/gdb/testsuite/gdb.fortran/pointers.f90
+new file mode 100644
+index 0000000000..6240c87988
+--- /dev/null
++++ b/gdb/testsuite/gdb.fortran/pointers.f90
 @@ -0,0 +1,109 @@
 +! Copyright 2016 Free Software Foundation, Inc.
 +!
@@ -899,10 +942,11 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/pointers.f90
 +  intv = intv + 1 ! After value assignment
 +
 +end program pointers
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/print_type.exp
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/print_type.exp	2017-04-20 22:27:49.956050299 +0200
+diff --git a/gdb/testsuite/gdb.fortran/print_type.exp b/gdb/testsuite/gdb.fortran/print_type.exp
+new file mode 100644
+index 0000000000..45b4968f6c
+--- /dev/null
++++ b/gdb/testsuite/gdb.fortran/print_type.exp
 @@ -0,0 +1,100 @@
 +# Copyright 2016 Free Software Foundation, Inc.
 +
@@ -1004,11 +1048,11 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/print_type.exp
 +    }
 +}
 +gdb_test "ptype realp" "type = PTR TO -> \\( $real \\)"
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-ptype.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/gdb.fortran/vla-ptype.exp	2017-04-20 22:27:47.094032225 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-ptype.exp	2017-04-20 22:27:49.956050299 +0200
-@@ -32,9 +32,9 @@
+diff --git a/gdb/testsuite/gdb.fortran/vla-ptype.exp b/gdb/testsuite/gdb.fortran/vla-ptype.exp
+index 5351a0aa2e..fa248c5a0c 100644
+--- a/gdb/testsuite/gdb.fortran/vla-ptype.exp
++++ b/gdb/testsuite/gdb.fortran/vla-ptype.exp
+@@ -32,9 +32,9 @@ set real [fortran_real4]
  # Check the ptype of various VLA states and pointer to VLA's.
  gdb_breakpoint [gdb_get_line_number "vla1-init"]
  gdb_continue_to_breakpoint "vla1-init"
@@ -1021,7 +1065,7 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-ptype.exp
  gdb_test "ptype vla1(3, 6, 9)" "no such vector element \\\(vector not allocated\\\)" \
    "ptype vla1(3, 6, 9) not initialized"
  gdb_test "ptype vla2(5, 45, 20)" \
-@@ -81,20 +81,20 @@
+@@ -81,20 +81,20 @@ gdb_test "ptype vla2(5, 45, 20)" "type = $real" \
  
  gdb_breakpoint [gdb_get_line_number "pvla-deassociated"]
  gdb_continue_to_breakpoint "pvla-deassociated"
@@ -1045,10 +1089,11 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-ptype.exp
  gdb_test "ptype vla2(5, 45, 20)" \
    "no such vector element \\\(vector not allocated\\\)" \
    "ptype vla2(5, 45, 20) not allocated"
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-strings.exp
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-strings.exp	2017-04-20 22:27:49.956050299 +0200
+diff --git a/gdb/testsuite/gdb.fortran/vla-strings.exp b/gdb/testsuite/gdb.fortran/vla-strings.exp
+new file mode 100644
+index 0000000000..484fdcb652
+--- /dev/null
++++ b/gdb/testsuite/gdb.fortran/vla-strings.exp
 @@ -0,0 +1,103 @@
 +# Copyright 2016 Free Software Foundation, Inc.
 +
@@ -1153,10 +1198,11 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-strings.exp
 +	    pass $test
 +    }
 +}
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-strings.f90
-===================================================================
---- /dev/null	1970-01-01 00:00:00.000000000 +0000
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-strings.f90	2017-04-20 22:27:49.956050299 +0200
+diff --git a/gdb/testsuite/gdb.fortran/vla-strings.f90 b/gdb/testsuite/gdb.fortran/vla-strings.f90
+new file mode 100644
+index 0000000000..3c22735fdb
+--- /dev/null
++++ b/gdb/testsuite/gdb.fortran/vla-strings.f90
 @@ -0,0 +1,39 @@
 +! Copyright 2016 Free Software Foundation, Inc.
 +!
@@ -1197,11 +1243,11 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-strings.f90
 +  var_char_p => null()
 +  l = associated(var_char_p)              ! var_char_p-not-associated
 +end program vla_strings
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-type.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/gdb.fortran/vla-type.exp	2017-04-20 22:27:47.094032225 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-type.exp	2017-04-20 22:27:49.956050299 +0200
-@@ -132,7 +132,10 @@
+diff --git a/gdb/testsuite/gdb.fortran/vla-type.exp b/gdb/testsuite/gdb.fortran/vla-type.exp
+index aff0d5a258..6f2d6a4009 100755
+--- a/gdb/testsuite/gdb.fortran/vla-type.exp
++++ b/gdb/testsuite/gdb.fortran/vla-type.exp
+@@ -132,7 +132,10 @@ gdb_test "ptype fivearr(2)%tone" \
                       "End Type one" ]
  
  # Check allocation status of dynamic array and it's dynamic members
@@ -1213,7 +1259,7 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-type.exp
  gdb_test "next" ""
  gdb_test "ptype fivedynarr(2)" \
           [multi_line "type = Type five" \
-@@ -141,7 +144,7 @@
+@@ -141,7 +144,7 @@ gdb_test "ptype fivedynarr(2)" \
           "ptype fivedynarr(2), tone is not allocated"
  gdb_test "ptype fivedynarr(2)%tone" \
           [multi_line "type = Type one" \
@@ -1222,114 +1268,35 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-type.exp
                       "End Type one" ] \
           "ptype fivedynarr(2)%tone, not allocated"
  
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-value.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/gdb.fortran/vla-value.exp	2017-04-20 22:27:47.095032231 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.fortran/vla-value.exp	2017-04-20 22:27:49.957050306 +0200
-@@ -14,6 +14,7 @@
- # along with this program.  If not, see <http://www.gnu.org/licenses/>.
- 
- standard_testfile "vla.f90"
-+load_lib "fortran.exp"
- 
- if { [prepare_for_testing "failed to prepare" ${testfile} ${srcfile} \
-      {debug f90 quiet}] } {
-@@ -25,12 +26,15 @@
-     return -1
- }
- 
-+# Depending on the compiler being used, the type names can be printed differently.
-+set real [fortran_real4]
-+
- # Try to access values in non allocated VLA
- gdb_breakpoint [gdb_get_line_number "vla1-init"]
+diff --git a/gdb/testsuite/gdb.fortran/vla-value.exp b/gdb/testsuite/gdb.fortran/vla-value.exp
+index 4b1842e38c..5a831a3964 100644
+--- a/gdb/testsuite/gdb.fortran/vla-value.exp
++++ b/gdb/testsuite/gdb.fortran/vla-value.exp
+@@ -35,7 +35,7 @@ gdb_breakpoint [gdb_get_line_number "vla1-init"]
  gdb_continue_to_breakpoint "vla1-init"
  gdb_test "print vla1" " = <not allocated>" "print non-allocated vla1"
  gdb_test "print &vla1" \
--  " = \\\(PTR TO -> \\\( real\\\(kind=4\\\) \\\(<not allocated>\\\)\\\)\\\) $hex" \
+-  " = \\\(PTR TO -> \\\( $real \\\(<not allocated>\\\)\\\)\\\) $hex" \
 +  " = \\\(PTR TO -> \\\( $real \\\(:,:,:\\\)\\\)\\\) $hex" \
    "print non-allocated &vla1"
  gdb_test "print vla1(1,1,1)" "no such vector element \\\(vector not allocated\\\)" \
    "print member in non-allocated vla1 (1)"
-@@ -51,7 +55,7 @@
- 	"step over value assignment of vla1"
- }
- gdb_test "print &vla1" \
--  " = \\\(PTR TO -> \\\( real\\\(kind=4\\\) \\\(10,10,10\\\)\\\)\\\) $hex" \
-+  " = \\\(PTR TO -> \\\( $real \\\(10,10,10\\\)\\\)\\\) $hex" \
-   "print allocated &vla1"
- gdb_test "print vla1(3, 6, 9)" " = 1311" "print allocated vla1(3,6,9)"
- gdb_test "print vla1(1, 3, 8)" " = 1311" "print allocated vla1(1,3,8)"
-@@ -71,7 +75,7 @@
+@@ -76,7 +76,7 @@ gdb_test "print vla1(9, 9, 9)" " = 999" \
  # Try to access values in undefined pointer to VLA (dangling)
  gdb_test "print pvla" " = <not associated>" "print undefined pvla"
  gdb_test "print &pvla" \
--  " = \\\(PTR TO -> \\\( real\\\(kind=4\\\) \\\(<not associated>\\\)\\\)\\\) $hex" \
+-  " = \\\(PTR TO -> \\\( $real \\\(<not associated>\\\)\\\)\\\) $hex" \
 +  " = \\\(PTR TO -> \\\( $real \\\(:,:,:\\\)\\\)\\\) $hex" \
    "print non-associated &pvla"
  gdb_test "print pvla(1, 3, 8)" "no such vector element \\\(vector not associated\\\)" \
    "print undefined pvla(1,3,8)"
-@@ -80,7 +84,7 @@
- gdb_breakpoint [gdb_get_line_number "pvla-associated"]
- gdb_continue_to_breakpoint "pvla-associated"
- gdb_test "print &pvla" \
--  " = \\\(PTR TO -> \\\( real\\\(kind=4\\\) \\\(10,10,10\\\)\\\)\\\) $hex" \
-+  " = \\\(PTR TO -> \\\( $real \\\(10,10,10\\\)\\\)\\\) $hex" \
-   "print associated &pvla"
- gdb_test "print pvla(3, 6, 9)" " = 42" "print associated pvla(3,6,9)"
- gdb_test "print pvla(1, 3, 8)" " = 1001" "print associated pvla(1,3,8)"
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.mi/mi-var-child-f.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/gdb.mi/mi-var-child-f.exp	2017-04-20 22:27:47.095032231 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.mi/mi-var-child-f.exp	2017-04-20 22:27:49.957050306 +0200
-@@ -17,6 +17,7 @@
- 
- load_lib mi-support.exp
- set MIFLAGS "-i=mi"
-+load_lib "fortran.exp"
- 
- if { [skip_fortran_tests] } { return -1 }
- 
-@@ -40,10 +41,8 @@
- mi_create_varobj "array" "array" "create local variable array"
- 
- 
--# Depending on the compiler version being used, the name of the 4-byte integer
--# and real types can be printed differently.  For instance, gfortran-4.1 uses
--# "int4" whereas gfortran-4.3 uses "integer(kind=4)".
--set int4 "(int4|integer\\(kind=4\\))"
-+# Depending on the compiler being used, the type names can be printed differently.
-+set int4 [fortran_int4]
- 
- set children [list [list "array.-1" "-1" 2 "$int4 \\(2\\)"] \
- 		  [list "array.0" "0" 2 "$int4 \\(2\\)"] \
-Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.mi/mi-vla-fortran.exp
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/testsuite/gdb.mi/mi-vla-fortran.exp	2017-04-20 22:27:47.095032231 +0200
-+++ gdb-7.99.90.20170420/gdb/testsuite/gdb.mi/mi-vla-fortran.exp	2017-04-20 22:27:49.957050306 +0200
-@@ -17,7 +17,9 @@
- # Array (VLA).
- 
- load_lib mi-support.exp
-+load_lib fortran.exp
- set MIFLAGS "-i=mi"
-+load_lib "fortran.exp"
- 
- gdb_exit
- if [mi_gdb_start] {
-@@ -32,6 +34,9 @@
-      return -1
- }
- 
-+# Depending on the compiler being used, the type names can be printed differently.
-+set real [fortran_real4]
-+
- mi_delete_breakpoints
- mi_gdb_reinitialize_dir $srcdir/$subdir
- mi_gdb_load ${binfile}
-@@ -46,10 +51,10 @@
+diff --git a/gdb/testsuite/gdb.mi/mi-vla-fortran.exp b/gdb/testsuite/gdb.mi/mi-vla-fortran.exp
+index b6e777235c..14b611f7b5 100644
+--- a/gdb/testsuite/gdb.mi/mi-vla-fortran.exp
++++ b/gdb/testsuite/gdb.mi/mi-vla-fortran.exp
+@@ -51,10 +51,10 @@ mi_expect_stop "breakpoint-hit" "vla" "" ".*vla.f90" "$bp_lineno" \
  mi_gdb_test "500-data-evaluate-expression vla1" \
-   "500\\^done,value=\"<not allocated>\"" "evaluate not allocated vla"
+   "500\\^done,value=\"<not allocated>\"" "evaluate not allocated vla, before allocation"
  
 -mi_create_varobj_checked vla1_not_allocated vla1 "<not allocated>" \
 +mi_create_varobj_checked vla1_not_allocated vla1 "$real \\(:\\)" \
@@ -1340,38 +1307,7 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.mi/mi-vla-fortran.exp
    "info type variable vla1_not_allocated"
  mi_gdb_test "502-var-show-format vla1_not_allocated" \
    "502\\^done,format=\"natural\"" \
-@@ -58,7 +63,7 @@
-   "503\\^done,value=\"\\\[0\\\]\"" \
-   "eval variable vla1_not_allocated"
- mi_list_array_varobj_children_with_index "vla1_not_allocated" "0" "1" \
--    "real\\\(kind=4\\\)" "get children of vla1_not_allocated"
-+    "$real" "get children of vla1_not_allocated"
- 
- 
- 
-@@ -71,10 +76,10 @@
- mi_gdb_test "510-data-evaluate-expression vla1" \
-   "510\\^done,value=\"\\(.*\\)\"" "evaluate allocated vla"
- 
--mi_create_varobj_checked vla1_allocated vla1 "real\\\(kind=4\\\) \\\(5\\\)" \
-+mi_create_varobj_checked vla1_allocated vla1 "$real \\\(5\\\)" \
-   "create local variable vla1_allocated"
- mi_gdb_test "511-var-info-type vla1_allocated" \
--  "511\\^done,type=\"real\\\(kind=4\\\) \\\(5\\\)\"" \
-+  "511\\^done,type=\"$real \\\(5\\\)\"" \
-   "info type variable vla1_allocated"
- mi_gdb_test "512-var-show-format vla1_allocated" \
-   "512\\^done,format=\"natural\"" \
-@@ -83,7 +88,7 @@
-   "513\\^done,value=\"\\\[5\\\]\"" \
-   "eval variable vla1_allocated"
- mi_list_array_varobj_children_with_index "vla1_allocated" "5" "1" \
--    "real\\\(kind=4\\\)" "get children of vla1_allocated"
-+    "$real" "get children of vla1_allocated"
- 
- 
- set bp_lineno [gdb_get_line_number "vla1-filled"]
-@@ -136,10 +141,10 @@
+@@ -146,10 +146,10 @@ gdb_expect {
      -re "580\\^done,value=\"<not associated>\".*${mi_gdb_prompt}$" {
  	pass $test
  
@@ -1384,32 +1320,11 @@ Index: gdb-7.99.90.20170420/gdb/testsuite/gdb.mi/mi-vla-fortran.exp
  	    "info type variable pvla2_not_associated"
  	mi_gdb_test "582-var-show-format pvla2_not_associated" \
  	    "582\\^done,format=\"natural\"" \
-@@ -148,7 +153,7 @@
- 	    "583\\^done,value=\"\\\[0\\\]\"" \
- 	    "eval variable pvla2_not_associated"
- 	mi_list_array_varobj_children_with_index "pvla2_not_associated" "0" "1" \
--	    "real\\\(kind=4\\\)" "get children of pvla2_not_associated"
-+	    "$real" "get children of pvla2_not_associated"
-     }
-     -re "580\\^error,msg=\"value contents too large \\(\[0-9\]+ bytes\\).*${mi_gdb_prompt}$" {
- 	# Undefined behaviour in gfortran.
-@@ -173,9 +178,9 @@
-   "evaluate associated vla"
- 
- mi_create_varobj_checked pvla2_associated pvla2 \
--  "real\\\(kind=4\\\) \\\(5,2\\\)" "create local variable pvla2_associated"
-+  "$real \\\(5,2\\\)" "create local variable pvla2_associated"
- mi_gdb_test "591-var-info-type pvla2_associated" \
--  "591\\^done,type=\"real\\\(kind=4\\\) \\\(5,2\\\)\"" \
-+  "591\\^done,type=\"$real \\\(5,2\\\)\"" \
-   "info type variable pvla2_associated"
- mi_gdb_test "592-var-show-format pvla2_associated" \
-   "592\\^done,format=\"natural\"" \
-Index: gdb-7.99.90.20170420/gdb/typeprint.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/typeprint.c	2017-04-20 22:27:47.095032231 +0200
-+++ gdb-7.99.90.20170420/gdb/typeprint.c	2017-04-20 22:27:49.957050306 +0200
-@@ -474,6 +474,25 @@
+diff --git a/gdb/typeprint.c b/gdb/typeprint.c
+index c098a3f426..319fbaf94e 100644
+--- a/gdb/typeprint.c
++++ b/gdb/typeprint.c
+@@ -538,6 +538,25 @@ whatis_exp (const char *exp, int show)
        printf_filtered (" */\n");    
      }
  
@@ -1435,11 +1350,11 @@ Index: gdb-7.99.90.20170420/gdb/typeprint.c
    LA_PRINT_TYPE (type, "", gdb_stdout, show, 0, &flags);
    printf_filtered ("\n");
  
-Index: gdb-7.99.90.20170420/gdb/valops.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/valops.c	2017-04-20 22:27:47.096032238 +0200
-+++ gdb-7.99.90.20170420/gdb/valops.c	2017-04-20 22:27:49.958050312 +0200
-@@ -1574,6 +1574,19 @@
+diff --git a/gdb/valops.c b/gdb/valops.c
+index 4cd4fd96ae..9b25980090 100644
+--- a/gdb/valops.c
++++ b/gdb/valops.c
+@@ -1564,6 +1564,19 @@ value_ind (struct value *arg1)
    if (TYPE_CODE (base_type) == TYPE_CODE_PTR)
      {
        struct type *enc_type;
@@ -1459,7 +1374,7 @@ Index: gdb-7.99.90.20170420/gdb/valops.c
  
        /* We may be pointing to something embedded in a larger object.
           Get the real type of the enclosing object.  */
-@@ -1589,8 +1602,7 @@
+@@ -1579,8 +1592,7 @@ value_ind (struct value *arg1)
        else
  	/* Retrieve the enclosing object pointed to.  */
  	arg2 = value_at_lazy (enc_type, 
@@ -1469,11 +1384,11 @@ Index: gdb-7.99.90.20170420/gdb/valops.c
  
        enc_type = value_type (arg2);
        return readjust_indirect_value_type (arg2, enc_type, base_type, arg1);
-Index: gdb-7.99.90.20170420/gdb/valprint.c
-===================================================================
---- gdb-7.99.90.20170420.orig/gdb/valprint.c	2017-04-20 22:25:38.224218378 +0200
-+++ gdb-7.99.90.20170420/gdb/valprint.c	2017-04-20 22:27:49.959050318 +0200
-@@ -1166,12 +1166,6 @@
+diff --git a/gdb/valprint.c b/gdb/valprint.c
+index b19123f23e..d01d02fc09 100644
+--- a/gdb/valprint.c
++++ b/gdb/valprint.c
+@@ -1111,12 +1111,6 @@ value_check_printable (struct value *val, struct ui_file *stream,
        return 0;
      }
  
@@ -1486,3 +1401,6 @@ Index: gdb-7.99.90.20170420/gdb/valprint.c
    if (type_not_allocated (value_type (val)))
      {
        val_print_not_allocated (stream);
+-- 
+2.14.3
+

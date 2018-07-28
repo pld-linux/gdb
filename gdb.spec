@@ -21,7 +21,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	8.1
-Release:	1
+Release:	2
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
@@ -61,11 +61,14 @@ BuildRequires:	libselinux-devel
 BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	libtool
 BuildRequires:	make >= 3.81
+BuildRequires:	mpfr-devel
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.219
+BuildRequires:	tar >= 1:1.22
 BuildRequires:	texinfo >= 4.4
+BuildRequires:	xz
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel
 %if %{with python}

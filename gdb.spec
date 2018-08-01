@@ -20,12 +20,12 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	8.1
-Release:	2
+Version:	8.1.1
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	f46487561f9a16916a8102316f7fd105
+# Source0-md5:	372fa63a53adeee1bfbfd581d8da9e34
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -180,8 +180,8 @@ GDB w postaci biblioteki statycznej.
 %setup -q
 
 # Files have `# <number> <file>' statements breaking VPATH / find-debuginfo.sh .
-rm -f gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
-rm -f gdb/jv-exp.c gdb/m2-exp.c gdb/objc-exp.c gdb/p-exp.c
+%{__rm} gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
+%{__rm} gdb/m2-exp.c gdb/p-exp.c
 
 %patch100 -p1
 %patch101 -p1

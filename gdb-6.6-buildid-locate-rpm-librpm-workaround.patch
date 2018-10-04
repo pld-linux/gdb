@@ -3,20 +3,13 @@ From: Fedora GDB patches <invalid@email.com>
 Date: Fri, 27 Oct 2017 21:07:50 +0200
 Subject: gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
 
-FileName: gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
-
 ;; Workaround librpm BZ 643031 due to its unexpected exit() calls (BZ 642879).
 ;;=push+jan
----
- gdb/build-id.c        | 13 +++++++++++++
- gdb/proc-service.list |  3 +++
- 2 files changed, 16 insertions(+)
 
 diff --git a/gdb/build-id.c b/gdb/build-id.c
-index d60cf622dc..409a5b8c54 100644
 --- a/gdb/build-id.c
 +++ b/gdb/build-id.c
-@@ -678,6 +678,19 @@ build_id_to_filename (const struct bfd_build_id *build_id, char **link_return)
+@@ -652,6 +652,19 @@ build_id_to_filename (const struct bfd_build_id *build_id, char **link_return)
  #include <dlfcn.h>
  #endif
  
@@ -37,7 +30,6 @@ index d60cf622dc..409a5b8c54 100644
     and avoid their duplicities during a single inferior run.  */
  
 diff --git a/gdb/proc-service.list b/gdb/proc-service.list
-index 53f7ed8b1e..323f5e83c2 100644
 --- a/gdb/proc-service.list
 +++ b/gdb/proc-service.list
 @@ -37,4 +37,7 @@
@@ -48,6 +40,3 @@ index 53f7ed8b1e..323f5e83c2 100644
 +  /* gdb-6.6-buildid-locate-rpm.patch */
 +  rpmsqEnable;
  };
--- 
-2.14.3
-

@@ -180,19 +180,19 @@
      maybe-install-strip-sid \
      maybe-install-strip-sim \
      maybe-install-strip-texinfo \
-@@ -42608,7 +42589,6 @@
- all-gdb: maybe-all-libiberty
- all-gdb: maybe-all-libiconv
- all-gdb: maybe-all-opcodes
+@@ -49604,7 +49604,6 @@ all-stage4-intl: maybe-all-stage4-libico
+ all-stageprofile-intl: maybe-all-stageprofile-libiconv
+ all-stagefeedback-intl: maybe-all-stagefeedback-libiconv
+ configure-gdb: maybe-configure-sim
 -all-gdb: maybe-all-readline
  all-gdb: maybe-all-build-bison
  all-gdb: maybe-all-sim
- all-gdb: maybe-all-libdecnumber
-@@ -42946,7 +42926,6 @@
- all-sim: maybe-all-libiberty
- all-sim: maybe-all-bfd
- all-sim: maybe-all-opcodes
+ all-gdb: maybe-all-libtermcap
+@@ -49927,7 +49926,6 @@ install-sid: maybe-install-tcl
+ install-strip-sid: maybe-install-strip-tcl
+ install-sid: maybe-install-tk
+ install-strip-sid: maybe-install-strip-tk
 -all-sim: maybe-all-readline
  all-sim: maybe-configure-gdb
- all-fastjar: maybe-all-zlib
  all-fastjar: maybe-all-build-texinfo
+ all-bison: maybe-all-build-texinfo

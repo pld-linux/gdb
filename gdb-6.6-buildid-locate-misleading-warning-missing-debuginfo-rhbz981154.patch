@@ -4,8 +4,6 @@ Date: Fri, 27 Oct 2017 21:07:50 +0200
 Subject: 
  gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
 
-FileName: gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
-
 ;; Fix 'gdb gives highly misleading error when debuginfo pkg is present,
 ;; but not corresponding binary pkg' (RH BZ 981154).
 ;;=push+jan
@@ -26,17 +24,11 @@ Comments by Sergio Durigan Junior <sergiodj@redhat.com>:
   and had a little thinko there.  The variable 'filename' needs to be set to
   NULL after it is free'd, otherwise the code below thinks that it is still
   valid and doesn't print the necessary warning ("Try: yum install ...").
----
- gdb/build-id.c                                     |  5 +-
- .../rhbz981154-misleading-yum-install-warning.exp  | 97 ++++++++++++++++++++++
- 2 files changed, 101 insertions(+), 1 deletion(-)
- create mode 100644 gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
 
 diff --git a/gdb/build-id.c b/gdb/build-id.c
-index 409a5b8c54..e2c1e81266 100644
 --- a/gdb/build-id.c
 +++ b/gdb/build-id.c
-@@ -592,7 +592,10 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id,
+@@ -581,7 +581,10 @@ build_id_to_debug_bfd (size_t build_id_len, const bfd_byte *build_id,
  	  do_cleanups (inner);
  
  	  if (abfd == NULL)
@@ -50,7 +42,6 @@ index 409a5b8c54..e2c1e81266 100644
  	    break;
 diff --git a/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp b/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
 new file mode 100644
-index 0000000000..bb70c5cf44
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/rhbz981154-misleading-yum-install-warning.exp
 @@ -0,0 +1,97 @@
@@ -151,6 +142,3 @@ index 0000000000..bb70c5cf44
 +
 +# Leaving the link there will cause breakage in the next run.
 +remote_exec build "rm -f [standard_output_file ${build_id_without_debug}]"
--- 
-2.14.3
-

@@ -3,8 +3,6 @@ From: Fedora GDB patches <invalid@email.com>
 Date: Fri, 27 Oct 2017 21:07:50 +0200
 Subject: gdb-6.6-buildid-locate-solib-missing-ids.patch
 
-FileName: gdb-6.6-buildid-locate-solib-missing-ids.patch
-
 ;; Fix loading of core files without build-ids but with build-ids in executables.
 ;; Load strictly build-id-checked core files only if no executable is specified
 ;; (Jan Kratochvil, RH BZ 1339862).
@@ -12,33 +10,23 @@ FileName: gdb-6.6-buildid-locate-solib-missing-ids.patch
 
 gdb returns an incorrect back trace when applying a debuginfo
 https://bugzilla.redhat.com/show_bug.cgi?id=1339862
----
- gdb/solib-svr4.c                                   |  35 ++++---
- .../gcore-buildid-exec-but-not-solib-lib.c         |  21 +++++
- .../gcore-buildid-exec-but-not-solib-main.c        |  25 +++++
- .../gdb.base/gcore-buildid-exec-but-not-solib.exp  | 105 +++++++++++++++++++++
- 4 files changed, 167 insertions(+), 19 deletions(-)
- create mode 100644 gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-lib.c
- create mode 100644 gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-main.c
- create mode 100644 gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib.exp
 
 diff --git a/gdb/solib-svr4.c b/gdb/solib-svr4.c
-index a3399ad8f7..d7eeb6350d 100644
 --- a/gdb/solib-svr4.c
 +++ b/gdb/solib-svr4.c
-@@ -1387,14 +1387,27 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
+@@ -1358,14 +1358,27 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
  	}
  
        {
 -	struct bfd_build_id *build_id;
 +	struct bfd_build_id *build_id = NULL;
  
- 	strncpy (newobj->so_original_name, buffer, SO_NAME_MAX_PATH_SIZE - 1);
+ 	strncpy (newobj->so_original_name, buffer.get (), SO_NAME_MAX_PATH_SIZE - 1);
  	newobj->so_original_name[SO_NAME_MAX_PATH_SIZE - 1] = '\0';
  	/* May get overwritten below.  */
  	strcpy (newobj->so_name, newobj->so_original_name);
  
--	build_id = build_id_addr_get (newobj->lm_info->l_ld);
+-	build_id = build_id_addr_get (((lm_info_svr4 *) newobj->lm_info)->l_ld);
 +	/* In the case the main executable was found according to its build-id
 +	   (from a core file) prevent loading a different build of a library
 +	   with accidentally the same SO_NAME.
@@ -56,7 +44,7 @@ index a3399ad8f7..d7eeb6350d 100644
  	if (build_id != NULL)
  	  {
  	    char *name, *build_id_filename;
-@@ -1409,23 +1422,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
+@@ -1380,23 +1393,7 @@ svr4_read_so_list (CORE_ADDR lm, CORE_ADDR prev_lm,
  		xfree (name);
  	      }
  	    else
@@ -83,7 +71,6 @@ index a3399ad8f7..d7eeb6350d 100644
  	    xfree (build_id);
 diff --git a/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-lib.c b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-lib.c
 new file mode 100644
-index 0000000000..d74b690c73
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-lib.c
 @@ -0,0 +1,21 @@
@@ -110,7 +97,6 @@ index 0000000000..d74b690c73
 +}
 diff --git a/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-main.c b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-main.c
 new file mode 100644
-index 0000000000..46b9dfe161
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib-main.c
 @@ -0,0 +1,25 @@
@@ -141,7 +127,6 @@ index 0000000000..46b9dfe161
 +}
 diff --git a/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib.exp b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib.exp
 new file mode 100644
-index 0000000000..0c46489f31
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/gcore-buildid-exec-but-not-solib.exp
 @@ -0,0 +1,105 @@
@@ -250,6 +235,3 @@ index 0000000000..0c46489f31
 +
 +gdb_test "bt"
 +gdb_test "info shared"
--- 
-2.14.3
-

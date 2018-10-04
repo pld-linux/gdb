@@ -3,23 +3,10 @@ From: Fedora GDB patches <invalid@email.com>
 Date: Fri, 27 Oct 2017 21:07:50 +0200
 Subject: gdb-vla-intel-tests.patch
 
-FileName: gdb-vla-intel-tests.patch
-
 ;;=fedoratest
----
- gdb/testsuite/gdb.fortran/vla-func.exp       |  61 ++++++++++++++++
- gdb/testsuite/gdb.fortran/vla-func.f90       |  71 +++++++++++++++++++
- gdb/testsuite/gdb.fortran/vla-stringsold.exp | 101 +++++++++++++++++++++++++++
- gdb/testsuite/gdb.fortran/vla-stringsold.f90 |  40 +++++++++++
- 4 files changed, 273 insertions(+)
- create mode 100644 gdb/testsuite/gdb.fortran/vla-func.exp
- create mode 100644 gdb/testsuite/gdb.fortran/vla-func.f90
- create mode 100644 gdb/testsuite/gdb.fortran/vla-stringsold.exp
- create mode 100644 gdb/testsuite/gdb.fortran/vla-stringsold.f90
 
 diff --git a/gdb/testsuite/gdb.fortran/vla-func.exp b/gdb/testsuite/gdb.fortran/vla-func.exp
 new file mode 100644
-index 0000000000..f0f236bef0
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/vla-func.exp
 @@ -0,0 +1,61 @@
@@ -86,7 +73,6 @@ index 0000000000..f0f236bef0
 +  "ptype vla3 (after func2)"
 diff --git a/gdb/testsuite/gdb.fortran/vla-func.f90 b/gdb/testsuite/gdb.fortran/vla-func.f90
 new file mode 100644
-index 0000000000..7540f54dbb
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/vla-func.f90
 @@ -0,0 +1,71 @@
@@ -163,7 +149,6 @@ index 0000000000..7540f54dbb
 +end program vla_func
 diff --git a/gdb/testsuite/gdb.fortran/vla-stringsold.exp b/gdb/testsuite/gdb.fortran/vla-stringsold.exp
 new file mode 100644
-index 0000000000..c1bf7ef763
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/vla-stringsold.exp
 @@ -0,0 +1,101 @@
@@ -270,7 +255,6 @@ index 0000000000..c1bf7ef763
 +  "ptype var_char_p after associated"
 diff --git a/gdb/testsuite/gdb.fortran/vla-stringsold.f90 b/gdb/testsuite/gdb.fortran/vla-stringsold.f90
 new file mode 100644
-index 0000000000..0a1d5221d0
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/vla-stringsold.f90
 @@ -0,0 +1,40 @@
@@ -314,6 +298,3 @@ index 0000000000..0a1d5221d0
 +  var_char_p => null()
 +  l = associated(var_char_p)              ! var_char_p-not-associated
 +end program vla_strings
--- 
-2.14.3
-

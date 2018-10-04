@@ -3,8 +3,6 @@ From: Andrew Cagney <cagney@gnu.org>
 Date: Fri, 27 Oct 2017 21:07:50 +0200
 Subject: gdb-6.3-gstack-20050411.patch
 
-FileName: gdb-6.3-gstack-20050411.patch
-
 ;; Add a wrapper script to GDB that implements pstack using the
 ;; --readnever option.
 ;;=push
@@ -14,21 +12,11 @@ FileName: gdb-6.3-gstack-20050411.patch
 	* Makefile.in (uninstall-gstack, install-gstack): New rules, add
 	to install and uninstall.
 	* gstack.sh, gstack.1: New files.
----
- gdb/Makefile.in                   | 34 ++++++++++++++++++--
- gdb/gstack.sh                     | 43 +++++++++++++++++++++++++
- gdb/testsuite/gdb.base/gstack.c   | 43 +++++++++++++++++++++++++
- gdb/testsuite/gdb.base/gstack.exp | 66 +++++++++++++++++++++++++++++++++++++++
- 4 files changed, 184 insertions(+), 2 deletions(-)
- create mode 100644 gdb/gstack.sh
- create mode 100644 gdb/testsuite/gdb.base/gstack.c
- create mode 100644 gdb/testsuite/gdb.base/gstack.exp
 
 diff --git a/gdb/Makefile.in b/gdb/Makefile.in
-index 17b71c6e7c..e77d6a5c03 100644
 --- a/gdb/Makefile.in
 +++ b/gdb/Makefile.in
-@@ -1744,7 +1744,7 @@ info install-info clean-info dvi pdf install-pdf html install-html: force
+@@ -1735,7 +1735,7 @@ info install-info clean-info dvi pdf install-pdf html install-html: force
  install: all
  	@$(MAKE) $(FLAGS_TO_PASS) install-only
  
@@ -85,7 +73,6 @@ index 17b71c6e7c..e77d6a5c03 100644
  	$(COMPILE) -DTEST_CPNAMES cp-name-parser.c
 diff --git a/gdb/gstack.sh b/gdb/gstack.sh
 new file mode 100644
-index 0000000000..f7f07248f7
 --- /dev/null
 +++ b/gdb/gstack.sh
 @@ -0,0 +1,43 @@
@@ -134,7 +121,6 @@ index 0000000000..f7f07248f7
 +    -e '/^Thread/p'
 diff --git a/gdb/testsuite/gdb.base/gstack.c b/gdb/testsuite/gdb.base/gstack.c
 new file mode 100644
-index 0000000000..dc10813f04
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/gstack.c
 @@ -0,0 +1,43 @@
@@ -183,7 +169,6 @@ index 0000000000..dc10813f04
 +}
 diff --git a/gdb/testsuite/gdb.base/gstack.exp b/gdb/testsuite/gdb.base/gstack.exp
 new file mode 100644
-index 0000000000..1186ec57bc
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/gstack.exp
 @@ -0,0 +1,66 @@
@@ -253,6 +238,3 @@ index 0000000000..1186ec57bc
 +gdb_exit
 +
 +remote_exec host "kill -9 $pid"
--- 
-2.14.3
-

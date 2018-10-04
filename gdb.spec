@@ -20,12 +20,12 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	8.1.1
+Version:	8.2
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	372fa63a53adeee1bfbfd581d8da9e34
+# Source0-md5:	b5a49dbff00d9a87fbe114d14b3101c0
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -37,7 +37,7 @@ Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
 Patch105:	gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
 Patch106:	gdb-6.6-buildid-locate-rpm-scl.patch
 Patch110:	gdb-6.3-gstack-20050411.patch
-Patch111:	gdb-gdb-add-index-script.patch
+
 Patch112:	gdb-archer-vla-tests.patch
 Patch113:	gdb-vla-intel-fortran-strides.patch
 Patch114:	gdb-vla-intel-stringbt-fix.patch
@@ -191,7 +191,7 @@ GDB w postaci biblioteki statycznej.
 %patch105 -p1
 %patch106 -p1
 %patch110 -p1
-%patch111 -p1
+
 %patch112 -p1
 %patch113 -p1
 %patch114 -p1

@@ -3,101 +3,9 @@ From: Fedora GDB patches <invalid@email.com>
 Date: Fri, 27 Oct 2017 21:07:50 +0200
 Subject: gdb-archer-vla-tests.patch
 
-FileName: gdb-archer-vla-tests.patch
-
 ;;=fedoratest
----
- gdb/testsuite/gdb.ada/packed_array.exp             |   6 +
- gdb/testsuite/gdb.arch/x86_64-vla-pointer-foo.S    | 358 ++++++++++++++++
- gdb/testsuite/gdb.arch/x86_64-vla-pointer.c        |  45 ++
- gdb/testsuite/gdb.arch/x86_64-vla-pointer.exp      |  65 +++
- gdb/testsuite/gdb.arch/x86_64-vla-typedef-foo.S    | 455 +++++++++++++++++++++
- gdb/testsuite/gdb.arch/x86_64-vla-typedef.c        |  45 ++
- gdb/testsuite/gdb.arch/x86_64-vla-typedef.exp      |  64 +++
- gdb/testsuite/gdb.base/arrayidx.c                  |   7 +
- gdb/testsuite/gdb.base/arrayidx.exp                |  10 +-
- .../gdb.base/internal-var-field-address.c          |  20 +
- .../gdb.base/internal-var-field-address.exp        |  26 ++
- gdb/testsuite/gdb.base/vla-frame.c                 |  31 ++
- gdb/testsuite/gdb.base/vla-frame.exp               |  38 ++
- gdb/testsuite/gdb.base/vla-overflow.c              |  30 ++
- gdb/testsuite/gdb.base/vla-overflow.exp            | 109 +++++
- gdb/testsuite/gdb.base/vla.c                       |  55 +++
- gdb/testsuite/gdb.base/vla.exp                     |  62 +++
- gdb/testsuite/gdb.cp/gdb9593.cc                    | 180 ++++++++
- gdb/testsuite/gdb.cp/gdb9593.exp                   | 182 +++++++++
- gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.S       | 246 +++++++++++
- gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.exp     |  66 +++
- gdb/testsuite/gdb.dwarf2/dw2-stripped.c            |  42 ++
- gdb/testsuite/gdb.dwarf2/dw2-stripped.exp          |  79 ++++
- .../gdb.dwarf2/dw2-struct-member-data-location.S   |  83 ++++
- .../gdb.dwarf2/dw2-struct-member-data-location.exp |  37 ++
- gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.S    | 121 ++++++
- gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.exp  |  39 ++
- gdb/testsuite/gdb.fortran/dwarf-stride.exp         |  42 ++
- gdb/testsuite/gdb.fortran/dwarf-stride.f90         |  40 ++
- gdb/testsuite/gdb.fortran/dynamic.exp              | 154 +++++++
- gdb/testsuite/gdb.fortran/dynamic.f90              |  98 +++++
- gdb/testsuite/gdb.fortran/string.exp               |  59 +++
- gdb/testsuite/gdb.fortran/string.f90               |  37 ++
- gdb/testsuite/gdb.fortran/subrange.exp             |  72 ++++
- gdb/testsuite/gdb.fortran/subrange.f90             |  28 ++
- gdb/testsuite/gdb.mi/mi2-var-stale-type.c          |  26 ++
- gdb/testsuite/gdb.mi/mi2-var-stale-type.exp        |  57 +++
- gdb/testsuite/gdb.opt/array-from-register-func.c   |  22 +
- gdb/testsuite/gdb.opt/array-from-register.c        |  28 ++
- gdb/testsuite/gdb.opt/array-from-register.exp      |  33 ++
- gdb/testsuite/gdb.opt/fortran-string.exp           |  39 ++
- gdb/testsuite/gdb.opt/fortran-string.f90           |  28 ++
- gdb/testsuite/gdb.pascal/arrays.exp                | 104 +++++
- gdb/testsuite/gdb.pascal/arrays.pas                |  82 ++++
- gdb/testsuite/lib/gdb.exp                          |   5 +
- gdb/testsuite/lib/pascal.exp                       |  17 +
- 46 files changed, 3471 insertions(+), 1 deletion(-)
- create mode 100644 gdb/testsuite/gdb.arch/x86_64-vla-pointer-foo.S
- create mode 100644 gdb/testsuite/gdb.arch/x86_64-vla-pointer.c
- create mode 100644 gdb/testsuite/gdb.arch/x86_64-vla-pointer.exp
- create mode 100644 gdb/testsuite/gdb.arch/x86_64-vla-typedef-foo.S
- create mode 100644 gdb/testsuite/gdb.arch/x86_64-vla-typedef.c
- create mode 100644 gdb/testsuite/gdb.arch/x86_64-vla-typedef.exp
- create mode 100644 gdb/testsuite/gdb.base/internal-var-field-address.c
- create mode 100644 gdb/testsuite/gdb.base/internal-var-field-address.exp
- create mode 100644 gdb/testsuite/gdb.base/vla-frame.c
- create mode 100644 gdb/testsuite/gdb.base/vla-frame.exp
- create mode 100644 gdb/testsuite/gdb.base/vla-overflow.c
- create mode 100644 gdb/testsuite/gdb.base/vla-overflow.exp
- create mode 100644 gdb/testsuite/gdb.base/vla.c
- create mode 100644 gdb/testsuite/gdb.base/vla.exp
- create mode 100644 gdb/testsuite/gdb.cp/gdb9593.cc
- create mode 100644 gdb/testsuite/gdb.cp/gdb9593.exp
- create mode 100644 gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.S
- create mode 100644 gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.exp
- create mode 100644 gdb/testsuite/gdb.dwarf2/dw2-stripped.c
- create mode 100644 gdb/testsuite/gdb.dwarf2/dw2-stripped.exp
- create mode 100644 gdb/testsuite/gdb.dwarf2/dw2-struct-member-data-location.S
- create mode 100644 gdb/testsuite/gdb.dwarf2/dw2-struct-member-data-location.exp
- create mode 100644 gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.S
- create mode 100644 gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.exp
- create mode 100644 gdb/testsuite/gdb.fortran/dwarf-stride.exp
- create mode 100644 gdb/testsuite/gdb.fortran/dwarf-stride.f90
- create mode 100644 gdb/testsuite/gdb.fortran/dynamic.exp
- create mode 100644 gdb/testsuite/gdb.fortran/dynamic.f90
- create mode 100644 gdb/testsuite/gdb.fortran/string.exp
- create mode 100644 gdb/testsuite/gdb.fortran/string.f90
- create mode 100644 gdb/testsuite/gdb.fortran/subrange.exp
- create mode 100644 gdb/testsuite/gdb.fortran/subrange.f90
- create mode 100644 gdb/testsuite/gdb.mi/mi2-var-stale-type.c
- create mode 100644 gdb/testsuite/gdb.mi/mi2-var-stale-type.exp
- create mode 100644 gdb/testsuite/gdb.opt/array-from-register-func.c
- create mode 100644 gdb/testsuite/gdb.opt/array-from-register.c
- create mode 100644 gdb/testsuite/gdb.opt/array-from-register.exp
- create mode 100644 gdb/testsuite/gdb.opt/fortran-string.exp
- create mode 100644 gdb/testsuite/gdb.opt/fortran-string.f90
- create mode 100644 gdb/testsuite/gdb.pascal/arrays.exp
- create mode 100644 gdb/testsuite/gdb.pascal/arrays.pas
 
 diff --git a/gdb/testsuite/gdb.ada/packed_array.exp b/gdb/testsuite/gdb.ada/packed_array.exp
-index 3e614b788a..0ae87786db 100644
 --- a/gdb/testsuite/gdb.ada/packed_array.exp
 +++ b/gdb/testsuite/gdb.ada/packed_array.exp
 @@ -56,5 +56,11 @@ gdb_test_multiple "$test" "$test" {
@@ -114,7 +22,6 @@ index 3e614b788a..0ae87786db 100644
  
 diff --git a/gdb/testsuite/gdb.arch/x86_64-vla-pointer-foo.S b/gdb/testsuite/gdb.arch/x86_64-vla-pointer-foo.S
 new file mode 100644
-index 0000000000..3a983e6b22
 --- /dev/null
 +++ b/gdb/testsuite/gdb.arch/x86_64-vla-pointer-foo.S
 @@ -0,0 +1,358 @@
@@ -478,7 +385,6 @@ index 0000000000..3a983e6b22
 +	.section	.note.GNU-stack,"",@progbits
 diff --git a/gdb/testsuite/gdb.arch/x86_64-vla-pointer.c b/gdb/testsuite/gdb.arch/x86_64-vla-pointer.c
 new file mode 100644
-index 0000000000..98ee43bbf2
 --- /dev/null
 +++ b/gdb/testsuite/gdb.arch/x86_64-vla-pointer.c
 @@ -0,0 +1,45 @@
@@ -529,7 +435,6 @@ index 0000000000..98ee43bbf2
 +#endif
 diff --git a/gdb/testsuite/gdb.arch/x86_64-vla-pointer.exp b/gdb/testsuite/gdb.arch/x86_64-vla-pointer.exp
 new file mode 100644
-index 0000000000..3e2e64a6ab
 --- /dev/null
 +++ b/gdb/testsuite/gdb.arch/x86_64-vla-pointer.exp
 @@ -0,0 +1,65 @@
@@ -600,7 +505,6 @@ index 0000000000..3e2e64a6ab
 +gdb_test "ptype array" "type = char \\\[78\\\]" "second: ptype array"
 diff --git a/gdb/testsuite/gdb.arch/x86_64-vla-typedef-foo.S b/gdb/testsuite/gdb.arch/x86_64-vla-typedef-foo.S
 new file mode 100644
-index 0000000000..66f7a399bf
 --- /dev/null
 +++ b/gdb/testsuite/gdb.arch/x86_64-vla-typedef-foo.S
 @@ -0,0 +1,455 @@
@@ -1061,7 +965,6 @@ index 0000000000..66f7a399bf
 +	.section	.note.GNU-stack,"",@progbits
 diff --git a/gdb/testsuite/gdb.arch/x86_64-vla-typedef.c b/gdb/testsuite/gdb.arch/x86_64-vla-typedef.c
 new file mode 100644
-index 0000000000..40099e9d39
 --- /dev/null
 +++ b/gdb/testsuite/gdb.arch/x86_64-vla-typedef.c
 @@ -0,0 +1,45 @@
@@ -1112,7 +1015,6 @@ index 0000000000..40099e9d39
 +#endif
 diff --git a/gdb/testsuite/gdb.arch/x86_64-vla-typedef.exp b/gdb/testsuite/gdb.arch/x86_64-vla-typedef.exp
 new file mode 100644
-index 0000000000..4ef6214629
 --- /dev/null
 +++ b/gdb/testsuite/gdb.arch/x86_64-vla-typedef.exp
 @@ -0,0 +1,64 @@
@@ -1181,7 +1083,6 @@ index 0000000000..4ef6214629
 +
 +gdb_test "ptype array" "type = char \\\[78\\\]" "second: ptype array"
 diff --git a/gdb/testsuite/gdb.base/arrayidx.c b/gdb/testsuite/gdb.base/arrayidx.c
-index 5a0d01d04f..9e4b16e902 100644
 --- a/gdb/testsuite/gdb.base/arrayidx.c
 +++ b/gdb/testsuite/gdb.base/arrayidx.c
 @@ -17,6 +17,13 @@
@@ -1199,7 +1100,6 @@ index 5a0d01d04f..9e4b16e902 100644
  main (void)
  {
 diff --git a/gdb/testsuite/gdb.base/arrayidx.exp b/gdb/testsuite/gdb.base/arrayidx.exp
-index 91eb3c6056..af29a51f23 100644
 --- a/gdb/testsuite/gdb.base/arrayidx.exp
 +++ b/gdb/testsuite/gdb.base/arrayidx.exp
 @@ -49,4 +49,12 @@ gdb_test "print array" \
@@ -1218,7 +1118,6 @@ index 91eb3c6056..af29a51f23 100644
 +}
 diff --git a/gdb/testsuite/gdb.base/internal-var-field-address.c b/gdb/testsuite/gdb.base/internal-var-field-address.c
 new file mode 100644
-index 0000000000..eeb7b8501c
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/internal-var-field-address.c
 @@ -0,0 +1,20 @@
@@ -1244,7 +1143,6 @@ index 0000000000..eeb7b8501c
 +} staticstruct = { 1 };
 diff --git a/gdb/testsuite/gdb.base/internal-var-field-address.exp b/gdb/testsuite/gdb.base/internal-var-field-address.exp
 new file mode 100644
-index 0000000000..33c9e94eee
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/internal-var-field-address.exp
 @@ -0,0 +1,26 @@
@@ -1276,7 +1174,6 @@ index 0000000000..33c9e94eee
 +gdb_test {p $varstruct.field} " = 1"
 diff --git a/gdb/testsuite/gdb.base/vla-frame.c b/gdb/testsuite/gdb.base/vla-frame.c
 new file mode 100644
-index 0000000000..5750f68b3d
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/vla-frame.c
 @@ -0,0 +1,31 @@
@@ -1313,7 +1210,6 @@ index 0000000000..5750f68b3d
 +}
 diff --git a/gdb/testsuite/gdb.base/vla-frame.exp b/gdb/testsuite/gdb.base/vla-frame.exp
 new file mode 100644
-index 0000000000..47736c7625
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/vla-frame.exp
 @@ -0,0 +1,38 @@
@@ -1357,7 +1253,6 @@ index 0000000000..47736c7625
 +gdb_test "bt full" "\r\n +s = \"X\\\\000\"\r\n.*"
 diff --git a/gdb/testsuite/gdb.base/vla-overflow.c b/gdb/testsuite/gdb.base/vla-overflow.c
 new file mode 100644
-index 0000000000..c5d5ee0bb9
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/vla-overflow.c
 @@ -0,0 +1,30 @@
@@ -1393,7 +1288,6 @@ index 0000000000..c5d5ee0bb9
 +}
 diff --git a/gdb/testsuite/gdb.base/vla-overflow.exp b/gdb/testsuite/gdb.base/vla-overflow.exp
 new file mode 100644
-index 0000000000..43a5825979
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/vla-overflow.exp
 @@ -0,0 +1,109 @@
@@ -1508,7 +1402,6 @@ index 0000000000..43a5825979
 +verbose -log "kb_found in bt after abort() = [expr [memory_v_pages_get] * $pagesize / 1024]"
 diff --git a/gdb/testsuite/gdb.base/vla.c b/gdb/testsuite/gdb.base/vla.c
 new file mode 100644
-index 0000000000..e1f3ed1780
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/vla.c
 @@ -0,0 +1,55 @@
@@ -1569,7 +1462,6 @@ index 0000000000..e1f3ed1780
 +}
 diff --git a/gdb/testsuite/gdb.base/vla.exp b/gdb/testsuite/gdb.base/vla.exp
 new file mode 100644
-index 0000000000..71fe637272
 --- /dev/null
 +++ b/gdb/testsuite/gdb.base/vla.exp
 @@ -0,0 +1,62 @@
@@ -1637,7 +1529,6 @@ index 0000000000..71fe637272
 +gdb_test "p temp3" " = '3' <repeats 48 times>" "second: print temp3"
 diff --git a/gdb/testsuite/gdb.cp/gdb9593.cc b/gdb/testsuite/gdb.cp/gdb9593.cc
 new file mode 100644
-index 0000000000..783c9622a8
 --- /dev/null
 +++ b/gdb/testsuite/gdb.cp/gdb9593.cc
 @@ -0,0 +1,180 @@
@@ -1823,7 +1714,6 @@ index 0000000000..783c9622a8
 +
 diff --git a/gdb/testsuite/gdb.cp/gdb9593.exp b/gdb/testsuite/gdb.cp/gdb9593.exp
 new file mode 100644
-index 0000000000..ef40424402
 --- /dev/null
 +++ b/gdb/testsuite/gdb.cp/gdb9593.exp
 @@ -0,0 +1,182 @@
@@ -2011,7 +1901,6 @@ index 0000000000..ef40424402
 +  "advance-over-throw"
 diff --git a/gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.S b/gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.S
 new file mode 100644
-index 0000000000..aac3baad8a
 --- /dev/null
 +++ b/gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.S
 @@ -0,0 +1,246 @@
@@ -2263,7 +2152,6 @@ index 0000000000..aac3baad8a
 +	.string		"unsigned int"
 diff --git a/gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.exp b/gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.exp
 new file mode 100644
-index 0000000000..39e69b470f
 --- /dev/null
 +++ b/gdb/testsuite/gdb.dwarf2/dw2-bound-loclist.exp
 @@ -0,0 +1,66 @@
@@ -2335,7 +2223,6 @@ index 0000000000..39e69b470f
 +gdb_test "ptype reg_string" {type = char \[-?[0-9]+\]}
 diff --git a/gdb/testsuite/gdb.dwarf2/dw2-stripped.c b/gdb/testsuite/gdb.dwarf2/dw2-stripped.c
 new file mode 100644
-index 0000000000..1f02d90eeb
 --- /dev/null
 +++ b/gdb/testsuite/gdb.dwarf2/dw2-stripped.c
 @@ -0,0 +1,42 @@
@@ -2383,7 +2270,6 @@ index 0000000000..1f02d90eeb
 +}
 diff --git a/gdb/testsuite/gdb.dwarf2/dw2-stripped.exp b/gdb/testsuite/gdb.dwarf2/dw2-stripped.exp
 new file mode 100644
-index 0000000000..9336e03157
 --- /dev/null
 +++ b/gdb/testsuite/gdb.dwarf2/dw2-stripped.exp
 @@ -0,0 +1,79 @@
@@ -2468,7 +2354,6 @@ index 0000000000..9336e03157
 +         "step"
 diff --git a/gdb/testsuite/gdb.dwarf2/dw2-struct-member-data-location.S b/gdb/testsuite/gdb.dwarf2/dw2-struct-member-data-location.S
 new file mode 100644
-index 0000000000..5fcdd84986
 --- /dev/null
 +++ b/gdb/testsuite/gdb.dwarf2/dw2-struct-member-data-location.S
 @@ -0,0 +1,83 @@
@@ -2557,7 +2442,6 @@ index 0000000000..5fcdd84986
 +	.byte		0x0			/* Terminator */
 diff --git a/gdb/testsuite/gdb.dwarf2/dw2-struct-member-data-location.exp b/gdb/testsuite/gdb.dwarf2/dw2-struct-member-data-location.exp
 new file mode 100644
-index 0000000000..bc35209fe5
 --- /dev/null
 +++ b/gdb/testsuite/gdb.dwarf2/dw2-struct-member-data-location.exp
 @@ -0,0 +1,37 @@
@@ -2600,7 +2484,6 @@ index 0000000000..bc35209fe5
 +gdb_test "ptype struct some_struct" "type = struct some_struct {\[\r\n \t\]*void field;\[\r\n \t\]*}"
 diff --git a/gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.S b/gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.S
 new file mode 100644
-index 0000000000..9dbbf3c3e1
 --- /dev/null
 +++ b/gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.S
 @@ -0,0 +1,121 @@
@@ -2727,7 +2610,6 @@ index 0000000000..9dbbf3c3e1
 +	.byte		0x0			/* Terminator */
 diff --git a/gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.exp b/gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.exp
 new file mode 100644
-index 0000000000..cec673cd39
 --- /dev/null
 +++ b/gdb/testsuite/gdb.dwarf2/dw2-subrange-no-type.exp
 @@ -0,0 +1,39 @@
@@ -2772,7 +2654,6 @@ index 0000000000..cec673cd39
 +gdb_test "p notype_string" " = 'x' <repeats 129 times>"
 diff --git a/gdb/testsuite/gdb.fortran/dwarf-stride.exp b/gdb/testsuite/gdb.fortran/dwarf-stride.exp
 new file mode 100644
-index 0000000000..d7b8bea8db
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/dwarf-stride.exp
 @@ -0,0 +1,42 @@
@@ -2820,7 +2701,6 @@ index 0000000000..d7b8bea8db
 +gdb_test "p c40pt(2)" " = '1-hello.*"
 diff --git a/gdb/testsuite/gdb.fortran/dwarf-stride.f90 b/gdb/testsuite/gdb.fortran/dwarf-stride.f90
 new file mode 100644
-index 0000000000..e492b3af42
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/dwarf-stride.f90
 @@ -0,0 +1,40 @@
@@ -2866,7 +2746,6 @@ index 0000000000..e492b3af42
 +end program repro
 diff --git a/gdb/testsuite/gdb.fortran/dynamic.exp b/gdb/testsuite/gdb.fortran/dynamic.exp
 new file mode 100644
-index 0000000000..37d435f799
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/dynamic.exp
 @@ -0,0 +1,154 @@
@@ -3026,7 +2905,6 @@ index 0000000000..37d435f799
 +gdb_test "p vart(2,9)" "\\$\[0-9\]* = 10"
 diff --git a/gdb/testsuite/gdb.fortran/dynamic.f90 b/gdb/testsuite/gdb.fortran/dynamic.f90
 new file mode 100644
-index 0000000000..0f43564378
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/dynamic.f90
 @@ -0,0 +1,98 @@
@@ -3130,7 +3008,6 @@ index 0000000000..0f43564378
 +end
 diff --git a/gdb/testsuite/gdb.fortran/string.exp b/gdb/testsuite/gdb.fortran/string.exp
 new file mode 100644
-index 0000000000..1b7c0dbf73
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/string.exp
 @@ -0,0 +1,59 @@
@@ -3195,7 +3072,6 @@ index 0000000000..1b7c0dbf73
 +gdb_test "p f" "\\$\[0-9\]* = \\(\\( 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   '\\) \\( 'f2  ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   '\\) \\( 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   '\\) \\)" "p *f re-set"
 diff --git a/gdb/testsuite/gdb.fortran/string.f90 b/gdb/testsuite/gdb.fortran/string.f90
 new file mode 100644
-index 0000000000..226dc5d0ff
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/string.f90
 @@ -0,0 +1,37 @@
@@ -3238,7 +3114,6 @@ index 0000000000..226dc5d0ff
 +end
 diff --git a/gdb/testsuite/gdb.fortran/subrange.exp b/gdb/testsuite/gdb.fortran/subrange.exp
 new file mode 100644
-index 0000000000..c121ab9751
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/subrange.exp
 @@ -0,0 +1,72 @@
@@ -3316,7 +3191,6 @@ index 0000000000..c121ab9751
 +gdb_test {p $a (3, 2:2)} { = \(23\)}
 diff --git a/gdb/testsuite/gdb.fortran/subrange.f90 b/gdb/testsuite/gdb.fortran/subrange.f90
 new file mode 100644
-index 0000000000..4747ea9746
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/subrange.f90
 @@ -0,0 +1,28 @@
@@ -3350,7 +3224,6 @@ index 0000000000..4747ea9746
 +end
 diff --git a/gdb/testsuite/gdb.mi/mi2-var-stale-type.c b/gdb/testsuite/gdb.mi/mi2-var-stale-type.c
 new file mode 100644
-index 0000000000..ebced3c042
 --- /dev/null
 +++ b/gdb/testsuite/gdb.mi/mi2-var-stale-type.c
 @@ -0,0 +1,26 @@
@@ -3382,7 +3255,6 @@ index 0000000000..ebced3c042
 +}
 diff --git a/gdb/testsuite/gdb.mi/mi2-var-stale-type.exp b/gdb/testsuite/gdb.mi/mi2-var-stale-type.exp
 new file mode 100644
-index 0000000000..88326c0390
 --- /dev/null
 +++ b/gdb/testsuite/gdb.mi/mi2-var-stale-type.exp
 @@ -0,0 +1,57 @@
@@ -3445,7 +3317,6 @@ index 0000000000..88326c0390
 +mi_gdb_test "-var-update *" "\\^done,changelist=.*" "-var-update *"
 diff --git a/gdb/testsuite/gdb.opt/array-from-register-func.c b/gdb/testsuite/gdb.opt/array-from-register-func.c
 new file mode 100644
-index 0000000000..729f457c82
 --- /dev/null
 +++ b/gdb/testsuite/gdb.opt/array-from-register-func.c
 @@ -0,0 +1,22 @@
@@ -3473,7 +3344,6 @@ index 0000000000..729f457c82
 +}
 diff --git a/gdb/testsuite/gdb.opt/array-from-register.c b/gdb/testsuite/gdb.opt/array-from-register.c
 new file mode 100644
-index 0000000000..3090e7e631
 --- /dev/null
 +++ b/gdb/testsuite/gdb.opt/array-from-register.c
 @@ -0,0 +1,28 @@
@@ -3507,7 +3377,6 @@ index 0000000000..3090e7e631
 +}
 diff --git a/gdb/testsuite/gdb.opt/array-from-register.exp b/gdb/testsuite/gdb.opt/array-from-register.exp
 new file mode 100644
-index 0000000000..f2de718bc3
 --- /dev/null
 +++ b/gdb/testsuite/gdb.opt/array-from-register.exp
 @@ -0,0 +1,33 @@
@@ -3546,7 +3415,6 @@ index 0000000000..f2de718bc3
 +gdb_test "p arr\[0\]" "\\$\[0-9\]+ = 42"
 diff --git a/gdb/testsuite/gdb.opt/fortran-string.exp b/gdb/testsuite/gdb.opt/fortran-string.exp
 new file mode 100644
-index 0000000000..90a2bdf212
 --- /dev/null
 +++ b/gdb/testsuite/gdb.opt/fortran-string.exp
 @@ -0,0 +1,39 @@
@@ -3591,7 +3459,6 @@ index 0000000000..90a2bdf212
 +gdb_test "p s" "\\$\[0-9\]* = 'foo'"
 diff --git a/gdb/testsuite/gdb.opt/fortran-string.f90 b/gdb/testsuite/gdb.opt/fortran-string.f90
 new file mode 100644
-index 0000000000..e48d520085
 --- /dev/null
 +++ b/gdb/testsuite/gdb.opt/fortran-string.f90
 @@ -0,0 +1,28 @@
@@ -3625,7 +3492,6 @@ index 0000000000..e48d520085
 +  end
 diff --git a/gdb/testsuite/gdb.pascal/arrays.exp b/gdb/testsuite/gdb.pascal/arrays.exp
 new file mode 100644
-index 0000000000..22acdb86d8
 --- /dev/null
 +++ b/gdb/testsuite/gdb.pascal/arrays.exp
 @@ -0,0 +1,104 @@
@@ -3735,7 +3601,6 @@ index 0000000000..22acdb86d8
 +
 diff --git a/gdb/testsuite/gdb.pascal/arrays.pas b/gdb/testsuite/gdb.pascal/arrays.pas
 new file mode 100644
-index 0000000000..295602d68c
 --- /dev/null
 +++ b/gdb/testsuite/gdb.pascal/arrays.pas
 @@ -0,0 +1,82 @@
@@ -3822,10 +3687,9 @@ index 0000000000..295602d68c
 +  writeln(s); { set breakpoint 2 here }
 +end.
 diff --git a/gdb/testsuite/lib/gdb.exp b/gdb/testsuite/lib/gdb.exp
-index a165bf0938..a13aaf7869 100644
 --- a/gdb/testsuite/lib/gdb.exp
 +++ b/gdb/testsuite/lib/gdb.exp
-@@ -169,6 +169,11 @@ proc gdb_unload {} {
+@@ -170,6 +170,11 @@ proc gdb_unload {} {
  	    send_gdb "y\n"
  	    exp_continue
  	}
@@ -3838,7 +3702,6 @@ index a165bf0938..a13aaf7869 100644
  	    send_gdb "y\n"
  	    exp_continue
 diff --git a/gdb/testsuite/lib/pascal.exp b/gdb/testsuite/lib/pascal.exp
-index 03d1b1bc06..9f9e143dff 100644
 --- a/gdb/testsuite/lib/pascal.exp
 +++ b/gdb/testsuite/lib/pascal.exp
 @@ -37,6 +37,9 @@ proc pascal_init {} {
@@ -3872,6 +3735,3 @@ index 03d1b1bc06..9f9e143dff 100644
      }
      set pascal_init_done 1
  }   
--- 
-2.14.3
-

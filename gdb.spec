@@ -57,6 +57,9 @@ BuildRequires:	expat-devel
 BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools >= 0.12.1
 %{?with_guile:BuildRequires:	guile-devel >= 2.0}
+%ifarch %{ix86} %{x8664}
+BuildRequires:	libipt-devel
+%endif
 BuildRequires:	libselinux-devel
 BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	libtool

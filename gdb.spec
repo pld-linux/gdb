@@ -3,9 +3,10 @@
 # TODO
 # - rpm5 librpm support (gdb/configure.ac checks for 4.x or so)
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
+# - reenable guile after https://sourceware.org/bugzilla/show_bug.cgi?id=21104 is fixed
 #
 # Conditional build:
-%bcond_without	guile		# Guile embedded scripting
+%bcond_with	guile		# Guile embedded scripting
 %bcond_without	python		# build without python support
 
 Summary:	A GNU source-level debugger for C, C++ and Fortran
@@ -20,12 +21,12 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	8.2
-Release:	4
+Version:	8.2.1
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	b5a49dbff00d9a87fbe114d14b3101c0
+# Source0-md5:	f8b2562e830a4098dd5b5ea9e9296c70
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -234,6 +235,7 @@ done
 cp -f /usr/share/automake/config.* .
 # don't --enable-shared here, there would be libs version mismatch with binutils
 %configure \
+	--disable-silent-rules \
 	--with-gdb-datadir=%{_datadir}/gdb \
 	--with-separate-debug-dir=/usr/lib/debug \
 %if %{with python}
@@ -309,7 +311,7 @@ install libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 # These are part of binutils:
 %{__rm} $RPM_BUILD_ROOT%{_localedir}/*/LC_MESSAGES/{bfd,opcodes}.mo
 %{__rm} $RPM_BUILD_ROOT%{_infodir}/bfd.info*
-%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,dis-asm,symcat,plugin-api}.h
+%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,diagnostics,dis-asm,symcat,plugin-api}.h
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.la
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.a
 

@@ -37,7 +37,7 @@ dbfd7140bf4c0500d1f5d192be781f83f78f7922
 diff --git a/gdb/dwarf2loc.c b/gdb/dwarf2loc.c
 --- a/gdb/dwarf2loc.c
 +++ b/gdb/dwarf2loc.c
-@@ -2600,11 +2600,14 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
+@@ -2429,11 +2429,14 @@ dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
  /* See dwarf2loc.h.  */
  
  int
@@ -54,7 +54,7 @@ diff --git a/gdb/dwarf2loc.c b/gdb/dwarf2loc.c
    if (prop == NULL)
      return 0;
  
-@@ -2628,7 +2631,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
+@@ -2457,7 +2460,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
  
  		*value = value_as_address (val);
  	      }
@@ -63,7 +63,7 @@ diff --git a/gdb/dwarf2loc.c b/gdb/dwarf2loc.c
  	  }
        }
        break;
-@@ -2650,7 +2653,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
+@@ -2479,7 +2482,7 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
  	    if (!value_optimized_out (val))
  	      {
  		*value = value_as_address (val);
@@ -72,7 +72,7 @@ diff --git a/gdb/dwarf2loc.c b/gdb/dwarf2loc.c
  	      }
  	  }
        }
-@@ -2658,8 +2661,8 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
+@@ -2487,8 +2490,8 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
  
      case PROP_CONST:
        *value = prop->data.const_val;
@@ -83,7 +83,7 @@ diff --git a/gdb/dwarf2loc.c b/gdb/dwarf2loc.c
      case PROP_ADDR_OFFSET:
        {
  	struct dwarf2_property_baton *baton
-@@ -2680,11 +2683,38 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
+@@ -2509,11 +2512,38 @@ dwarf2_evaluate_property (const struct dynamic_prop *prop,
  	  val = value_at (baton->offset_info.type,
  			  pinfo->addr + baton->offset_info.offset);
  	*value = value_as_address (val);
@@ -143,7 +143,7 @@ diff --git a/gdb/dwarf2loc.h b/gdb/dwarf2loc.h
 diff --git a/gdb/dwarf2read.c b/gdb/dwarf2read.c
 --- a/gdb/dwarf2read.c
 +++ b/gdb/dwarf2read.c
-@@ -17566,7 +17566,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -17752,7 +17752,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
    struct type *base_type, *orig_base_type;
    struct type *range_type;
    struct attribute *attr;
@@ -152,7 +152,7 @@ diff --git a/gdb/dwarf2read.c b/gdb/dwarf2read.c
    int low_default_is_valid;
    int high_bound_is_count = 0;
    const char *name;
-@@ -17586,7 +17586,9 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -17772,7 +17772,9 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
  
    low.kind = PROP_CONST;
    high.kind = PROP_CONST;
@@ -162,7 +162,7 @@ diff --git a/gdb/dwarf2read.c b/gdb/dwarf2read.c
  
    /* Set LOW_DEFAULT_IS_VALID if current language and DWARF version allow
       omitting DW_AT_lower_bound.  */
-@@ -17619,6 +17621,14 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -17805,6 +17807,14 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
        break;
      }
  
@@ -177,7 +177,7 @@ diff --git a/gdb/dwarf2read.c b/gdb/dwarf2read.c
    attr = dwarf2_attr (die, DW_AT_lower_bound, cu);
    if (attr)
      attr_to_dynamic_prop (attr, die, cu, &low);
-@@ -17696,7 +17706,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
+@@ -17897,7 +17907,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
        && !TYPE_UNSIGNED (base_type) && (high.data.const_val & negative_mask))
      high.data.const_val |= negative_mask;
  
@@ -189,7 +189,7 @@ diff --git a/gdb/dwarf2read.c b/gdb/dwarf2read.c
 diff --git a/gdb/eval.c b/gdb/eval.c
 --- a/gdb/eval.c
 +++ b/gdb/eval.c
-@@ -377,29 +377,325 @@ init_array_element (struct value *array, struct value *element,
+@@ -377,29 +377,324 @@ init_array_element (struct value *array, struct value *element,
    return index;
  }
  
@@ -207,8 +207,7 @@ diff --git a/gdb/eval.c b/gdb/eval.c
 +		    int *pos, int nargs, enum noside noside)
  {
 -  int pc = (*pos) + 1;
-+  int i, dim_count = 0;
-   LONGEST low_bound, high_bound;
+-  LONGEST low_bound, high_bound;
 -  struct type *range = check_typedef (TYPE_INDEX_TYPE (value_type (array)));
 -  enum range_type range_type
 -    = (enum range_type) longest_to_int (exp->elts[pc].longconst);
@@ -219,11 +218,12 @@ diff --git a/gdb/eval.c b/gdb/eval.c
 -    low_bound = TYPE_LOW_BOUND (range);
 -  else
 -    low_bound = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
++  int i, dim_count = 0;
 +  struct value *new_array = array;
 +  struct type *array_type = check_typedef (value_type (new_array));
 +  struct type *elt_type;
 +
-+  typedef struct subscript_range
++  typedef struct
 +  {
 +    enum range_type f90_range_type;
 +    LONGEST low, high, stride;
@@ -272,11 +272,7 @@ diff --git a/gdb/eval.c b/gdb/eval.c
 +  for (i = 0; i < nargs; i++)
 +    {
 +      struct subscript_store *index = &subscript_array[i];
- 
--  if (range_type == HIGH_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
--    high_bound = TYPE_HIGH_BOUND (range);
--  else
--    high_bound = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
++
 +      /* The user input is a range, with or without lower and upper bound.
 +	 E.g.: "p arry(2:5)", "p arry( :5)", "p arry( : )", etc.  */
 +      if (exp->elts[*pos].opcode == OP_RANGE)
@@ -310,7 +306,11 @@ diff --git a/gdb/eval.c b/gdb/eval.c
 +	  /* Assign the default stride value '1'.  */
 +	  else
 +	    range->stride = 1;
-+
+ 
+-  if (range_type == HIGH_BOUND_DEFAULT || range_type == BOTH_BOUND_DEFAULT)
+-    high_bound = TYPE_HIGH_BOUND (range);
+-  else
+-    high_bound = value_as_long (evaluate_subexp (NULL_TYPE, exp, pos, noside));
 +	  /* Check the provided stride value is illegal, aka '0'.  */
 +	  if (range->stride == 0)
 +	    error (_("Stride must not be 0"));
@@ -480,7 +480,8 @@ diff --git a/gdb/eval.c b/gdb/eval.c
 +      struct value *v = NULL;
 +
 +      elt_type = TYPE_TARGET_TYPE (value_type (new_array));
-+
+ 
+-  return value_slice (array, low_bound, high_bound - low_bound + 1);
 +      /* Every SUBSCRIPT_RANGE in the user input signifies an actual range in
 +	 the output array.  So we traverse the SUBSCRIPT_ARRAY again, looking
 +	 for a range entry.  When we find one, we use the range info to create
@@ -497,8 +498,7 @@ diff --git a/gdb/eval.c b/gdb/eval.c
 +	      struct type *range_type, *interim_array_type;
 +
 +	      int new_length;
- 
--  return value_slice (array, low_bound, high_bound - low_bound + 1);
++
 +	      /* The length of a sub-dimension with all elements between the
 +		 bounds plus the start element itself.  It may be modified by
 +		 a user provided stride value.  */
@@ -533,20 +533,54 @@ diff --git a/gdb/eval.c b/gdb/eval.c
  }
  
  
-@@ -1926,19 +2222,8 @@ evaluate_subexp_standard (struct type *expect_type,
+@@ -1242,19 +1537,6 @@ evaluate_funcall (type *expect_type, expression *exp, int *pos,
+   return eval_call (exp, noside, nargs, argvec, var_func_name, expect_type);
+ }
+ 
+-/* Helper for skipping all the arguments in an undetermined argument list.
+-   This function was designed for use in the OP_F77_UNDETERMINED_ARGLIST
+-   case of evaluate_subexp_standard as multiple, but not all, code paths
+-   require a generic skip.  */
+-
+-static void
+-skip_undetermined_arglist (int nargs, struct expression *exp, int *pos,
+-			   enum noside noside)
+-{
+-  for (int i = 0; i < nargs; ++i)
+-    evaluate_subexp (NULL_TYPE, exp, pos, noside);
+-}
+-
+ struct value *
+ evaluate_subexp_standard (struct type *expect_type,
+ 			  struct expression *exp, int *pos,
+@@ -1949,33 +2231,8 @@ evaluate_subexp_standard (struct type *expect_type,
        switch (code)
  	{
  	case TYPE_CODE_ARRAY:
 -	  if (exp->elts[*pos].opcode == OP_RANGE)
 -	    return value_f90_subarray (arg1, exp, pos, noside);
 -	  else
--	    goto multi_f77_subscript;
+-	    {
+-	      if (noside == EVAL_SKIP)
+-		{
+-		  skip_undetermined_arglist (nargs, exp, pos, noside);
+-		  /* Return the dummy value with the correct type.  */
+-		  return arg1;
+-		}
+-	      goto multi_f77_subscript;
+-	    }
 -
  	case TYPE_CODE_STRING:
 -	  if (exp->elts[*pos].opcode == OP_RANGE)
 -	    return value_f90_subarray (arg1, exp, pos, noside);
 -	  else
 -	    {
+-	      if (noside == EVAL_SKIP)
+-		{
+-		  skip_undetermined_arglist (nargs, exp, pos, noside);
+-		  /* Return the dummy value with the correct type.  */
+-		  return arg1;
+-		}
 -	      arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
 -	      return value_subscript (arg1, value_as_long (arg2));
 -	    }
@@ -554,7 +588,7 @@ diff --git a/gdb/eval.c b/gdb/eval.c
  
  	case TYPE_CODE_PTR:
  	case TYPE_CODE_FUNC:
-@@ -2334,49 +2619,6 @@ evaluate_subexp_standard (struct type *expect_type,
+@@ -2372,49 +2629,6 @@ evaluate_subexp_standard (struct type *expect_type,
  	}
        return (arg1);
  
@@ -604,7 +638,7 @@ diff --git a/gdb/eval.c b/gdb/eval.c
      case BINOP_LOGICAL_AND:
        arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
        if (noside == EVAL_SKIP)
-@@ -3293,6 +3535,9 @@ calc_f77_array_dims (struct type *array_type)
+@@ -3334,6 +3548,9 @@ calc_f77_array_dims (struct type *array_type)
    int ndimen = 1;
    struct type *tmp_type;
  
@@ -639,7 +673,7 @@ diff --git a/gdb/expprint.c b/gdb/expprint.c
  	  print_subexp (exp, pos, stream, PREC_ABOVE_COMMA);
  	fputs_filtered (")", stream);
  	return;
-@@ -1098,22 +1095,24 @@ dump_subexp_body_standard (struct expression *exp,
+@@ -1105,22 +1102,24 @@ dump_subexp_body_standard (struct expression *exp,
  
  	switch (range_type)
  	  {
@@ -672,7 +706,7 @@ diff --git a/gdb/expprint.c b/gdb/expprint.c
  	    fputs_filtered ("ExclusiveRange 'EXP..EXP'", stream);
  	    break;
  	  default:
-@@ -1121,11 +1120,9 @@ dump_subexp_body_standard (struct expression *exp,
+@@ -1128,11 +1127,9 @@ dump_subexp_body_standard (struct expression *exp,
  	    break;
  	  }
  
@@ -689,7 +723,7 @@ diff --git a/gdb/expprint.c b/gdb/expprint.c
 diff --git a/gdb/expression.h b/gdb/expression.h
 --- a/gdb/expression.h
 +++ b/gdb/expression.h
-@@ -148,28 +148,27 @@ extern void dump_raw_expression (struct expression *,
+@@ -150,28 +150,27 @@ extern void dump_raw_expression (struct expression *,
  				 struct ui_file *, const char *);
  extern void dump_prefix_expression (struct expression *, struct ui_file *);
  
@@ -832,7 +866,7 @@ diff --git a/gdb/f-valprint.c b/gdb/f-valprint.c
 diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
 --- a/gdb/gdbtypes.c
 +++ b/gdb/gdbtypes.c
-@@ -902,7 +902,8 @@ operator== (const range_bounds &l, const range_bounds &r)
+@@ -911,7 +911,8 @@ operator== (const range_bounds &l, const range_bounds &r)
  struct type *
  create_range_type (struct type *result_type, struct type *index_type,
  		   const struct dynamic_prop *low_bound,
@@ -842,7 +876,7 @@ diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
  {
    if (result_type == NULL)
      result_type = alloc_type_copy (index_type);
-@@ -917,6 +918,7 @@ create_range_type (struct type *result_type, struct type *index_type,
+@@ -926,6 +927,7 @@ create_range_type (struct type *result_type, struct type *index_type,
      TYPE_ZALLOC (result_type, sizeof (struct range_bounds));
    TYPE_RANGE_DATA (result_type)->low = *low_bound;
    TYPE_RANGE_DATA (result_type)->high = *high_bound;
@@ -850,7 +884,7 @@ diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
  
    if (low_bound->kind == PROP_CONST && low_bound->data.const_val >= 0)
      TYPE_UNSIGNED (result_type) = 1;
-@@ -945,7 +947,7 @@ struct type *
+@@ -954,7 +956,7 @@ struct type *
  create_static_range_type (struct type *result_type, struct type *index_type,
  			  LONGEST low_bound, LONGEST high_bound)
  {
@@ -859,7 +893,7 @@ diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
  
    low.kind = PROP_CONST;
    low.data.const_val = low_bound;
-@@ -953,7 +955,11 @@ create_static_range_type (struct type *result_type, struct type *index_type,
+@@ -962,7 +964,11 @@ create_static_range_type (struct type *result_type, struct type *index_type,
    high.kind = PROP_CONST;
    high.data.const_val = high_bound;
  
@@ -872,7 +906,7 @@ diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
  
    return result_type;
  }
-@@ -1171,16 +1177,20 @@ create_array_type_with_stride (struct type *result_type,
+@@ -1180,16 +1186,20 @@ create_array_type_with_stride (struct type *result_type,
        && (!type_not_associated (result_type)
  	  && !type_not_allocated (result_type)))
      {
@@ -894,7 +928,7 @@ diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
        else if (bit_stride > 0)
  	TYPE_LENGTH (result_type) =
  	  (bit_stride * (high_bound - low_bound + 1) + 7) / 8;
-@@ -1981,12 +1991,12 @@ resolve_dynamic_range (struct type *dyn_range_type,
+@@ -1990,12 +2000,12 @@ resolve_dynamic_range (struct type *dyn_range_type,
    CORE_ADDR value;
    struct type *static_range_type, *static_target_type;
    const struct dynamic_prop *prop;
@@ -909,7 +943,7 @@ diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
      {
        low_bound.kind = PROP_CONST;
        low_bound.data.const_val = value;
-@@ -1998,7 +2008,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
+@@ -2007,7 +2017,7 @@ resolve_dynamic_range (struct type *dyn_range_type,
      }
  
    prop = &TYPE_RANGE_DATA (dyn_range_type)->high;
@@ -918,7 +952,7 @@ diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
      {
        high_bound.kind = PROP_CONST;
        high_bound.data.const_val = value;
-@@ -2013,12 +2023,20 @@ resolve_dynamic_range (struct type *dyn_range_type,
+@@ -2022,12 +2032,20 @@ resolve_dynamic_range (struct type *dyn_range_type,
        high_bound.data.const_val = 0;
      }
  
@@ -943,7 +977,7 @@ diff --git a/gdb/gdbtypes.c b/gdb/gdbtypes.c
 diff --git a/gdb/gdbtypes.h b/gdb/gdbtypes.h
 --- a/gdb/gdbtypes.h
 +++ b/gdb/gdbtypes.h
-@@ -612,6 +612,10 @@ struct range_bounds
+@@ -614,6 +614,10 @@ struct range_bounds
  
    struct dynamic_prop high;
  
@@ -954,7 +988,7 @@ diff --git a/gdb/gdbtypes.h b/gdb/gdbtypes.h
    /* True if HIGH range bound contains the number of elements in the
       subrange. This affects how the final hight bound is computed.  */
  
-@@ -776,7 +780,6 @@ struct main_type
+@@ -778,7 +782,6 @@ struct main_type
      /* * Union member used for range types.  */
  
      struct range_bounds *bounds;
@@ -962,7 +996,7 @@ diff --git a/gdb/gdbtypes.h b/gdb/gdbtypes.h
    } flds_bnds;
  
    /* * Slot to point to additional language-specific fields of this
-@@ -1329,6 +1332,15 @@ extern bool set_type_align (struct type *, ULONGEST);
+@@ -1327,6 +1330,15 @@ extern bool set_type_align (struct type *, ULONGEST);
    TYPE_RANGE_DATA(range_type)->high.kind
  #define TYPE_LOW_BOUND_KIND(range_type) \
    TYPE_RANGE_DATA(range_type)->low.kind
@@ -978,7 +1012,7 @@ diff --git a/gdb/gdbtypes.h b/gdb/gdbtypes.h
  
  /* Property accessors for the type data location.  */
  #define TYPE_DATA_LOCATION(thistype) \
-@@ -1363,6 +1375,9 @@ extern bool set_type_align (struct type *, ULONGEST);
+@@ -1361,6 +1373,9 @@ extern bool set_type_align (struct type *, ULONGEST);
     TYPE_HIGH_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
  #define TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED(arraytype) \
     TYPE_LOW_BOUND_UNDEFINED(TYPE_INDEX_TYPE(arraytype))
@@ -988,7 +1022,7 @@ diff --git a/gdb/gdbtypes.h b/gdb/gdbtypes.h
  
  #define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
     (TYPE_HIGH_BOUND(TYPE_INDEX_TYPE((arraytype))))
-@@ -1892,6 +1907,7 @@ extern struct type *create_array_type_with_stride
+@@ -1896,6 +1911,7 @@ extern struct type *create_array_type_with_stride
     struct dynamic_prop *, unsigned int);
  
  extern struct type *create_range_type (struct type *, struct type *,
@@ -1038,7 +1072,7 @@ diff --git a/gdb/parse.c b/gdb/parse.c
 diff --git a/gdb/rust-exp.y b/gdb/rust-exp.y
 --- a/gdb/rust-exp.y
 +++ b/gdb/rust-exp.y
-@@ -2478,24 +2478,28 @@ convert_ast_to_expression (struct parser_state *state,
+@@ -2475,24 +2475,28 @@ rust_parser::convert_ast_to_expression (const struct rust_op *operation,
  
      case OP_RANGE:
        {
@@ -1047,13 +1081,13 @@ diff --git a/gdb/rust-exp.y b/gdb/rust-exp.y
  
  	if (operation->left.op != NULL)
  	  {
- 	    convert_ast_to_expression (state, operation->left.op, top);
+ 	    convert_ast_to_expression (operation->left.op, top);
 -	    kind = HIGH_BOUND_DEFAULT;
 +	    kind = SUBARRAY_LOW_BOUND;
  	  }
  	if (operation->right.op != NULL)
  	  {
- 	    convert_ast_to_expression (state, operation->right.op, top);
+ 	    convert_ast_to_expression (operation->right.op, top);
 -	    if (kind == BOTH_BOUND_DEFAULT)
 -	      kind = (operation->inclusive
 -		      ? LOW_BOUND_DEFAULT : LOW_BOUND_DEFAULT_EXCLUSIVE);
@@ -1078,7 +1112,7 @@ diff --git a/gdb/rust-exp.y b/gdb/rust-exp.y
 diff --git a/gdb/rust-lang.c b/gdb/rust-lang.c
 --- a/gdb/rust-lang.c
 +++ b/gdb/rust-lang.c
-@@ -1149,13 +1149,11 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
+@@ -1193,13 +1193,11 @@ rust_range (struct expression *exp, int *pos, enum noside noside)
    kind = (enum range_type) longest_to_int (exp->elts[*pos + 1].longconst);
    *pos += 3;
  
@@ -1095,7 +1129,7 @@ diff --git a/gdb/rust-lang.c b/gdb/rust-lang.c
  
    if (noside == EVAL_SKIP)
      return value_from_longest (builtin_type (exp->gdbarch)->builtin_int, 1);
-@@ -1244,7 +1242,7 @@ rust_compute_range (struct type *type, struct value *range,
+@@ -1288,7 +1286,7 @@ rust_compute_range (struct type *type, struct value *range,
  
    *low = 0;
    *high = 0;
@@ -1104,7 +1138,7 @@ diff --git a/gdb/rust-lang.c b/gdb/rust-lang.c
  
    if (TYPE_NFIELDS (type) == 0)
      return;
-@@ -1252,15 +1250,14 @@ rust_compute_range (struct type *type, struct value *range,
+@@ -1296,15 +1294,14 @@ rust_compute_range (struct type *type, struct value *range,
    i = 0;
    if (strcmp (TYPE_FIELD_NAME (type, 0), "start") == 0)
      {
@@ -1122,7 +1156,7 @@ diff --git a/gdb/rust-lang.c b/gdb/rust-lang.c
        *high = value_as_long (value_field (range, i));
  
        if (rust_inclusive_range_type_p (type))
-@@ -1278,7 +1275,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
+@@ -1322,7 +1319,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
    struct type *rhstype;
    LONGEST low, high_bound;
    /* Initialized to appease the compiler.  */
@@ -1131,7 +1165,7 @@ diff --git a/gdb/rust-lang.c b/gdb/rust-lang.c
    LONGEST high = 0;
    int want_slice = 0;
  
-@@ -1376,7 +1373,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
+@@ -1420,7 +1417,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
  	error (_("Cannot subscript non-array type"));
  
        if (want_slice
@@ -1140,7 +1174,7 @@ diff --git a/gdb/rust-lang.c b/gdb/rust-lang.c
  	low = low_bound;
        if (low < 0)
  	error (_("Index less than zero"));
-@@ -1394,7 +1391,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
+@@ -1438,7 +1435,7 @@ rust_subscript (struct expression *exp, int *pos, enum noside noside,
  	  CORE_ADDR addr;
  	  struct value *addrval, *tem;
  
@@ -1761,7 +1795,7 @@ diff --git a/gdb/testsuite/gdb.fortran/vla.f90 b/gdb/testsuite/gdb.fortran/vla.f
 diff --git a/gdb/valarith.c b/gdb/valarith.c
 --- a/gdb/valarith.c
 +++ b/gdb/valarith.c
-@@ -187,10 +187,16 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
+@@ -187,11 +187,17 @@ value_subscripted_rvalue (struct value *array, LONGEST index, int lowerbound)
    struct type *array_type = check_typedef (value_type (array));
    struct type *elt_type = check_typedef (TYPE_TARGET_TYPE (array_type));
    ULONGEST elt_size = type_length_units (elt_type);
@@ -1774,16 +1808,17 @@ diff --git a/gdb/valarith.c b/gdb/valarith.c
 +  else
 +    elt_offs *= elt_size;
  
-   if (index < lowerbound || (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)
--			     && elt_offs >= type_length_units (array_type)))
-+			     && abs (elt_offs) >= type_length_units (array_type)))
+   if (index < lowerbound
+       || (!TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)
+-          && elt_offs >= type_length_units (array_type))
++          && abs (elt_offs) >= type_length_units (array_type))
+       || (VALUE_LVAL (array) != lval_memory
+           && TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (array_type)))
      {
-       if (type_not_associated (array_type))
-         error (_("no such vector element (vector not associated)"));
 diff --git a/gdb/valops.c b/gdb/valops.c
 --- a/gdb/valops.c
 +++ b/gdb/valops.c
-@@ -3808,56 +3808,195 @@ value_of_this_silent (const struct language_defn *lang)
+@@ -3792,56 +3792,195 @@ value_of_this_silent (const struct language_defn *lang)
  
  struct value *
  value_slice (struct value *array, int lowbound, int length)

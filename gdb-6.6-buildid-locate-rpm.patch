@@ -244,7 +244,7 @@ diff --git a/gdb/build-id.c b/gdb/build-id.c
  
  #define BUILD_ID_VERBOSE_NONE 0
  #define BUILD_ID_VERBOSE_FILENAMES 1
-@@ -640,8 +642,366 @@ build_id_to_filename (const struct bfd_build_id *build_id, char **link_return)
+@@ -700,8 +702,366 @@ build_id_to_filename (const struct bfd_build_id *build_id, char **link_return)
    return result;
  }
  
@@ -612,7 +612,7 @@ diff --git a/gdb/build-id.c b/gdb/build-id.c
     avoidance.  */
  
  struct missing_filepair
-@@ -695,11 +1055,17 @@ missing_filepair_change (void)
+@@ -755,11 +1115,17 @@ missing_filepair_change (void)
        /* All their memory came just from missing_filepair_OBSTACK.  */
        missing_filepair_hash = NULL;
      }
@@ -630,7 +630,7 @@ diff --git a/gdb/build-id.c b/gdb/build-id.c
    missing_filepair_change ();
  }
  
-@@ -766,14 +1132,39 @@ debug_print_missing (const char *binary, const char *debug)
+@@ -826,14 +1192,39 @@ debug_print_missing (const char *binary, const char *debug)
  
    *slot = missing_filepair;
  
@@ -690,7 +690,7 @@ diff --git a/gdb/config.in b/gdb/config.in
  /* Define to 1 if translation of program messages to the user's native
     language is requested. */
  #undef ENABLE_NLS
-@@ -270,6 +273,9 @@
+@@ -255,6 +258,9 @@
  /* Define if Python 2.7 is being used. */
  #undef HAVE_LIBPYTHON2_7
  
@@ -703,7 +703,7 @@ diff --git a/gdb/config.in b/gdb/config.in
 diff --git a/gdb/configure b/gdb/configure
 --- a/gdb/configure
 +++ b/gdb/configure
-@@ -749,6 +749,11 @@ CODESIGN_CERT
+@@ -751,6 +751,11 @@ CODESIGN_CERT
  HAVE_NATIVE_GCORE_TARGET
  TARGET_OBS
  subdirs
@@ -715,15 +715,15 @@ diff --git a/gdb/configure b/gdb/configure
  GDB_DATADIR
  DEBUGDIR
  MAKEINFO_EXTRA_FLAGS
-@@ -853,6 +858,7 @@ with_gdb_datadir
+@@ -855,6 +860,7 @@ with_gdb_datadir
  with_relocated_sources
  with_auto_load_dir
  with_auto_load_safe_path
 +with_rpm
  enable_targets
  enable_64_bit_bfd
- enable_gdbcli
-@@ -912,6 +918,11 @@ CCC
+ enable_gdbmi
+@@ -914,6 +920,11 @@ CCC
  CPP
  MAKEINFO
  MAKEINFOFLAGS
@@ -735,7 +735,7 @@ diff --git a/gdb/configure b/gdb/configure
  YACC
  YFLAGS
  XMKMF'
-@@ -1583,6 +1594,8 @@ Optional Packages:
+@@ -1585,6 +1596,8 @@ Optional Packages:
                            [--with-auto-load-dir]
    --without-auto-load-safe-path
                            do not restrict auto-loaded files locations
@@ -744,7 +744,7 @@ diff --git a/gdb/configure b/gdb/configure
    --with-libunwind-ia64   use libunwind frame unwinding for ia64 targets
    --with-curses           use the curses library instead of the termcap
                            library
-@@ -1640,6 +1653,13 @@ Some influential environment variables:
+@@ -1642,6 +1655,13 @@ Some influential environment variables:
    MAKEINFO    Parent configure detects if it is of sufficient version.
    MAKEINFOFLAGS
                Parameters for MAKEINFO.
@@ -758,7 +758,7 @@ diff --git a/gdb/configure b/gdb/configure
    YACC        The `Yet Another Compiler Compiler' implementation to use.
                Defaults to the first program found out of: `bison -y', `byacc',
                `yacc'.
-@@ -6575,6 +6595,494 @@ _ACEOF
+@@ -6623,6 +6643,494 @@ _ACEOF
  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_auto_load_safe_path" >&5
  $as_echo "$with_auto_load_safe_path" >&6; }
  
@@ -1459,7 +1459,7 @@ diff --git a/gdb/configure.ac b/gdb/configure.ac
 diff --git a/gdb/corelow.c b/gdb/corelow.c
 --- a/gdb/corelow.c
 +++ b/gdb/corelow.c
-@@ -366,7 +366,7 @@ build_id_locate_exec (int from_tty)
+@@ -365,7 +365,7 @@ build_id_locate_exec (int from_tty)
          symfile_objfile->flags |= OBJF_BUILD_ID_CORE_LOADED;
      }
    else
@@ -1472,7 +1472,7 @@ diff --git a/gdb/event-top.c b/gdb/event-top.c
 --- a/gdb/event-top.c
 +++ b/gdb/event-top.c
 @@ -40,6 +40,7 @@
- #include "buffer.h"
+ #include "common/buffer.h"
  #include "ser-event.h"
  #include "gdb_select.h"
 +#include "symfile.h"
@@ -1488,7 +1488,7 @@ diff --git a/gdb/event-top.c b/gdb/event-top.c
    /* Do not call the python hook on an explicit prompt change as
       passed to this function, as this forms a secondary/local prompt,
       IE, displayed but not set.  */
-@@ -774,7 +777,10 @@ command_line_handler (char *rl)
+@@ -770,7 +773,10 @@ command_line_handler (gdb::unique_xmalloc_ptr<char> &&rl)
        command_handler (cmd);
  
        if (ui->prompt_state != PROMPTED)
@@ -1503,7 +1503,7 @@ diff --git a/gdb/event-top.c b/gdb/event-top.c
 diff --git a/gdb/symfile.h b/gdb/symfile.h
 --- a/gdb/symfile.h
 +++ b/gdb/symfile.h
-@@ -540,6 +540,8 @@ void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
+@@ -534,6 +534,8 @@ void map_symbol_filenames (symbol_filename_ftype *fun, void *data,
  /* build-id support.  */
  extern struct bfd_build_id *build_id_addr_get (CORE_ADDR addr);
  extern void debug_print_missing (const char *binary, const char *debug);

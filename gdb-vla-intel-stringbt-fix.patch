@@ -38,7 +38,7 @@ diff --git a/gdb/dwarf2loc.c b/gdb/dwarf2loc.c
  #include "common/underlying.h"
  #include "common/byte-vector.h"
  
-@@ -2348,6 +2349,20 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
+@@ -2158,6 +2159,20 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
    ctx.per_cu = per_cu;
    ctx.obj_address = 0;
  

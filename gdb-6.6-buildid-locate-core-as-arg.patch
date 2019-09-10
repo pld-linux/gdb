@@ -85,7 +85,7 @@ diff --git a/gdb/exec.c b/gdb/exec.c
  
  #include <fcntl.h>
  #include "readline/readline.h"
-@@ -357,12 +358,27 @@ exec_file_attach (const char *filename, int from_tty)
+@@ -355,12 +356,27 @@ exec_file_attach (const char *filename, int from_tty)
  
        if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
  	{
@@ -102,7 +102,7 @@ diff --git a/gdb/exec.c b/gdb/exec.c
  	  exec_close ();
 -	  error (_("\"%s\": not in executable format: %s"),
 -		 scratch_pathname,
--		 gdb_bfd_errmsg (bfd_get_error (), matching));
+-		 gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
 +
 +	  if (is_core != 0)
 +	    throw_error (IS_CORE_ERROR,
@@ -112,14 +112,14 @@ diff --git a/gdb/exec.c b/gdb/exec.c
 +	  else
 +	    error (_("\"%s\": not in executable format: %s"),
 +		   scratch_pathname,
-+		   gdb_bfd_errmsg (bfd_get_error (), matching));
++		   gdb_bfd_errmsg (bfd_get_error (), matching).c_str ());
  	}
  
        if (build_section_table (exec_bfd, &sections, &sections_end))
 diff --git a/gdb/main.c b/gdb/main.c
 --- a/gdb/main.c
 +++ b/gdb/main.c
-@@ -447,6 +447,37 @@ struct cmdarg
+@@ -448,6 +448,35 @@ struct cmdarg
    char *string;
  };
  
@@ -130,8 +130,6 @@ diff --git a/gdb/main.c b/gdb/main.c
 +static void
 +exec_or_core_file_attach (const char *filename, int from_tty)
 +{
-+  volatile struct gdb_exception e;
-+
 +  gdb_assert (exec_bfd == NULL);
 +
 +  TRY
@@ -157,7 +155,7 @@ diff --git a/gdb/main.c b/gdb/main.c
  static void
  captured_main_1 (struct captured_main_args *context)
  {
-@@ -883,6 +914,8 @@ captured_main_1 (struct captured_main_args *context)
+@@ -893,6 +922,8 @@ captured_main_1 (struct captured_main_args *context)
  	{
  	  symarg = argv[optind];
  	  execarg = argv[optind];
@@ -166,7 +164,7 @@ diff --git a/gdb/main.c b/gdb/main.c
  	  optind++;
  	}
  
-@@ -1033,11 +1066,25 @@ captured_main_1 (struct captured_main_args *context)
+@@ -1043,12 +1074,25 @@ captured_main_1 (struct captured_main_args *context)
        && symarg != NULL
        && strcmp (execarg, symarg) == 0)
      {
@@ -185,13 +183,14 @@ diff --git a/gdb/main.c b/gdb/main.c
        /* The exec file and the symbol-file are the same.  If we can't
           open it, better only print one error message.
 -         catch_command_errors returns non-zero on success!  */
--      if (catch_command_errors (exec_file_attach, execarg,
--				!batch_flag))
+-      ret = catch_command_errors (exec_file_attach, execarg,
+-				  !batch_flag);
+-      if (ret != 0)
 +         catch_command_errors returns non-zero on success!
 +	 Do not load EXECARG as a symbol file if it has been already processed
 +	 as a core file.  */
-+      if (catch_command_errors (func, execarg, !batch_flag)
-+	  && core_bfd == NULL)
- 	catch_command_errors (symbol_file_add_main_adapter, symarg,
- 			      !batch_flag);
++      ret = catch_command_errors (func, execarg, !batch_flag);
++      if (ret != 0 && core_bfd == NULL)
+ 	ret = catch_command_errors (symbol_file_add_main_adapter,
+ 				    symarg, !batch_flag);
      }

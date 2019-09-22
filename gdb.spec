@@ -235,42 +235,42 @@ done
 cp -f /usr/share/automake/config.* .
 # don't --enable-shared here, there would be libs version mismatch with binutils
 %configure \
-	--disable-silent-rules \
-	--with-gdb-datadir=%{_datadir}/gdb \
-	--with-separate-debug-dir=/usr/lib/debug \
-%if %{with python}
-	--with-python=yes \
-	--with-pythondir=%{py_sitescriptdir} \
-%else
-	--without-python \
-%endif
-%if %{with guile}
-	--with-guile \
-%else
-	--without-guile \
-%endif
 	--disable-gdbtk \
 	--disable-shared \
+	--disable-silent-rules \
 	--enable-gdbcli \
 	--enable-gdbmi \
 	--enable-multi-ice \
 	--enable-netrom \
 	--enable-nls \
 	--enable-tui \
-	--with-system-readline \
 	--with-cpu=%{_target_cpu} \
+	--with-gdb-datadir=%{_datadir}/gdb \
+	--with-guile%{!?with_guile:=no} \
 %ifnarch alpha
 	--with-mmalloc \
 %endif
+%if %{with python}
+	--with-python \
+	--with-pythondir=%{py_sitescriptdir} \
+%else
+	--without-python \
+%endif
+	--with-separate-debug-dir=/usr/lib/debug \
+	--with-system-readline \
 	--without-included-gettext \
 	--without-included-regex \
 	--without-x
 
-%{__make}
+# V=1 because only some subdirs honour --enable-silent-rules
+%{__make} \
+	V=1
+
 %{__make} -j1 info
 
 # gdb/ChangeLog: Build gdb directly from *.o files not using libgdb.a.
-%{__make} -C gdb libgdb.a
+%{__make} -C gdb libgdb.a \
+	V=1
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -305,7 +305,7 @@ done
 
 cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_mandir}/man1/gstack.1
 
-install libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
+cp -p libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
 # These are part of binutils:

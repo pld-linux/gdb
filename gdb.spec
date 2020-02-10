@@ -21,12 +21,12 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	8.3.1
-Release:	2
+Version:	9.1
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	73b6a5d8141672c62bf851cd34c4aa83
+# Source0-md5:	f7e9f6236c425097d9e5f18a6ac40655
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -213,7 +213,20 @@ cat > gdb/version.in << EOF
 %{version}-%{release} (PLD Linux)
 EOF
 
-sed -i -e 's#_GCC_AUTOCONF_VERSION\], \[2\.64\]#_GCC_AUTOCONF_VERSION], [2.69]#g' config/override.m4
+sed -E -i -e '1s,#!\s*/usr/bin/env\s+python2(\s|$),#!%{__python}\1,' -e '1s,#!\s*/usr/bin/env\s+python(\s|$),#!%{__python}\1,' -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
+      contrib/dg-extract-results.py \
+      gdb/contrib/test_pubnames_and_indexes.py \
+      gdb/testsuite/analyze-racy-logs.py \
+      gdb/testsuite/print-ts.py
+
+sed -E -i -e '1s,#!\s*/usr/bin/env\s+python3(\s|$),#!%{__python3}\1,' \
+      gdb/copyright.py
+
+sed -E -i -e '1s,#!\s*/usr/bin/env\s+(.*),#!%{__bindir}\1,' \
+      gdb/contrib/cc-with-tweaks.sh \
+      gdb/gcore \
+      gdb/gcore.in \
+      src-release.sh
 
 %build
 # omit hand-written gdb/testsuite aclocal.m4
@@ -233,8 +246,9 @@ for dir in $(find gdb -name 'configure.in' -o -name 'configure.ac'); do
 	cd $olddir
 done
 cp -f /usr/share/automake/config.* .
+install -d build && cd build
 # don't --enable-shared here, there would be libs version mismatch with binutils
-%configure \
+../%configure \
 	--disable-gdbtk \
 	--disable-shared \
 	--disable-silent-rules \
@@ -276,10 +290,10 @@ cp -f /usr/share/automake/config.* .
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_infodir}
 
-%{__make} -j1 install install-info \
+%{__make} -C build -j1 install install-info \
 	DESTDIR=$RPM_BUILD_ROOT
 
-cp -a gdb/libgdb.a $RPM_BUILD_ROOT%{_libdir}
+cp -a build/gdb/libgdb.a $RPM_BUILD_ROOT%{_libdir}
 
 # gdbtui seems all identical to gdb except when invoked as gdbtui, ncurses
 # window is created too.
@@ -305,13 +319,13 @@ done
 
 cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_mandir}/man1/gstack.1
 
-cp -p libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
+cp -p build/libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
 # These are part of binutils:
 %{__rm} $RPM_BUILD_ROOT%{_localedir}/*/LC_MESSAGES/{bfd,opcodes}.mo
 %{__rm} $RPM_BUILD_ROOT%{_infodir}/bfd.info*
-%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,diagnostics,dis-asm,symcat,plugin-api}.h
+%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfd_stdint,bfdlink,diagnostics,dis-asm,symcat,plugin-api}.h
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.la
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.a
 

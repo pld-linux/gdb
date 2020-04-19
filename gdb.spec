@@ -22,7 +22,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	9.1
-Release:	1
+Release:	2
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
@@ -57,7 +57,10 @@ BuildRequires:	babeltrace-devel >= 1.1.0
 BuildRequires:	expat-devel
 BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools >= 0.12.1
-%{?with_guile:BuildRequires:	guile-devel >= 2.0}
+%if %{with guile}
+BuildRequires:	guile-devel >= 2.0
+BuildRequires:	guile-devel < 2.2
+%endif
 %ifarch %{ix86} %{x8664}
 BuildRequires:	libipt-devel
 %endif
@@ -70,8 +73,10 @@ BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel
 BuildRequires:	rpmbuild(macros) >= 1.219
+BuildRequires:	source-highlight-devel >= 3.0
 BuildRequires:	tar >= 1:1.22
 BuildRequires:	texinfo >= 4.4
+BuildRequires:	xxHash-devel
 BuildRequires:	xz
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel

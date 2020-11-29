@@ -382,7 +382,9 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/gdbserver
 %{_mandir}/man1/gdbserver.1*
+%ifnarch %{arm}
 %attr(755,root,root) %{_libdir}/libinproctrace.so
+%endif
 
 %files lib
 %defattr(644,root,root,755)

@@ -25,7 +25,7 @@ Version:	9.1
 Release:	2
 License:	GPL v3+
 Group:		Development/Debuggers
-Source0:	http://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
+Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
 # Source0-md5:	f7e9f6236c425097d9e5f18a6ac40655
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247

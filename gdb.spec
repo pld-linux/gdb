@@ -81,11 +81,11 @@ BuildRequires:	xz
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel
 %if %{with python}
-BuildRequires:	python-devel
+BuildRequires:	python3-devel
 BuildRequires:	rpm-pythonprov
 Obsoletes:	python-gdb
 # for traceback module
-Requires:	python-modules
+Requires:	python3-modules
 %endif
 %{?with_guile:Requires:	guile >= 2.0.12}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -174,7 +174,7 @@ Requires:	expat-devel
 Requires:	libselinux-devel
 Requires:	libsepol-devel
 Requires:	ncurses-devel
-Requires:	python-devel
+Requires:	python3-devel
 Requires:	readline-devel
 Requires:	xz-devel
 Requires:	zlib-devel
@@ -218,7 +218,7 @@ cat > gdb/version.in << EOF
 %{version}-%{release} (PLD Linux)
 EOF
 
-sed -E -i -e '1s,#!\s*/usr/bin/env\s+python2(\s|$),#!%{__python}\1,' -e '1s,#!\s*/usr/bin/env\s+python(\s|$),#!%{__python}\1,' -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python}\1,' \
+sed -E -i -e '1s,#!\s*/usr/bin/env\s+python2(\s|$),#!%{__python}\1,' -e '1s,#!\s*/usr/bin/env\s+python(\s|$),#!%{__python3}\1,' -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python3}\1,' \
       contrib/dg-extract-results.py \
       gdb/contrib/test_pubnames_and_indexes.py \
       gdb/testsuite/analyze-racy-logs.py \
@@ -270,8 +270,8 @@ install -d build && cd build
 	--with-mmalloc \
 %endif
 %if %{with python}
-	--with-python \
-	--with-pythondir=%{py_sitescriptdir} \
+	--with-python="%{__python3}" \
+	--with-pythondir=%{py3_sitescriptdir} \
 %else
 	--without-python \
 %endif
@@ -317,9 +317,8 @@ for LIB in lib lib64 libx32; do
 	install -d $LIBPATH
 done
 
-%py_ocomp $RPM_BUILD_ROOT%{py_sitescriptdir}
-%py_comp $RPM_BUILD_ROOT%{py_sitescriptdir}
-%py_postclean
+%py3_ocomp $RPM_BUILD_ROOT%{py3_sitescriptdir}
+%py3_comp $RPM_BUILD_ROOT%{py3_sitescriptdir}
 %endif
 
 cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_mandir}/man1/gstack.1

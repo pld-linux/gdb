@@ -29,7 +29,7 @@
 --- gdb-7.4.50.20120120/Makefile.in.orig	2012-01-20 02:48:18.000000000 +0100
 +++ gdb-7.4.50.20120120/Makefile.in	2012-03-17 10:35:14.194730128 +0100
 @@ -922,7 +922,6 @@
-     maybe-configure-libiberty \
+     maybe-configure-libiberty-linker-plugin \
      maybe-configure-libiconv \
      maybe-configure-m4 \
 -    maybe-configure-readline \
@@ -37,7 +37,7 @@
      maybe-configure-sim \
      maybe-configure-texinfo \
 @@ -1149,7 +1148,6 @@
- info-host: maybe-info-libiberty
+ info-host: maybe-info-libiberty-linker-plugin
  info-host: maybe-info-libiconv
  info-host: maybe-info-m4
 -info-host: maybe-info-readline
@@ -45,7 +45,7 @@
  info-host: maybe-info-sim
  info-host: maybe-info-texinfo
 @@ -1226,7 +1224,6 @@
- dvi-host: maybe-dvi-libiberty
+ dvi-host: maybe-dvi-libiberty-linker-plugin
  dvi-host: maybe-dvi-libiconv
  dvi-host: maybe-dvi-m4
 -dvi-host: maybe-dvi-readline
@@ -53,7 +53,7 @@
  dvi-host: maybe-dvi-sim
  dvi-host: maybe-dvi-texinfo
 @@ -1303,7 +1300,6 @@
- pdf-host: maybe-pdf-libiberty
+ pdf-host: maybe-pdf-libiberty-linker-plugin
  pdf-host: maybe-pdf-libiconv
  pdf-host: maybe-pdf-m4
 -pdf-host: maybe-pdf-readline
@@ -61,7 +61,7 @@
  pdf-host: maybe-pdf-sim
  pdf-host: maybe-pdf-texinfo
 @@ -1380,7 +1376,6 @@
- html-host: maybe-html-libiberty
+ html-host: maybe-html-libiberty-linker-plugin
  html-host: maybe-html-libiconv
  html-host: maybe-html-m4
 -html-host: maybe-html-readline
@@ -69,7 +69,7 @@
  html-host: maybe-html-sim
  html-host: maybe-html-texinfo
 @@ -1457,7 +1452,6 @@
- TAGS-host: maybe-TAGS-libiberty
+ TAGS-host: maybe-TAGS-libiberty-linker-plugin
  TAGS-host: maybe-TAGS-libiconv
  TAGS-host: maybe-TAGS-m4
 -TAGS-host: maybe-TAGS-readline
@@ -77,7 +77,7 @@
  TAGS-host: maybe-TAGS-sim
  TAGS-host: maybe-TAGS-texinfo
 @@ -1534,7 +1528,6 @@
- install-info-host: maybe-install-info-libiberty
+ install-info-host: maybe-install-info-libiberty-linker-plugin
  install-info-host: maybe-install-info-libiconv
  install-info-host: maybe-install-info-m4
 -install-info-host: maybe-install-info-readline
@@ -85,7 +85,7 @@
  install-info-host: maybe-install-info-sim
  install-info-host: maybe-install-info-texinfo
 @@ -1611,7 +1604,6 @@
- install-pdf-host: maybe-install-pdf-libiberty
+ install-pdf-host: maybe-install-pdf-libiberty-linker-plugin
  install-pdf-host: maybe-install-pdf-libiconv
  install-pdf-host: maybe-install-pdf-m4
 -install-pdf-host: maybe-install-pdf-readline
@@ -93,7 +93,7 @@
  install-pdf-host: maybe-install-pdf-sim
  install-pdf-host: maybe-install-pdf-texinfo
 @@ -1688,7 +1680,6 @@
- install-html-host: maybe-install-html-libiberty
+ install-html-host: maybe-install-html-libiberty-linker-plugin
  install-html-host: maybe-install-html-libiconv
  install-html-host: maybe-install-html-m4
 -install-html-host: maybe-install-html-readline
@@ -101,7 +101,7 @@
  install-html-host: maybe-install-html-sim
  install-html-host: maybe-install-html-texinfo
 @@ -1765,7 +1756,6 @@
- installcheck-host: maybe-installcheck-libiberty
+ installcheck-host: maybe-installcheck-libiberty-linker-plugin
  installcheck-host: maybe-installcheck-libiconv
  installcheck-host: maybe-installcheck-m4
 -installcheck-host: maybe-installcheck-readline
@@ -109,7 +109,7 @@
  installcheck-host: maybe-installcheck-sim
  installcheck-host: maybe-installcheck-texinfo
 @@ -1842,7 +1832,6 @@
- mostlyclean-host: maybe-mostlyclean-libiberty
+ mostlyclean-host: maybe-mostlyclean-libiberty-linker-plugin
  mostlyclean-host: maybe-mostlyclean-libiconv
  mostlyclean-host: maybe-mostlyclean-m4
 -mostlyclean-host: maybe-mostlyclean-readline
@@ -117,7 +117,7 @@
  mostlyclean-host: maybe-mostlyclean-sim
  mostlyclean-host: maybe-mostlyclean-texinfo
 @@ -1919,7 +1908,6 @@
- clean-host: maybe-clean-libiberty
+ clean-host: maybe-clean-libiberty-linker-plugin
  clean-host: maybe-clean-libiconv
  clean-host: maybe-clean-m4
 -clean-host: maybe-clean-readline
@@ -125,7 +125,7 @@
  clean-host: maybe-clean-sim
  clean-host: maybe-clean-texinfo
 @@ -1996,7 +1984,6 @@
- distclean-host: maybe-distclean-libiberty
+ distclean-host: maybe-distclean-libiberty-linker-plugin
  distclean-host: maybe-distclean-libiconv
  distclean-host: maybe-distclean-m4
 -distclean-host: maybe-distclean-readline
@@ -133,7 +133,7 @@
  distclean-host: maybe-distclean-sim
  distclean-host: maybe-distclean-texinfo
 @@ -2073,7 +2060,6 @@
- maintainer-clean-host: maybe-maintainer-clean-libiberty
+ maintainer-clean-host: maybe-maintainer-clean-libiberty-linker-plugin
  maintainer-clean-host: maybe-maintainer-clean-libiconv
  maintainer-clean-host: maybe-maintainer-clean-m4
 -maintainer-clean-host: maybe-maintainer-clean-readline
@@ -141,7 +141,7 @@
  maintainer-clean-host: maybe-maintainer-clean-sim
  maintainer-clean-host: maybe-maintainer-clean-texinfo
 @@ -2205,7 +2191,6 @@
-     maybe-check-libiberty \
+     maybe-check-libiberty-linker-plugin \
      maybe-check-libiconv \
      maybe-check-m4 \
 -    maybe-check-readline \
@@ -149,7 +149,7 @@
      maybe-check-sim \
      maybe-check-texinfo \
 @@ -2308,7 +2293,6 @@
-     maybe-install-libiberty \
+     maybe-install-libiberty-linker-plugin \
      maybe-install-libiconv \
      maybe-install-m4 \
 -    maybe-install-readline \
@@ -157,7 +157,7 @@
      maybe-install-sim \
      maybe-install-texinfo \
 @@ -2354,7 +2338,6 @@
-     maybe-install-libiberty \
+     maybe-install-libiberty-linker-plugin \
      maybe-install-libiconv \
      maybe-install-m4 \
 -    maybe-install-readline \
@@ -165,7 +165,7 @@
      maybe-install-sim \
      maybe-install-texinfo \
 @@ -2450,7 +2433,6 @@
-     maybe-install-strip-libiberty \
+     maybe-install-strip-libiberty-linker-plugin \
      maybe-install-strip-libiconv \
      maybe-install-strip-m4 \
 -    maybe-install-strip-readline \

@@ -7,8 +7,8 @@ diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
  	"prefix=$(prefix)" \
 +	"infodir=$(infodir)" \
  	"exec_prefix=$(exec_prefix)" \
- 	"against=$(against)" \
- 	"AR=$(AR)" \
+ 	"infodir=$(infodir)" \
+ 	"datarootdir=$(datarootdir)" \
 --- gdb-7.7.1/gdb/doc/gdb.texinfo.orig	2014-06-05 12:01:44.942170134 +0200
 +++ gdb-7.7.1/gdb/doc/gdb.texinfo	2014-06-05 12:11:48.614397269 +0200
 @@ -42,10 +42,10 @@
@@ -38,4 +38,4 @@ diff -urN gdb-5.0.org/gdb/Makefile.in gdb-5.0/gdb/Makefile.in
 +* Stabs: (stabs).			The "stabs" debugging information format
  @end direntry
  
- @ifinfo
+ @copying

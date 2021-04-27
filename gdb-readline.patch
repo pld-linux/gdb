@@ -18,14 +18,14 @@
  # Where is expat?  This will be empty if expat was not available.
  LIBEXPAT = @LIBEXPAT@
 @@ -613,7 +613,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(
- 	$(LIBEXPAT) $(LIBLZMA) $(LIBBABELTRACE) $(LIBIPT) \
- 	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU) $(LIBICONV) $(LIBMPFR) \
- 	$(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS)
--CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(LIBCTF) \
-+CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(LIBCTF) \
- 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
+ 	$(WIN32LIBS) $(LIBGNU) $(LIBICONV) \
+ 	$(LIBMPFR) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
+ 	$(DEBUGINFOD_LIBS)
+-CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
++CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(CTF_DEPS) \
+ 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
+ 	$(LIBSUPPORT)
  
- DIST = gdb
 --- gdb-7.4.50.20120120/Makefile.in.orig	2012-01-20 02:48:18.000000000 +0100
 +++ gdb-7.4.50.20120120/Makefile.in	2012-03-17 10:35:14.194730128 +0100
 @@ -922,7 +922,6 @@
@@ -173,9 +173,9 @@
      maybe-install-strip-sim \
      maybe-install-strip-texinfo \
 @@ -51050,7 +51032,6 @@ all-stagefeedback-intl: maybe-all-stagef
- configure-gdb: maybe-configure-sim
- configure-gdb: maybe-all-gnulib
+ configure-gdb: maybe-all-gdbsupport
  all-gdb: maybe-all-gnulib
+ all-gdb: maybe-all-gdbsupport
 -all-gdb: maybe-all-readline
  all-gdb: maybe-all-build-bison
  all-gdb: maybe-all-sim

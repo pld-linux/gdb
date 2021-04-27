@@ -80,7 +80,7 @@ new file mode 100644
 +	# gdb.arch/x86_64-vla-pointer.c:27
 +	.loc 1 27 0
 +	movl	$0, -20(%rbp)
-+# SUCC: 4 [100.0%] 
++# SUCC: 4 [100.0%]
 +	jmp	.L2
 +# BLOCK 3 seq:1
 +# PRED: 4
@@ -98,7 +98,7 @@ new file mode 100644
 +	.loc 1 27 0 discriminator 3
 +	addl	$1, -20(%rbp)
 +# BLOCK 4 seq:2
-+# PRED: 3 (FALLTHRU,DFS_BACK) 2 [100.0%] 
++# PRED: 3 (FALLTHRU,DFS_BACK) 2 [100.0%]
 +.L2:
 +	# gdb.arch/x86_64-vla-pointer.c:27
 +	.loc 1 27 0 is_stmt 0 discriminator 1
@@ -119,7 +119,7 @@ new file mode 100644
 +	movq	-8(%rbp), %rbx
 +	leave
 +	.cfi_def_cfa 7, 8
-+# SUCC: EXIT [100.0%] 
++# SUCC: EXIT [100.0%]
 +	ret
 +	.cfi_endproc
 +.LFE0:
@@ -1531,7 +1531,7 @@ diff --git a/gdb/testsuite/gdb.cp/gdb9593.cc b/gdb/testsuite/gdb.cp/gdb9593.cc
 new file mode 100644
 --- /dev/null
 +++ b/gdb/testsuite/gdb.cp/gdb9593.cc
-@@ -0,0 +1,180 @@
+@@ -0,0 +1,179 @@
 +/* This testcase is part of GDB, the GNU debugger.
 +
 +   Copyright 2008, 2009 Free Software Foundation, Inc.
@@ -1560,27 +1560,27 @@ new file mode 100644
 +
 +
 +  // Single throw an exception in this function.
-+  void function1() 
++  void function1()
 +  {
 +    throw 20;
 +  }
 +
 +  // Throw an exception in another function.
-+  void function2() 
++  void function2()
 +  {
 +    function1();
 +  }
 +
 +  // Throw an exception in another function, but handle it
 +  // locally.
-+  void function3 () 
++  void function3 ()
 +  {
 +    {
 +      try
 +	{
 +	  function1 ();
 +	}
-+      catch (...) 
++      catch (...)
 +	{
 +	  cout << "Caught and handled function1 exception" << endl;
 +	}
@@ -1623,8 +1623,8 @@ new file mode 100644
 +NextOverThrowDerivates next_cases;
 +
 +
-+int main () 
-+{ 
++int main ()
++{
 +  try
 +    {
 +      next_cases.function1 ();
@@ -1711,12 +1711,11 @@ new file mode 100644
 +    {
 +    }
 +}
-+
 diff --git a/gdb/testsuite/gdb.cp/gdb9593.exp b/gdb/testsuite/gdb.cp/gdb9593.exp
 new file mode 100644
 --- /dev/null
 +++ b/gdb/testsuite/gdb.cp/gdb9593.exp
-@@ -0,0 +1,182 @@
+@@ -0,0 +1,189 @@
 +# Copyright 2008, 2009 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
@@ -1771,7 +1770,7 @@ new file mode 100644
 +if ![runto_main] then {
 +    perror "couldn't run to main"
 +    continue
-+} 
++}
 +
 +# See whether we have the needed unwinder hooks.
 +set ok 1
@@ -1860,9 +1859,16 @@ new file mode 100644
 +  ".*function1 ().*" \
 +  "step into finish, for until"
 +
-+gdb_test "until" \
-+  ".*function1 ().*" \
-+  "until with no argument 1"
++gdb_test_multiple "until" "until with no argument 1" {
++    -re -wrap ".*function1 ().*" {
++	pass $gdb_test_name
++    }
++    -re -wrap ".*$hex\t80\t  \}" {
++	# PR gcc/97774 - "Incorrect line info for try/catch"
++	# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=97774
++	xfail $gdb_test_name
++    }
++}
 +
 +set line [gdb_get_line_number "marker for until" $testfile.cc]
 +
@@ -2239,7 +2245,7 @@ new file mode 100644
 +   but WITHOUT ANY WARRANTY; without even the implied warranty of
 +   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 +   GNU General Public License for more details.
-+ 
++
 +   You should have received a copy of the GNU General Public License
 +   along with this program; if not, write to the Free Software
 +   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307,
@@ -2272,19 +2278,19 @@ diff --git a/gdb/testsuite/gdb.dwarf2/dw2-stripped.exp b/gdb/testsuite/gdb.dwarf
 new file mode 100644
 --- /dev/null
 +++ b/gdb/testsuite/gdb.dwarf2/dw2-stripped.exp
-@@ -0,0 +1,79 @@
+@@ -0,0 +1,84 @@
 +# Copyright 2006 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
 +# it under the terms of the GNU General Public License as published by
 +# the Free Software Foundation; either version 2 of the License, or
 +# (at your option) any later version.
-+# 
++#
 +# This program is distributed in the hope that it will be useful,
 +# but WITHOUT ANY WARRANTY; without even the implied warranty of
 +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 +# GNU General Public License for more details.
-+# 
++#
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write to the Free Software
 +# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
@@ -2299,7 +2305,12 @@ new file mode 100644
 +    && ![istarget *-*-openbsd*]
 +    && ![istarget arm-*-eabi*]
 +    && ![istarget powerpc-*-eabi*]} {
-+    return 0  
++    return 0
++}
++
++if {[use_gdb_stub]} {
++    untested "skipping test because of use_gdb_stub"
++    return -1
 +}
 +
 +set testfile "dw2-stripped"
@@ -2468,7 +2479,7 @@ new file mode 100644
 +    && ![istarget *-*-openbsd*]
 +    && ![istarget arm-*-eabi*]
 +    && ![istarget powerpc-*-eabi*]} {
-+    return 0  
++    return 0
 +}
 +
 +set testfile "dw2-struct-member-data-location"
@@ -2636,7 +2647,7 @@ new file mode 100644
 +
 +# This test can only be run on targets which support DWARF-2 and use gas.
 +if {![dwarf2_support]} {
-+    return 0  
++    return 0
 +}
 +
 +set testfile dw2-subrange-no-type
@@ -2663,15 +2674,15 @@ new file mode 100644
 +# it under the terms of the GNU General Public License as published by
 +# the Free Software Foundation; either version 2 of the License, or
 +# (at your option) any later version.
-+# 
++#
 +# This program is distributed in the hope that it will be useful,
 +# but WITHOUT ANY WARRANTY; without even the implied warranty of
 +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 +# GNU General Public License for more details.
-+# 
++#
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write to the Free Software
-+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
++# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 +
 +# This file was written by Jan Kratochvil <jan.kratochvil@redhat.com>.
 +
@@ -2755,15 +2766,15 @@ new file mode 100644
 +# it under the terms of the GNU General Public License as published by
 +# the Free Software Foundation; either version 2 of the License, or
 +# (at your option) any later version.
-+# 
++#
 +# This program is distributed in the hope that it will be useful,
 +# but WITHOUT ANY WARRANTY; without even the implied warranty of
 +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 +# GNU General Public License for more details.
-+# 
++#
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write to the Free Software
-+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
++# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 +
 +# This file was written by Jan Kratochvil <jan.kratochvil@redhat.com>.
 +
@@ -3010,22 +3021,22 @@ diff --git a/gdb/testsuite/gdb.fortran/string.exp b/gdb/testsuite/gdb.fortran/st
 new file mode 100644
 --- /dev/null
 +++ b/gdb/testsuite/gdb.fortran/string.exp
-@@ -0,0 +1,59 @@
+@@ -0,0 +1,71 @@
 +# Copyright 2008 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
 +# it under the terms of the GNU General Public License as published by
 +# the Free Software Foundation; either version 2 of the License, or
 +# (at your option) any later version.
-+# 
++#
 +# This program is distributed in the hope that it will be useful,
 +# but WITHOUT ANY WARRANTY; without even the implied warranty of
 +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 +# GNU General Public License for more details.
-+# 
++#
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write to the Free Software
-+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
++# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 +
 +# This file was written by Jan Kratochvil <jan.kratochvil@redhat.com>.
 +
@@ -3055,13 +3066,23 @@ new file mode 100644
 +gdb_continue_to_breakpoint "var-init"
 +gdb_test "ptype c" "type = character(\\(kind=1\\)|\\*1)"
 +gdb_test "ptype d" "type = character(\\(kind=8\\)|\\*8)"
++# Fortran: Support pointers to dynamic types.
++setup_kfail gdb/nnnnn "*-*-*"
 +gdb_test "ptype e" "type = character(\\(kind=4\\)|\\*4)"
++# Fortran: Support pointers to dynamic types.
++setup_kfail gdb/nnnnn "*-*-*"
 +gdb_test "ptype f" "type = character(\\(kind=4\\)|\\*4) \\(7,8:10\\)"
++# Fortran: Support pointers to dynamic types.
++setup_kfail gdb/nnnnn "*-*-*"
 +gdb_test "ptype *e" "Attempt to take contents of a non-pointer value."
++# Fortran: Support pointers to dynamic types.
++setup_kfail gdb/nnnnn "*-*-*"
 +gdb_test "ptype *f" "type = character(\\(kind=4\\)|\\*4) \\(7\\)"
 +gdb_test "p c" "\\$\[0-9\]* = 'c'"
 +gdb_test "p d" "\\$\[0-9\]* = 'd       '"
 +gdb_test "p e" "\\$\[0-9\]* = 'g   '"
++# Fortran: Support pointers to dynamic types.
++setup_kfail gdb/nnnnn "*-*-*"
 +gdb_test "p f" "\\$\[0-9\]* = \\(\\( 'h   ', 'h   ', 'h   ', 'h   ', 'h   ', 'h   ', 'h   '\\) \\( 'h   ', 'h   ', 'h   ', 'h   ', 'h   ', 'h   ', 'h   '\\) \\( 'h   ', 'h   ', 'h   ', 'h   ', 'h   ', 'h   ', 'h   '\\) \\)"
 +gdb_test "p *e" "Attempt to take contents of a non-pointer value."
 +gdb_test "p *f" "Attempt to take contents of a non-pointer value."
@@ -3069,6 +3090,8 @@ new file mode 100644
 +gdb_breakpoint [gdb_get_line_number "var-finish"]
 +gdb_continue_to_breakpoint "var-finish"
 +gdb_test "p e" "\\$\[0-9\]* = 'e   '" "p e re-set"
++# Fortran: Support pointers to dynamic types.
++setup_kfail gdb/nnnnn "*-*-*"
 +gdb_test "p f" "\\$\[0-9\]* = \\(\\( 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   '\\) \\( 'f2  ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   '\\) \\( 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   ', 'f   '\\) \\)" "p *f re-set"
 diff --git a/gdb/testsuite/gdb.fortran/string.f90 b/gdb/testsuite/gdb.fortran/string.f90
 new file mode 100644
@@ -3200,12 +3223,12 @@ new file mode 100644
 +! it under the terms of the GNU General Public License as published by
 +! the Free Software Foundation; either version 3 of the License, or
 +! (at your option) any later version.
-+! 
++!
 +! This program is distributed in the hope that it will be useful,
 +! but WITHOUT ANY WARRANTY; without even the implied warranty of
 +! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 +! GNU General Public License for more details.
-+! 
++!
 +! You should have received a copy of the GNU General Public License
 +! along with this program.  If not, see <http://www.gnu.org/licenses/>.
 +
@@ -3417,22 +3440,22 @@ diff --git a/gdb/testsuite/gdb.opt/fortran-string.exp b/gdb/testsuite/gdb.opt/fo
 new file mode 100644
 --- /dev/null
 +++ b/gdb/testsuite/gdb.opt/fortran-string.exp
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,46 @@
 +# Copyright 2009 Free Software Foundation, Inc.
 +
 +# This program is free software; you can redistribute it and/or modify
 +# it under the terms of the GNU General Public License as published by
 +# the Free Software Foundation; either version 2 of the License, or
 +# (at your option) any later version.
-+# 
++#
 +# This program is distributed in the hope that it will be useful,
 +# but WITHOUT ANY WARRANTY; without even the implied warranty of
 +# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 +# GNU General Public License for more details.
-+# 
++#
 +# You should have received a copy of the GNU General Public License
 +# along with this program; if not, write to the Free Software
-+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  
++# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 +
 +# This file was written by Jan Kratochvil <jan.kratochvil@redhat.com>.
 +
@@ -3454,14 +3477,21 @@ new file mode 100644
 +    continue
 +}
 +
-+gdb_test "frame" ".*s='foo'.*"
-+gdb_test "ptype s" "type = character\\*3"
++gdb_test "info args" ".*s = 'foo'.*"
++gdb_test_multiple "ptype s" "" {
++    -re -wrap "type = character \\(3\\)" {
++	pass $gdb_test_name
++    }
++    -re -wrap "type = character\\*3" {
++	pass $gdb_test_name
++    }
++}
 +gdb_test "p s" "\\$\[0-9\]* = 'foo'"
 diff --git a/gdb/testsuite/gdb.opt/fortran-string.f90 b/gdb/testsuite/gdb.opt/fortran-string.f90
 new file mode 100644
 --- /dev/null
 +++ b/gdb/testsuite/gdb.opt/fortran-string.f90
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,29 @@
 +! Copyright 2009 Free Software Foundation, Inc.
 +!
 +! This program is free software; you can redistribute it and/or modify
@@ -3485,6 +3515,7 @@ new file mode 100644
 +  subroutine f(s)
 +  character*(*) s
 +  s = s
++  print *, s
 +  end
 +
 +  program main
@@ -3494,7 +3525,7 @@ diff --git a/gdb/testsuite/gdb.pascal/arrays.exp b/gdb/testsuite/gdb.pascal/arra
 new file mode 100644
 --- /dev/null
 +++ b/gdb/testsuite/gdb.pascal/arrays.exp
-@@ -0,0 +1,104 @@
+@@ -0,0 +1,107 @@
 +# Copyright 2008, 2009 Free Software Foundation, Inc.
 +#
 +# This program is free software; you can redistribute it and/or modify
@@ -3586,11 +3617,15 @@ new file mode 100644
 +
 +if { $fpc_generates_dwarf_for_dynamic_arrays == 0} {
 +  setup_xfail "*-*-*"
++} else {
++  setup_kfail "*-*-*" pascal/26106
 +}
 +gdb_test "print DynArrStr" ".* = \\{'dstr0', 'dstr1', 'dstr2', 'dstr3', 'dstr4', 'dstr5', 'dstr6', 'dstr7', 'dstr8', 'dstr9', 'dstr10', 'dstr11', 'dstr12'\\}" "Print dynamic array of string"
 +
 +if { $fpc_generates_dwarf_for_dynamic_arrays == 0} {
 +  setup_xfail "*-*-*"
++} else {
++  setup_kfail "*-*-*" pascal/26855
 +}
 +gdb_test "print StatArrStr" ".* = \\{'str0', 'str1', 'str2', 'str3', 'str4', 'str5', 'str6', 'str7', 'str8', 'str9', 'str10', 'str11', 'str12'\\}" "Print static array of string"
 +
@@ -3598,7 +3633,6 @@ new file mode 100644
 +  setup_xfail "*-*-*"
 +}
 +gdb_test "print DynArrChar" ".* = 'abcdefghijklm'" "Print dynamic array of char"
-+
 diff --git a/gdb/testsuite/gdb.pascal/arrays.pas b/gdb/testsuite/gdb.pascal/arrays.pas
 new file mode 100644
 --- /dev/null
@@ -3648,7 +3682,7 @@ new file mode 100644
 +    Stat2dArrInt: TStat2dArrInt;
 +
 +    s: string;
-+	
++
 +    i,j : integer;
 +
 +begin
@@ -3678,8 +3712,8 @@ new file mode 100644
 +    DynArrStr[i]:='dstr'+inttostr(i);
 +    end;
 +  writeln(DynArrInt_[1]);
-+  writeln(DynArrInt[1]); 
-+  writeln(DynArrStr[1]); 
++  writeln(DynArrInt[1]);
++  writeln(DynArrStr[1]);
 +  writeln(StatArrStr[1]);
 +  writeln(DynArrChar[1]);
 +
@@ -3689,7 +3723,7 @@ new file mode 100644
 diff --git a/gdb/testsuite/lib/gdb.exp b/gdb/testsuite/lib/gdb.exp
 --- a/gdb/testsuite/lib/gdb.exp
 +++ b/gdb/testsuite/lib/gdb.exp
-@@ -170,6 +170,11 @@ proc gdb_unload {} {
+@@ -224,6 +224,11 @@ proc gdb_unload {} {
  	    send_gdb "y\n" answer
  	    exp_continue
  	}
@@ -3705,12 +3739,12 @@ diff --git a/gdb/testsuite/lib/pascal.exp b/gdb/testsuite/lib/pascal.exp
 --- a/gdb/testsuite/lib/pascal.exp
 +++ b/gdb/testsuite/lib/pascal.exp
 @@ -37,6 +37,9 @@ proc pascal_init {} {
-     global pascal_compiler_is_fpc
-     global gpc_compiler
-     global fpc_compiler
-+    global fpcversion_major
-+    global fpcversion_minor
-+    global fpcversion_release
+     gdb_persistent_global pascal_compiler_is_fpc
+     gdb_persistent_global gpc_compiler
+     gdb_persistent_global fpc_compiler
++    gdb_persistent_global fpcversion_major
++    gdb_persistent_global fpcversion_minor
++    gdb_persistent_global fpcversion_release
      global env
   
      if { $pascal_init_done == 1 } {
@@ -3724,7 +3758,7 @@ diff --git a/gdb/testsuite/lib/pascal.exp b/gdb/testsuite/lib/pascal.exp
 +	    set fpcversion_major 1
 +	    set fpcversion_minor 0
 +	    set fpcversion_release 0
-+	    set fpcversion [ remote_exec host $fpc_compiler "-iV" ] 
++	    set fpcversion [ remote_exec host $fpc_compiler "-iV" ]
 +	    if [regexp {.*([0-9]+)\.([0-9]+)\.([0-9]+).?} $fpcversion] {
 +              regsub {.*([0-9]+)\.([0-9]+)\.([0-9]+).?\n?.?} $fpcversion {\1} fpcversion_major
 +              regsub {.*([0-9]+)\.([0-9]+)\.([0-9]+).?\n?.?} $fpcversion {\2} fpcversion_minor

@@ -21,12 +21,12 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	9.1
-Release:	2
+Version:	10.2
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	f7e9f6236c425097d9e5f18a6ac40655
+# Source0-md5:	c044b7146903ec51c9d2337a29aee93b
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -42,8 +42,7 @@ Patch110:	gdb-6.3-gstack-20050411.patch
 Patch112:	gdb-archer-vla-tests.patch
 Patch113:	gdb-vla-intel-fortran-strides.patch
 Patch114:	gdb-vla-intel-stringbt-fix.patch
-Patch115:	gdb-vla-intel-fortran-vla-strings.patch
-Patch116:	gdb-vla-intel-tests.patch
+Patch115:	gdb-vla-intel-tests.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
@@ -89,6 +88,8 @@ Requires:	python3-modules
 %endif
 %{?with_guile:Requires:	guile >= 2.0.12}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define		autoconf_ver	%(rpm -q --qf='%%{VERSION}' autoconf)
 
 %description
 Gdb is a full featured, command driven debugger. Gdb allows you to
@@ -205,7 +206,6 @@ GDB w postaci biblioteki statycznej.
 %patch113 -p1
 %patch114 -p1
 %patch115 -p1
-%patch116 -p1
 
 %patch1000 -p1
 %patch1001 -p1
@@ -233,9 +233,11 @@ sed -E -i -e '1s,#!\s*/usr/bin/env\s+(.*),#!%{__bindir}\1,' \
       gdb/gcore.in \
       src-release.sh
 
+sed -i -e 's/\[2\.69\]/[%{autoconf_ver}]/' config/override.m4
+
 %build
 # omit hand-written gdb/testsuite aclocal.m4
-for dir in gdb gdb/gdbserver ; do
+for dir in gdb gdbserver ; do
 	olddir=$(pwd)
 	cd $dir
 	%{__rm} aclocal.m4
@@ -357,6 +359,9 @@ rm -rf $RPM_BUILD_ROOT
 %ifarch %{x8664} x32
 %dir %{_datadir}/gdb/auto-load%{_prefix}/lib64
 %dir %{_datadir}/gdb/auto-load%{_prefix}/libx32
+%endif
+%ifarch aarch64
+%dir %{_datadir}/gdb/auto-load%{_prefix}/lib64
 %endif
 %{?with_guile:%{_datadir}/gdb/guile}
 %{_datadir}/gdb/syscalls

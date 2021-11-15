@@ -21,26 +21,24 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	10.2
+Version:	11.1
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	c044b7146903ec51c9d2337a29aee93b
+# Source0-md5:	257cb0f67927f79acf636d8c01e19990
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
+Patch0:		glibc2.34.patch
 Patch100:	gdb-6.6-buildid-locate.patch
 Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
 Patch102:	gdb-6.6-buildid-locate-rpm.patch
-Patch103:	gdb-6.6-buildid-locate-core-as-arg.patch
 Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
 Patch105:	gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
 Patch106:	gdb-6.6-buildid-locate-rpm-scl.patch
 Patch110:	gdb-6.3-gstack-20050411.patch
 
-Patch112:	gdb-archer-vla-tests.patch
-Patch113:	gdb-vla-intel-fortran-strides.patch
 Patch114:	gdb-vla-intel-stringbt-fix.patch
 Patch115:	gdb-vla-intel-tests.patch
 Patch1000:	%{name}-readline.patch
@@ -193,17 +191,15 @@ GDB w postaci biblioteki statycznej.
 %{__rm} gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 %{__rm} gdb/m2-exp.c gdb/p-exp.c
 
+%patch0 -p1
 %patch100 -p1
 %patch101 -p1
 %patch102 -p1
-%patch103 -p1
 %patch104 -p1
 %patch105 -p1
 %patch106 -p1
 %patch110 -p1
 
-%patch112 -p1
-%patch113 -p1
 %patch114 -p1
 %patch115 -p1
 
@@ -331,7 +327,7 @@ cp -p build/libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 # These are part of binutils:
 %{__rm} $RPM_BUILD_ROOT%{_localedir}/*/LC_MESSAGES/{bfd,opcodes}.mo
 %{__rm} $RPM_BUILD_ROOT%{_infodir}/bfd.info*
-%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfd_stdint,bfdlink,diagnostics,dis-asm,symcat,plugin-api}.h
+%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,diagnostics,dis-asm,symcat,plugin-api}.h
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.la
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.a
 

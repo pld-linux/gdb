@@ -1,24 +1,3 @@
-diff -ur gdb-5.1.1/sim/Makefile.in gdb-5.1.1-/sim/Makefile.in
---- gdb-5.1.1/sim/Makefile.in	Fri Apr 16 01:34:55 1999
-+++ gdb-5.1.1-/sim/Makefile.in	Tue Apr  9 11:03:47 2002
-@@ -81,6 +81,17 @@
- 	"bindir=$(bindir)" \
- 	"mandir=$(mandir)" \
- 	"libdir=$(libdir)" \
-+	"datadir=$(datadir)" \
-+	"includedir=$(includedir)" \
-+	"infodir=$(infodir)" \
-+	"libexecdir=$(libexecdir)" \
-+	"lispdir=$(lispdir)" \
-+	"localstatedir=$(localstatedir)" \
-+	"oldincludedir=$(oldincludedir)" \
-+	"sbindir=$(sbindir)" \
-+	"sharedstatedir=$(sharedstatedir)" \
-+	"sysconfdir=$(sysconfdir)" \
-+	"tooldir=$(tooldir)" \
- 	"against=$(against)" \
- 	"AR=$(AR)" \
- 	"AR_FLAGS=$(AR_FLAGS)" \
 --- gdb-5.2/gdb/Makefile.in.orig	Thu May 23 19:37:49 2002
 +++ gdb-5.2/gdb/Makefile.in	Thu May 23 20:00:03 2002
 @@ -410,6 +410,8 @@

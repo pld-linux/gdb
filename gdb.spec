@@ -56,7 +56,7 @@ BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools >= 0.12.1
 %if %{with guile}
 BuildRequires:	guile-devel >= 2.0
-BuildRequires:	guile-devel < 2.2
+BuildRequires:	guile-devel < 3.2
 %endif
 %ifarch %{ix86} %{x8664}
 BuildRequires:	libipt-devel
@@ -327,9 +327,9 @@ cp -p build/libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 # These are part of binutils:
 %{__rm} $RPM_BUILD_ROOT%{_localedir}/*/LC_MESSAGES/{bfd,opcodes}.mo
 %{__rm} $RPM_BUILD_ROOT%{_infodir}/bfd.info*
-%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,diagnostics,dis-asm,symcat,plugin-api}.h
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.la
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,opcodes}.a
+%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,ctf,ctf-api,diagnostics,dis-asm,symcat,plugin-api}.h
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes}.la
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes}.a
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -391,3 +391,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libdecnumber.a
 %{_libdir}/libgdb.a
 %{_includedir}/gdb
+# -devel?
+%{_includedir}/sim

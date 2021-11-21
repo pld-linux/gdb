@@ -31,6 +31,7 @@ Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-ma
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
 Patch0:		glibc2.34.patch
+Patch1:		x32.patch
 Patch100:	gdb-6.6-buildid-locate.patch
 Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
 Patch102:	gdb-6.6-buildid-locate-rpm.patch
@@ -192,6 +193,7 @@ GDB w postaci biblioteki statycznej.
 %{__rm} gdb/m2-exp.c gdb/p-exp.c
 
 %patch0 -p1
+%patch1 -p1
 %patch100 -p1
 %patch101 -p1
 %patch102 -p1

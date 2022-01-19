@@ -21,16 +21,15 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	11.1
+Version:	11.2
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	257cb0f67927f79acf636d8c01e19990
+# Source0-md5:	433bd0904caa31c247b1b1867f2f911d
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
-Patch0:		glibc2.34.patch
 Patch1:		x32.patch
 Patch100:	gdb-6.6-buildid-locate.patch
 Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
@@ -55,6 +54,7 @@ BuildRequires:	babeltrace-devel >= 1.1.0
 BuildRequires:	expat-devel
 BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools >= 0.12.1
+BuildRequires:	gmp-devel
 %if %{with guile}
 BuildRequires:	guile-devel >= 2.0
 BuildRequires:	guile-devel < 3.2
@@ -62,6 +62,7 @@ BuildRequires:	guile-devel < 3.2
 %ifarch %{ix86} %{x8664}
 BuildRequires:	libipt-devel
 %endif
+BuildRequires:	libmpc-devel
 BuildRequires:	libselinux-devel
 BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	libtool
@@ -81,7 +82,7 @@ BuildRequires:	zlib-devel
 %if %{with python}
 BuildRequires:	python3-devel
 BuildRequires:	rpm-pythonprov
-Obsoletes:	python-gdb
+Obsoletes:	python-gdb < 7.3
 # for traceback module
 Requires:	python3-modules
 %endif
@@ -192,7 +193,6 @@ GDB w postaci biblioteki statycznej.
 %{__rm} gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 %{__rm} gdb/m2-exp.c gdb/p-exp.c
 
-%patch0 -p1
 %patch1 -p1
 %patch100 -p1
 %patch101 -p1

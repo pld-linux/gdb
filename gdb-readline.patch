@@ -1,6 +1,6 @@
---- gdb-6.7.org/gdb/Makefile.in	2007-09-05 02:14:02.000000000 +0200
-+++ gdb-6.7/gdb/Makefile.in	2007-10-10 21:11:18.119976680 +0200
-@@ -175,11 +175,11 @@ LIBDECNUMBER_SRC = $(srcdir)/$(LIBDECNUM
+--- gdb-12.1/gdb/Makefile.in.orig	2022-06-23 22:08:57.971168251 +0200
++++ gdb-12.1/gdb/Makefile.in	2022-06-23 22:15:34.112355503 +0200
+@@ -180,11 +180,11 @@ LIBDECNUMBER_SRC = $(srcdir)/$(LIBDECNUM
  LIBDECNUMBER_CFLAGS = -I$(LIBDECNUMBER_DIR) -I$(LIBDECNUMBER_SRC)
  
  # Where is the READLINE library?  Typically in ../readline/readline.
@@ -17,18 +17,18 @@
  
  # Where is expat?  This will be empty if expat was not available.
  LIBEXPAT = @LIBEXPAT@
-@@ -613,7 +613,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(
+@@ -652,7 +652,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(
  	$(WIN32LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS) $(LIBICONV) \
  	$(LIBMPFR) $(LIBGMP) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
- 	$(DEBUGINFOD_LIBS)
+ 	$(DEBUGINFOD_LIBS) $(LIBBABELTRACE_LIB)
 -CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
 +CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(CTF_DEPS) \
  	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
  	$(LIBSUPPORT)
  
---- gdb-7.4.50.20120120/Makefile.in.orig	2012-01-20 02:48:18.000000000 +0100
-+++ gdb-7.4.50.20120120/Makefile.in	2012-03-17 10:35:14.194730128 +0100
-@@ -922,7 +922,6 @@
+--- gdb-12.1/Makefile.in.orig	2022-05-01 20:47:43.000000000 +0200
++++ gdb-12.1/Makefile.in	2022-06-23 22:06:05.298770364 +0200
+@@ -1087,7 +1087,6 @@ configure-host:  \
      maybe-configure-libiberty-linker-plugin \
      maybe-configure-libiconv \
      maybe-configure-m4 \
@@ -36,7 +36,15 @@
      maybe-configure-sid \
      maybe-configure-sim \
      maybe-configure-texinfo \
-@@ -1149,7 +1148,6 @@
+@@ -1261,7 +1260,6 @@ all-host: maybe-all-libiberty-linker-plu
+ all-host: maybe-all-libiconv
+ @endif libiconv-no-bootstrap
+ all-host: maybe-all-m4
+-all-host: maybe-all-readline
+ all-host: maybe-all-sid
+ all-host: maybe-all-sim
+ all-host: maybe-all-texinfo
+@@ -1373,7 +1371,6 @@ info-host: maybe-info-libiberty
  info-host: maybe-info-libiberty-linker-plugin
  info-host: maybe-info-libiconv
  info-host: maybe-info-m4
@@ -44,7 +52,7 @@
  info-host: maybe-info-sid
  info-host: maybe-info-sim
  info-host: maybe-info-texinfo
-@@ -1226,7 +1224,6 @@
+@@ -1464,7 +1461,6 @@ dvi-host: maybe-dvi-libiberty
  dvi-host: maybe-dvi-libiberty-linker-plugin
  dvi-host: maybe-dvi-libiconv
  dvi-host: maybe-dvi-m4
@@ -52,7 +60,7 @@
  dvi-host: maybe-dvi-sid
  dvi-host: maybe-dvi-sim
  dvi-host: maybe-dvi-texinfo
-@@ -1303,7 +1300,6 @@
+@@ -1555,7 +1551,6 @@ pdf-host: maybe-pdf-libiberty
  pdf-host: maybe-pdf-libiberty-linker-plugin
  pdf-host: maybe-pdf-libiconv
  pdf-host: maybe-pdf-m4
@@ -60,7 +68,7 @@
  pdf-host: maybe-pdf-sid
  pdf-host: maybe-pdf-sim
  pdf-host: maybe-pdf-texinfo
-@@ -1380,7 +1376,6 @@
+@@ -1646,7 +1641,6 @@ html-host: maybe-html-libiberty
  html-host: maybe-html-libiberty-linker-plugin
  html-host: maybe-html-libiconv
  html-host: maybe-html-m4
@@ -68,7 +76,7 @@
  html-host: maybe-html-sid
  html-host: maybe-html-sim
  html-host: maybe-html-texinfo
-@@ -1457,7 +1452,6 @@
+@@ -1737,7 +1731,6 @@ TAGS-host: maybe-TAGS-libiberty
  TAGS-host: maybe-TAGS-libiberty-linker-plugin
  TAGS-host: maybe-TAGS-libiconv
  TAGS-host: maybe-TAGS-m4
@@ -76,7 +84,7 @@
  TAGS-host: maybe-TAGS-sid
  TAGS-host: maybe-TAGS-sim
  TAGS-host: maybe-TAGS-texinfo
-@@ -1534,7 +1528,6 @@
+@@ -1828,7 +1821,6 @@ install-info-host: maybe-install-info-li
  install-info-host: maybe-install-info-libiberty-linker-plugin
  install-info-host: maybe-install-info-libiconv
  install-info-host: maybe-install-info-m4
@@ -84,7 +92,15 @@
  install-info-host: maybe-install-info-sid
  install-info-host: maybe-install-info-sim
  install-info-host: maybe-install-info-texinfo
-@@ -1611,7 +1604,6 @@
+@@ -1919,7 +1911,6 @@ install-dvi-host: maybe-install-dvi-libi
+ install-dvi-host: maybe-install-dvi-libiberty-linker-plugin
+ install-dvi-host: maybe-install-dvi-libiconv
+ install-dvi-host: maybe-install-dvi-m4
+-install-dvi-host: maybe-install-dvi-readline
+ install-dvi-host: maybe-install-dvi-sid
+ install-dvi-host: maybe-install-dvi-sim
+ install-dvi-host: maybe-install-dvi-texinfo
+@@ -2010,7 +2001,6 @@ install-pdf-host: maybe-install-pdf-libi
  install-pdf-host: maybe-install-pdf-libiberty-linker-plugin
  install-pdf-host: maybe-install-pdf-libiconv
  install-pdf-host: maybe-install-pdf-m4
@@ -92,7 +108,7 @@
  install-pdf-host: maybe-install-pdf-sid
  install-pdf-host: maybe-install-pdf-sim
  install-pdf-host: maybe-install-pdf-texinfo
-@@ -1688,7 +1680,6 @@
+@@ -2101,7 +2091,6 @@ install-html-host: maybe-install-html-li
  install-html-host: maybe-install-html-libiberty-linker-plugin
  install-html-host: maybe-install-html-libiconv
  install-html-host: maybe-install-html-m4
@@ -100,7 +116,7 @@
  install-html-host: maybe-install-html-sid
  install-html-host: maybe-install-html-sim
  install-html-host: maybe-install-html-texinfo
-@@ -1765,7 +1756,6 @@
+@@ -2192,7 +2181,6 @@ installcheck-host: maybe-installcheck-li
  installcheck-host: maybe-installcheck-libiberty-linker-plugin
  installcheck-host: maybe-installcheck-libiconv
  installcheck-host: maybe-installcheck-m4
@@ -108,7 +124,7 @@
  installcheck-host: maybe-installcheck-sid
  installcheck-host: maybe-installcheck-sim
  installcheck-host: maybe-installcheck-texinfo
-@@ -1842,7 +1832,6 @@
+@@ -2283,7 +2271,6 @@ mostlyclean-host: maybe-mostlyclean-libi
  mostlyclean-host: maybe-mostlyclean-libiberty-linker-plugin
  mostlyclean-host: maybe-mostlyclean-libiconv
  mostlyclean-host: maybe-mostlyclean-m4
@@ -116,7 +132,7 @@
  mostlyclean-host: maybe-mostlyclean-sid
  mostlyclean-host: maybe-mostlyclean-sim
  mostlyclean-host: maybe-mostlyclean-texinfo
-@@ -1919,7 +1908,6 @@
+@@ -2374,7 +2361,6 @@ clean-host: maybe-clean-libiberty
  clean-host: maybe-clean-libiberty-linker-plugin
  clean-host: maybe-clean-libiconv
  clean-host: maybe-clean-m4
@@ -124,7 +140,7 @@
  clean-host: maybe-clean-sid
  clean-host: maybe-clean-sim
  clean-host: maybe-clean-texinfo
-@@ -1996,7 +1984,6 @@
+@@ -2465,7 +2451,6 @@ distclean-host: maybe-distclean-libibert
  distclean-host: maybe-distclean-libiberty-linker-plugin
  distclean-host: maybe-distclean-libiconv
  distclean-host: maybe-distclean-m4
@@ -132,7 +148,7 @@
  distclean-host: maybe-distclean-sid
  distclean-host: maybe-distclean-sim
  distclean-host: maybe-distclean-texinfo
-@@ -2073,7 +2060,6 @@
+@@ -2556,7 +2541,6 @@ maintainer-clean-host: maybe-maintainer-
  maintainer-clean-host: maybe-maintainer-clean-libiberty-linker-plugin
  maintainer-clean-host: maybe-maintainer-clean-libiconv
  maintainer-clean-host: maybe-maintainer-clean-m4
@@ -140,7 +156,7 @@
  maintainer-clean-host: maybe-maintainer-clean-sid
  maintainer-clean-host: maybe-maintainer-clean-sim
  maintainer-clean-host: maybe-maintainer-clean-texinfo
-@@ -2205,7 +2191,6 @@
+@@ -2705,7 +2689,6 @@ check-host:  \
      maybe-check-libiberty-linker-plugin \
      maybe-check-libiconv \
      maybe-check-m4 \
@@ -148,7 +164,7 @@
      maybe-check-sid \
      maybe-check-sim \
      maybe-check-texinfo \
-@@ -2308,7 +2293,6 @@
+@@ -2843,7 +2826,6 @@ install-host-nogcc:  \
      maybe-install-libiberty-linker-plugin \
      maybe-install-libiconv \
      maybe-install-m4 \
@@ -156,7 +172,7 @@
      maybe-install-sid \
      maybe-install-sim \
      maybe-install-texinfo \
-@@ -2354,7 +2338,6 @@
+@@ -2899,7 +2881,6 @@ install-host:  \
      maybe-install-libiberty-linker-plugin \
      maybe-install-libiconv \
      maybe-install-m4 \
@@ -164,7 +180,7 @@
      maybe-install-sid \
      maybe-install-sim \
      maybe-install-texinfo \
-@@ -2450,7 +2433,6 @@
+@@ -3010,7 +2991,6 @@ install-strip-host:  \
      maybe-install-strip-libiberty-linker-plugin \
      maybe-install-strip-libiconv \
      maybe-install-strip-m4 \
@@ -172,7 +188,7 @@
      maybe-install-strip-sid \
      maybe-install-strip-sim \
      maybe-install-strip-texinfo \
-@@ -51050,7 +51032,6 @@ all-stagefeedback-intl: maybe-all-stagef
+@@ -63072,7 +63052,6 @@ configure-gdb: maybe-all-gnulib
  configure-gdb: maybe-all-gdbsupport
  all-gdb: maybe-all-gnulib
  all-gdb: maybe-all-gdbsupport
@@ -180,11 +196,11 @@
  all-gdb: maybe-all-build-bison
  all-gdb: maybe-all-sim
  all-gdb: maybe-all-libtermcap
-@@ -51387,7 +51368,6 @@ install-sid: maybe-install-tcl
+@@ -63562,7 +63541,6 @@ install-strip-sid: maybe-install-strip-t
  install-sid: maybe-install-tk
  install-strip-sid: maybe-install-strip-tk
  configure-sim: maybe-all-gnulib
--all-sim: maybe-all-readline
+-configure-sim: maybe-all-readline
  all-fastjar: maybe-all-build-texinfo
  all-libctf: all-libiberty
  all-stage1-libctf: all-stage1-libiberty

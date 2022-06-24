@@ -1,6 +1,7 @@
 # NOTE: -lib package is used by fpc.spec
 
 # TODO
+# - debuginfod (BR: elfutils-debuginfod-devel >= 0.179)
 # - rpm5 librpm support (gdb/configure.ac checks for 4.x or so)
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
 # - reenable guile after https://sourceware.org/bugzilla/show_bug.cgi?id=21104 is fixed
@@ -21,16 +22,15 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	11.2
-Release:	2
+Version:	12.1
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	433bd0904caa31c247b1b1867f2f911d
+# Source0-md5:	759a1b8d2b4d403367dd0e14fa04643d
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
-Patch1:		x32.patch
 Patch100:	gdb-6.6-buildid-locate.patch
 Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
 Patch102:	gdb-6.6-buildid-locate-rpm.patch
@@ -38,9 +38,6 @@ Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
 Patch105:	gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
 Patch106:	gdb-6.6-buildid-locate-rpm-scl.patch
 Patch110:	gdb-6.3-gstack-20050411.patch
-
-Patch114:	gdb-vla-intel-stringbt-fix.patch
-Patch115:	gdb-vla-intel-tests.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
@@ -49,8 +46,8 @@ Patch1006:	buildid-locate-rpm-pld.patch
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.69
 BuildRequires:	automake
-BuildRequires:	bison
 BuildRequires:	babeltrace-devel >= 1.1.0
+BuildRequires:	bison
 BuildRequires:	expat-devel
 BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools >= 0.12.1
@@ -65,12 +62,13 @@ BuildRequires:	libipt-devel
 BuildRequires:	libmpc-devel
 BuildRequires:	libselinux-devel
 BuildRequires:	libstdc++-devel >= 6:4.8
-BuildRequires:	libtool
+BuildRequires:	libtool >= 2:2
 BuildRequires:	make >= 3.81
 BuildRequires:	mpfr-devel
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel
+BuildRequires:	rpm-devel >= 4.6
 BuildRequires:	rpmbuild(macros) >= 1.219
 BuildRequires:	source-highlight-devel >= 3.0
 BuildRequires:	tar >= 1:1.22
@@ -80,11 +78,11 @@ BuildRequires:	xz
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel
 %if %{with python}
-BuildRequires:	python3-devel
+BuildRequires:	python3-devel >= 1:3.2
 BuildRequires:	rpm-pythonprov
 Obsoletes:	python-gdb < 7.3
 # for traceback module
-Requires:	python3-modules
+Requires:	python3-modules >= 1:3.2
 %endif
 %{?with_guile:Requires:	guile >= 2.0.12}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -193,7 +191,6 @@ GDB w postaci biblioteki statycznej.
 %{__rm} gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 %{__rm} gdb/m2-exp.c gdb/p-exp.c
 
-%patch1 -p1
 %patch100 -p1
 %patch101 -p1
 %patch102 -p1
@@ -201,9 +198,6 @@ GDB w postaci biblioteki statycznej.
 %patch105 -p1
 %patch106 -p1
 %patch110 -p1
-
-%patch114 -p1
-%patch115 -p1
 
 %patch1000 -p1
 %patch1001 -p1
@@ -216,18 +210,19 @@ cat > gdb/version.in << EOF
 %{version}-%{release} (PLD Linux)
 EOF
 
-sed -E -i -e '1s,#!\s*/usr/bin/env\s+python2(\s|$),#!%{__python}\1,' -e '1s,#!\s*/usr/bin/env\s+python(\s|$),#!%{__python3}\1,' -e '1s,#!\s*/usr/bin/python(\s|$),#!%{__python3}\1,' \
+%{__sed} -i -e '1s,/usr/bin/python$,%{__python},' \
       contrib/dg-extract-results.py \
+
+%{__sed} -i -e '1s,/usr/bin/env python$,%{__python},' \
       gdb/contrib/test_pubnames_and_indexes.py \
-      gdb/testsuite/analyze-racy-logs.py \
       gdb/testsuite/print-ts.py
 
-sed -E -i -e '1s,#!\s*/usr/bin/env\s+python3(\s|$),#!%{__python3}\1,' \
+%{__sed} -i -e '1s,/usr/bin/env python3,%{__python3},' \
+      gdb/testsuite/analyze-racy-logs.py \
       gdb/copyright.py
 
-sed -E -i -e '1s,#!\s*/usr/bin/env\s+(.*),#!%{__bindir}\1,' \
+%{__sed} -i -e '1s,/usr/bin/env bash,/bin/bash,' \
       gdb/contrib/cc-with-tweaks.sh \
-      gdb/gcore \
       gdb/gcore.in \
       src-release.sh
 
@@ -328,7 +323,7 @@ cp -p build/libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
 # These are part of binutils:
 %{__rm} $RPM_BUILD_ROOT%{_localedir}/*/LC_MESSAGES/{bfd,opcodes}.mo
-%{__rm} $RPM_BUILD_ROOT%{_infodir}/bfd.info*
+%{__rm} $RPM_BUILD_ROOT%{_infodir}/{bfd,ctf-spec}.info*
 %{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,ctf,ctf-api,diagnostics,dis-asm,symcat,plugin-api}.h
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes}.la
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes}.a
@@ -344,7 +339,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(644,root,root,755)
-%doc gdb/{ChangeLog,NEWS,PROBLEMS,README}
+%doc gdb/{NEWS,PROBLEMS,README}
 %attr(755,root,root) %{_bindir}/gdb
 %attr(755,root,root) %{_bindir}/gdbtui
 %attr(755,root,root) %{_bindir}/gdb-add-index
@@ -393,5 +388,3 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libdecnumber.a
 %{_libdir}/libgdb.a
 %{_includedir}/gdb
-# -devel?
-%{_includedir}/sim

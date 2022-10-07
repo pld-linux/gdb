@@ -41,6 +41,7 @@ Patch110:	gdb-6.3-gstack-20050411.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
+Patch1003:	%{name}-readline8.2.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
 Patch1006:	buildid-locate-rpm-pld.patch
 URL:		http://www.gnu.org/software/gdb/
@@ -202,6 +203,7 @@ GDB w postaci biblioteki statycznej.
 %patch1000 -p1
 %patch1001 -p1
 %patch1002 -p1
+%patch1003 -p1
 %patch1005 -p1
 %patch1006 -p1
 

@@ -4,10 +4,9 @@
 # - debuginfod (BR: elfutils-debuginfod-devel >= 0.179)
 # - rpm5 librpm support (gdb/configure.ac checks for 4.x or so)
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
-# - reenable guile after https://sourceware.org/bugzilla/show_bug.cgi?id=21104 is fixed
 #
 # Conditional build:
-%bcond_with	guile		# Guile embedded scripting
+%bcond_without	guile		# Guile embedded scripting
 %bcond_without	python		# build without python support
 
 Summary:	A GNU source-level debugger for C, C++ and Fortran
@@ -54,8 +53,8 @@ BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools >= 0.12.1
 BuildRequires:	gmp-devel
 %if %{with guile}
-BuildRequires:	guile-devel >= 2.0
-BuildRequires:	guile-devel < 3.2
+BuildRequires:	guile-devel >= 5:2.0
+BuildRequires:	guile-devel < 5:3.2
 %endif
 %ifarch %{ix86} %{x8664}
 BuildRequires:	libipt-devel
@@ -89,6 +88,8 @@ Requires:	python3-modules >= 1:3.2
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		autoconf_ver	%(rpm -q --qf='%%{VERSION}' autoconf)
+
+%define		_noautostrip	.*%{_datadir}/gdb/guile/.*\.go
 
 %description
 Gdb is a full featured, command driven debugger. Gdb allows you to

@@ -2,7 +2,7 @@
 
 # TODO
 # - debuginfod (BR: elfutils-debuginfod-devel >= 0.179)
-# - rpm5 librpm support (gdb/configure.ac checks for 4.x or so)
+# - amd-dbgapi (BR: pkgconfig(amd-dbgapi) >= 0.68.0) <https://github.com/ROCm/ROCdbgapi>
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
 #
 # Conditional build:
@@ -21,12 +21,12 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	12.1
+Version:	14.1
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	759a1b8d2b4d403367dd0e14fa04643d
+# Source0-md5:	4a084d03915b271f67e9b8ea2ab24972
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
@@ -35,12 +35,10 @@ Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
 Patch102:	gdb-6.6-buildid-locate-rpm.patch
 Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
 Patch105:	gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
-Patch106:	gdb-6.6-buildid-locate-rpm-scl.patch
 Patch110:	gdb-6.3-gstack-20050411.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
-Patch1003:	%{name}-readline8.2.patch
 Patch1005:	%{name}-pretty-print-by-default.patch
 Patch1006:	buildid-locate-rpm-pld.patch
 URL:		http://www.gnu.org/software/gdb/
@@ -51,7 +49,7 @@ BuildRequires:	bison
 BuildRequires:	expat-devel
 BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools >= 0.12.1
-BuildRequires:	gmp-devel
+BuildRequires:	gmp-devel >= 4.3.2
 %if %{with guile}
 BuildRequires:	guile-devel >= 5:2.0
 BuildRequires:	guile-devel < 5:3.2
@@ -59,16 +57,16 @@ BuildRequires:	guile-devel < 5:3.2
 %ifarch %{ix86} %{x8664}
 BuildRequires:	libipt-devel
 %endif
-BuildRequires:	libmpc-devel
+BuildRequires:	libmpc-devel >= 0.8.1
 BuildRequires:	libselinux-devel
 BuildRequires:	libstdc++-devel >= 6:4.8
 BuildRequires:	libtool >= 2:2
 BuildRequires:	make >= 3.81
-BuildRequires:	mpfr-devel
+BuildRequires:	mpfr-devel >= 3.1.6
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel
-BuildRequires:	rpm-devel >= 4.6
+BuildRequires:	rpm-devel >= 1:4.6
 BuildRequires:	rpmbuild(macros) >= 1.219
 BuildRequires:	source-highlight-devel >= 3.0
 BuildRequires:	tar >= 1:1.22
@@ -198,13 +196,11 @@ GDB w postaci biblioteki statycznej.
 %patch102 -p1
 %patch104 -p1
 %patch105 -p1
-%patch106 -p1
 %patch110 -p1
 
 %patch1000 -p1
 %patch1001 -p1
 %patch1002 -p1
-%patch1003 -p1
 %patch1005 -p1
 %patch1006 -p1
 
@@ -326,7 +322,7 @@ cp -p build/libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
 # These are part of binutils:
 %{__rm} $RPM_BUILD_ROOT%{_localedir}/*/LC_MESSAGES/{bfd,opcodes}.mo
-%{__rm} $RPM_BUILD_ROOT%{_infodir}/{bfd,ctf-spec}.info*
+%{__rm} $RPM_BUILD_ROOT%{_infodir}/{bfd,ctf-spec,sframe-spec}.info*
 %{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,ctf,ctf-api,diagnostics,dis-asm,symcat,plugin-api}.h
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes}.la
 %{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes}.a

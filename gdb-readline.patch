@@ -1,5 +1,5 @@
---- gdb-12.1/gdb/Makefile.in.orig	2022-06-23 22:08:57.971168251 +0200
-+++ gdb-12.1/gdb/Makefile.in	2022-06-23 22:15:34.112355503 +0200
+--- gdb-14.1/gdb/Makefile.in.orig	2022-06-23 22:08:57.971168251 +0200
++++ gdb-14.1/gdb/Makefile.in	2022-06-23 22:15:34.112355503 +0200
 @@ -180,11 +180,11 @@ LIBDECNUMBER_SRC = $(srcdir)/$(LIBDECNUM
  LIBDECNUMBER_CFLAGS = -I$(LIBDECNUMBER_DIR) -I$(LIBDECNUMBER_SRC)
  
@@ -17,15 +17,6 @@
  
  # Where is expat?  This will be empty if expat was not available.
  LIBEXPAT = @LIBEXPAT@
-@@ -652,7 +652,7 @@ CLIBS = $(SIM) $(READLINE) $(OPCODES) $(
- 	$(WIN32LIBS) $(LIBGNU) $(LIBGNU_EXTRA_LIBS) $(LIBICONV) \
- 	$(LIBMPFR) $(LIBGMP) $(SRCHIGH_LIBS) $(LIBXXHASH) $(PTHREAD_LIBS) \
- 	$(DEBUGINFOD_LIBS) $(LIBBABELTRACE_LIB)
--CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) $(CTF_DEPS) \
-+CDEPS = $(NAT_CDEPS) $(SIM) $(BFD) $(CTF_DEPS) \
- 	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU) \
- 	$(LIBSUPPORT)
- 
 --- gdb-12.1/Makefile.in.orig	2022-05-01 20:47:43.000000000 +0200
 +++ gdb-12.1/Makefile.in	2022-06-23 22:06:05.298770364 +0200
 @@ -1087,7 +1087,6 @@ configure-host:  \

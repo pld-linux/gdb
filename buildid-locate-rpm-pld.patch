@@ -1,18 +1,18 @@
---- gdb-7.7.1/gdb/build-id.c.old	2014-06-05 14:31:11.000000000 +0200
-+++ gdb-7.7.1/gdb/build-id.c	2014-06-05 14:33:12.248235380 +0200
-@@ -1190,13 +1190,8 @@
- 	fprintf_unfiltered (gdb_stdlog,
- 			    _("Missing separate debuginfo for %s\n"), binary);
-         if (debug != NULL)
--	  fprintf_unfiltered (gdb_stdlog, _("Try: %s %s\n"),
+--- gdb-14.1/gdb/build-id.c.old	2014-06-05 14:31:11.000000000 +0200
++++ gdb-14.1/gdb/build-id.c	2014-06-05 14:33:12.248235380 +0200
+@@ -1306,13 +1306,8 @@ debug_print_missing (const char *binary,
+ 	if (debug != NULL)
+ 	{
+ 	  if (access (debug, F_OK) == 0) {
+-	    gdb_printf (gdb_stdlog, _("Try: %s %s\n"),
 -#ifdef DNF_DEBUGINFO_INSTALL
--			      "dnf"
+-			"dnf"
 -#else
--			      "yum"
+-			"yum"
 -#endif
--			      " --enablerepo='*debug*' install", debug);
-+	  fprintf_unfiltered (gdb_stdlog, _("Try to install package that provides `%s' file\n"),
-+			      debug);
-       }
- }
- 
+-			" --enablerepo='*debug*' install", debug);
++	    gdb_printf (gdb_stdlog, _("Try to install package that provides `%s' file\n"),
++			debug);
+ 	  } else
+ 	    gdb_printf (gdb_stdlog, _("The debuginfo package for this file is probably broken.\n"));
+ 	}

@@ -1,19 +1,20 @@
---- gdb-7.7.1/gdb/valprint.c.orig	2014-06-04 16:13:46.353948386 +0200
-+++ gdb-7.7.1/gdb/valprint.c	2014-06-04 16:15:55.599699077 +0200
-@@ -108,12 +108,12 @@
+--- gdb-14.1/gdb/valprint.c.orig	2014-06-04 16:13:46.353948386 +0200
++++ gdb-14.1/gdb/valprint.c	2014-06-04 16:15:55.599699077 +0200
+@@ -106,13 +106,13 @@ static void val_print_type_code_flags (s
  struct value_print_options user_print_options =
  {
    Val_prettyformat_default,	/* prettyformat */
--  0,				/* prettyformat_arrays */
--  0,				/* prettyformat_structs */
--  0,				/* vtblprint */
-+  1,				/* prettyformat_arrays */
-+  1,				/* prettyformat_structs */
-+  1,				/* vtblprint */
-   1,				/* unionprint */
-   1,				/* addressprint */
--  0,				/* objectprint */
-+  1,				/* objectprint */
+-  false,			/* prettyformat_arrays */
+-  false,			/* prettyformat_structs */
+-  false,			/* vtblprint */
++  true,				/* prettyformat_arrays */
++  true,				/* prettyformat_structs */
++  true,				/* vtblprint */
+   true,				/* unionprint */
+   true,				/* addressprint */
+   false,			/* nibblesprint */
+-  false,			/* objectprint */
++  true,				/* objectprint */
    PRINT_MAX_DEFAULT,		/* print_max */
+   PRINT_MAX_CHARS_DEFAULT,	/* print_max_chars */
    10,				/* repeat_count_threshold */
-   0,				/* output_format */

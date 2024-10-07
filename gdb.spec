@@ -21,18 +21,17 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	14.2
+Version:	15.2
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	4452f575d09f94276cb0a1e95ecff856
+# Source0-md5:	85c722e2f2baea2b7820a6a7eaea2ce8
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
 Patch100:	gdb-6.6-buildid-locate.patch
 Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
-Patch102:	gdb-6.6-buildid-locate-rpm.patch
 Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
 Patch105:	gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
 Patch110:	gdb-6.3-gstack-20050411.patch
@@ -59,14 +58,13 @@ BuildRequires:	libipt-devel
 %endif
 BuildRequires:	libmpc-devel >= 0.8.1
 BuildRequires:	libselinux-devel
-BuildRequires:	libstdc++-devel >= 6:4.8
+BuildRequires:	libstdc++-devel >= 6:8
 BuildRequires:	libtool >= 2:2
-BuildRequires:	make >= 3.81
+BuildRequires:	make >= 1:3.81
 BuildRequires:	mpfr-devel >= 3.1.6
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel
-BuildRequires:	rpm-devel >= 1:4.6
 BuildRequires:	rpmbuild(macros) >= 1.219
 BuildRequires:	source-highlight-devel >= 3.0
 BuildRequires:	tar >= 1:1.22
@@ -75,8 +73,10 @@ BuildRequires:	xxHash-devel
 BuildRequires:	xz
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel
+BuildRequires:	zstd-devel
 %if %{with python}
 BuildRequires:	python3-devel >= 1:3.2
+BuildRequires:	python3-modules >= 1:3.2
 BuildRequires:	rpm-pythonprov
 Obsoletes:	python-gdb < 7.3
 # for traceback module
@@ -193,7 +193,6 @@ GDB w postaci biblioteki statycznej.
 
 %patch100 -p1
 %patch101 -p1
-%patch102 -p1
 %patch104 -p1
 %patch105 -p1
 %patch110 -p1
@@ -210,20 +209,20 @@ cat > gdb/version.in << EOF
 EOF
 
 %{__sed} -i -e '1s,/usr/bin/python$,%{__python},' \
-      contrib/dg-extract-results.py \
+	contrib/dg-extract-results.py \
 
 %{__sed} -i -e '1s,/usr/bin/env python$,%{__python},' \
-      gdb/contrib/test_pubnames_and_indexes.py \
-      gdb/testsuite/print-ts.py
+	gdb/contrib/test_pubnames_and_indexes.py \
+	gdb/testsuite/print-ts.py
 
 %{__sed} -i -e '1s,/usr/bin/env python3,%{__python3},' \
-      gdb/testsuite/analyze-racy-logs.py \
-      gdb/copyright.py
+	gdb/testsuite/analyze-racy-logs.py \
+	gdb/copyright.py
 
 %{__sed} -i -e '1s,/usr/bin/env bash,/bin/bash,' \
-      gdb/contrib/cc-with-tweaks.sh \
-      gdb/gcore.in \
-      src-release.sh
+	gdb/contrib/cc-with-tweaks.sh \
+	gdb/gcore.in \
+	src-release.sh
 
 sed -i -e 's/\[2\.69\]/[%{autoconf_ver}]/' config/override.m4
 

@@ -22,7 +22,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	15.2
-Release:	
+Release:	2
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
@@ -191,17 +191,17 @@ GDB w postaci biblioteki statycznej.
 %{__rm} gdb/ada-exp.c gdb/ada-lex.c gdb/c-exp.c gdb/cp-name-parser.c gdb/f-exp.c
 %{__rm} gdb/m2-exp.c gdb/p-exp.c
 
-%patch100 -p1
-%patch101 -p1
-%patch104 -p1
-%patch105 -p1
-%patch110 -p1
+%patch -P 100 -p1
+%patch -P 101 -p1
+%patch -P 104 -p1
+%patch -P 105 -p1
+%patch -P 110 -p1
 
-%patch1000 -p1
-%patch1001 -p1
-%patch1002 -p1
-%patch1005 -p1
-%patch1006 -p1
+%patch -P 1000 -p1
+%patch -P 1001 -p1
+%patch -P 1002 -p1
+%patch -P 1005 -p1
+%patch -P 1006 -p1
 
 # Change the version that gets printed at GDB startup, so it is PLD Linux specific.
 cat > gdb/version.in << EOF

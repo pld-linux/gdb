@@ -22,7 +22,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	15.2
-Release:	2
+Release:	3
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
@@ -65,7 +65,7 @@ BuildRequires:	mpfr-devel >= 3.1.6
 BuildRequires:	ncurses-devel >= 5.2
 BuildRequires:	pkgconfig
 BuildRequires:	readline-devel
-BuildRequires:	rpmbuild(macros) >= 1.219
+BuildRequires:	rpmbuild(macros) >= 2.045
 BuildRequires:	source-highlight-devel >= 3.0
 BuildRequires:	tar >= 1:1.22
 BuildRequires:	texinfo >= 4.4
@@ -246,7 +246,8 @@ done
 cp -f /usr/share/automake/config.* .
 install -d build && cd build
 # don't --enable-shared here, there would be libs version mismatch with binutils
-../%configure \
+%define configuredir ..
+%configure \
 	--disable-gdbtk \
 	--disable-shared \
 	--disable-silent-rules \

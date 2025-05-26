@@ -1,18 +1,11 @@
---- gdb-14.1/gdb/build-id.c.old	2014-06-05 14:31:11.000000000 +0200
-+++ gdb-14.1/gdb/build-id.c	2014-06-05 14:33:12.248235380 +0200
-@@ -1306,13 +1306,8 @@ debug_print_missing (const char *binary,
- 	      _("Missing separate debuginfo for %s.\n"), binary);
-   if (debug != NULL)
-     {
--      gdb_printf (gdb_stdlog, _("Try: %s %s\n"),
--#ifdef DNF_DEBUGINFO_INSTALL
--		  "dnf"
--#else
--		  "yum"
--#endif
--		  " --enablerepo='*debug*' install", debug);
-+	    gdb_printf (gdb_stdlog, _("Try to install package that provides `%s' file\n"),
-+			debug);
-     }
- }
- 
+--- gdb-16.3/gdb/python/lib/gdb/command/rpm-suggestions.py.orig	2025-05-25 15:48:56.578577662 +0200
++++ gdb-16.3/gdb/python/lib/gdb/command/rpm-suggestions.py	2025-05-25 21:34:58.842765490 +0200
+@@ -361,7 +361,7 @@ else:
+     # packages for the executable with the given build-id.
+     def print_build_id_suggestions(build_id_list):
+         for build_id in build_id_list:
+-            print("Missing file(s), try: dnf --enablerepo='*debug*' install "
++            print("Missing file(s), try to install packages: "
+                   + build_id_to_usr_lib_filename(build_id, False)
+                   + ' '
+                   + build_id_to_usr_lib_filename(build_id, True, ".debug"))

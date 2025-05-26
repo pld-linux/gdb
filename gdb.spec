@@ -1,7 +1,6 @@
 # NOTE: -lib package is used by fpc.spec
 
 # TODO
-# - debuginfod (BR: elfutils-debuginfod-devel >= 0.179)
 # - amd-dbgapi (BR: pkgconfig(amd-dbgapi) >= 0.68.0) <https://github.com/ROCm/ROCdbgapi>
 # - change install msg to poldek in buildid-locate-rpm-pld.patch when poldek allows it. LP#493922
 #
@@ -21,20 +20,17 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	15.2
-Release:	3
+Version:	16.3
+Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	85c722e2f2baea2b7820a6a7eaea2ce8
+# Source0-md5:	f7a7e2d0a6d28622ac69a3623b23876b
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
 Source3:	%{name}-gstack.man
-Patch100:	gdb-6.6-buildid-locate.patch
-Patch101:	gdb-6.6-buildid-locate-solib-missing-ids.patch
-Patch104:	gdb-6.6-buildid-locate-rpm-librpm-workaround.patch
-Patch105:	gdb-6.6-buildid-locate-misleading-warning-missing-debuginfo-rhbz981154.patch
-Patch110:	gdb-6.3-gstack-20050411.patch
+# patch 100 from Fedora
+Patch100:	gdb-add-rpm-suggestion-script.patch
 Patch1000:	%{name}-readline.patch
 Patch1001:	%{name}-info.patch
 Patch1002:	%{name}-passflags.patch
@@ -45,6 +41,7 @@ BuildRequires:	autoconf >= 2.69
 BuildRequires:	automake
 BuildRequires:	babeltrace-devel >= 1.1.0
 BuildRequires:	bison
+BuildRequires:	elfutils-debuginfod-devel >= 0.188
 BuildRequires:	expat-devel
 BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools >= 0.12.1
@@ -73,7 +70,7 @@ BuildRequires:	xxHash-devel
 BuildRequires:	xz
 BuildRequires:	xz-devel
 BuildRequires:	zlib-devel
-BuildRequires:	zstd-devel
+BuildRequires:	zstd-devel >= 1.4.0
 %if %{with python}
 BuildRequires:	python3-devel >= 1:3.2
 BuildRequires:	python3-modules >= 1:3.2
@@ -82,7 +79,9 @@ Obsoletes:	python-gdb < 7.3
 # for traceback module
 Requires:	python3-modules >= 1:3.2
 %endif
+Requires:	elfutils-debuginfod-libs >= 0.188
 %{?with_guile:Requires:	guile >= 2.0.12}
+Requires:	zstd >= 1.4.0
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		autoconf_ver	%(rpm -q --qf='%%{VERSION}' autoconf)
@@ -192,10 +191,6 @@ GDB w postaci biblioteki statycznej.
 %{__rm} gdb/m2-exp.c gdb/p-exp.c
 
 %patch -P 100 -p1
-%patch -P 101 -p1
-%patch -P 104 -p1
-%patch -P 105 -p1
-%patch -P 110 -p1
 
 %patch -P 1000 -p1
 %patch -P 1001 -p1
@@ -208,20 +203,21 @@ cat > gdb/version.in << EOF
 %{version}-%{release} (PLD Linux)
 EOF
 
-%{__sed} -i -e '1s,/usr/bin/python$,%{__python},' \
+%{__sed} -i -e '1s,/usr/bin/python$,%{__python3},' \
 	contrib/dg-extract-results.py \
 
-%{__sed} -i -e '1s,/usr/bin/env python$,%{__python},' \
-	gdb/contrib/test_pubnames_and_indexes.py \
+%{__sed} -i -e '1s,/usr/bin/env python$,%{__python3},' \
 	gdb/testsuite/print-ts.py
 
 %{__sed} -i -e '1s,/usr/bin/env python3,%{__python3},' \
+	gdb/contrib/test_pubnames_and_indexes.py \
 	gdb/testsuite/analyze-racy-logs.py \
 	gdb/copyright.py
 
 %{__sed} -i -e '1s,/usr/bin/env bash,/bin/bash,' \
 	gdb/contrib/cc-with-tweaks.sh \
 	gdb/gcore.in \
+	gdb/gstack-1.in \
 	src-release.sh
 
 sed -i -e 's/\[2\.69\]/[%{autoconf_ver}]/' config/override.m4
@@ -323,9 +319,9 @@ cp -p build/libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 # These are part of binutils:
 %{__rm} $RPM_BUILD_ROOT%{_localedir}/*/LC_MESSAGES/{bfd,opcodes}.mo
 %{__rm} $RPM_BUILD_ROOT%{_infodir}/{bfd,ctf-spec,sframe-spec}.info*
-%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,ctf,ctf-api,diagnostics,dis-asm,symcat,plugin-api}.h
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes}.la
-%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes}.a
+%{__rm} $RPM_BUILD_ROOT%{_includedir}/{ansidecl,bfd,bfdlink,ctf,ctf-api,diagnostics,dis-asm,plugin-api,sframe,sframe-api,symcat}.h
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes,sframe}.la
+%{__rm} $RPM_BUILD_ROOT%{_libdir}/lib{bfd,ctf,ctf-nobfd,opcodes,sframe}.a
 
 %clean
 rm -rf $RPM_BUILD_ROOT

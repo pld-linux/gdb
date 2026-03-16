@@ -21,7 +21,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	16.3
-Release:	1
+Release:	2
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
@@ -82,6 +82,7 @@ Requires:	python3-modules >= 1:3.2
 Requires:	elfutils-debuginfod-libs >= 0.188
 %{?with_guile:Requires:	guile >= 2.0.12}
 Requires:	zstd >= 1.4.0
+Suggests:	%{name}-utils = %{version}-%{release}
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %define		autoconf_ver	%(rpm -q --qf='%%{VERSION}' autoconf)
@@ -182,6 +183,17 @@ GDB in the form of a static library.
 
 %description lib -l pl.UTF-8
 GDB w postaci biblioteki statycznej.
+
+%package utils
+Summary:	GDB utils
+Summary(pl.UTF-8):	Narzędzia GDB
+Group:		Development/Debuggers
+
+%description utils
+GDB utils.
+
+%description utils -l pl.UTF-8
+Narzędzia GDB.
 
 %prep
 %setup -q
@@ -337,7 +349,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc gdb/{NEWS,PROBLEMS,README}
 %attr(755,root,root) %{_bindir}/gdb
 %attr(755,root,root) %{_bindir}/gdbtui
-%attr(755,root,root) %{_bindir}/gdb-add-index
 %attr(755,root,root) %{_bindir}/gstack
 %attr(755,root,root) %{_bindir}/gcore
 %dir %{_datadir}/gdb
@@ -357,7 +368,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/gdb/python
 %{_mandir}/man1/gdb.1*
 %{_mandir}/man1/gdbtui.1*
-%{_mandir}/man1/gdb-add-index.1*
 %{_mandir}/man1/gstack.1*
 %{_mandir}/man1/gcore.1*
 %{_mandir}/man5/gdbinit.5*
@@ -383,3 +393,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/libdecnumber.a
 %{_libdir}/libgdb.a
 %{_includedir}/gdb
+
+%files utils
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/gdb-add-index
+%{_mandir}/man1/gdb-add-index.1*

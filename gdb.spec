@@ -20,15 +20,14 @@ Summary(uk.UTF-8):	Символьний відладчик для С та інш
 Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
-Version:	16.3
+Version:	18.1
 Release:	1
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
-# Source0-md5:	f7a7e2d0a6d28622ac69a3623b23876b
+# Source0-md5:	2a34dcf033be0be3093a249d64354f51
 Source1:	http://www.mif.pg.gda.pl/homepages/ankry/man-PLD/%{name}-non-english-man-pages.tar.bz2
 # Source1-md5:	2e8a48939ae282c12bbacdd54e398247
-Source3:	%{name}-gstack.man
 # patch 100 from Fedora
 Patch100:	gdb-add-rpm-suggestion-script.patch
 Patch1000:	%{name}-readline.patch
@@ -39,7 +38,6 @@ Patch1006:	buildid-locate-rpm-pld.patch
 URL:		http://www.gnu.org/software/gdb/
 BuildRequires:	autoconf >= 2.69
 BuildRequires:	automake
-BuildRequires:	babeltrace-devel >= 1.1.0
 BuildRequires:	bison
 BuildRequires:	elfutils-debuginfod-devel >= 0.188
 BuildRequires:	expat-devel
@@ -47,7 +45,7 @@ BuildRequires:	flex >= 2.6.4
 BuildRequires:	gettext-tools >= 0.12.1
 BuildRequires:	gmp-devel >= 4.3.2
 %if %{with guile}
-BuildRequires:	guile-devel >= 5:2.0
+BuildRequires:	guile-devel >= 5:2.2
 BuildRequires:	guile-devel < 5:3.2
 %endif
 %ifarch %{ix86} %{x8664}
@@ -80,7 +78,7 @@ Obsoletes:	python-gdb < 7.3
 Requires:	python3-modules >= 1:3.2
 %endif
 Requires:	elfutils-debuginfod-libs >= 0.188
-%{?with_guile:Requires:	guile >= 2.0.12}
+%{?with_guile:Requires:	guile >= 2.2}
 Requires:	zstd >= 1.4.0
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
@@ -216,7 +214,6 @@ EOF
 
 %{__sed} -i -e '1s,/usr/bin/env bash,/bin/bash,' \
 	gdb/contrib/cc-with-tweaks.sh \
-	gdb/gcore.in \
 	gdb/gstack-1.in \
 	src-release.sh
 
@@ -311,8 +308,6 @@ done
 %py3_comp $RPM_BUILD_ROOT%{py3_sitescriptdir}
 %endif
 
-cp -a %{SOURCE3} $RPM_BUILD_ROOT%{_mandir}/man1/gstack.1
-
 cp -p build/libdecnumber/libdecnumber.a $RPM_BUILD_ROOT%{_libdir}
 
 # Remove the files that are part of a gdb build but that are owned and provided by other packages.
@@ -368,7 +363,6 @@ rm -rf $RPM_BUILD_ROOT
 %lang(pl) %{_mandir}/pl/man1/*
 %{_infodir}/annotate.info*
 %{_infodir}/gdb.info*
-%{_infodir}/stabs.info*
 
 %files gdbserver
 %defattr(644,root,root,755)

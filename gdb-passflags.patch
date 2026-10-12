@@ -1,11 +1,10 @@
---- gdb-5.2/gdb/Makefile.in.orig	Thu May 23 19:37:49 2002
-+++ gdb-5.2/gdb/Makefile.in	Thu May 23 20:00:03 2002
-@@ -410,6 +410,8 @@
+--- gdb-18.1/gdb/Makefile.in.orig
++++ gdb-18.1/gdb/Makefile.in
+@@ -933,6 +933,7 @@
  
  FLAGS_TO_PASS = \
  	"prefix=$(prefix)" \
 +	"bindir=$(bindir)" \
-+	"mandir=$(mandir)" \
- 	"infodir=$(infodir)" \
  	"exec_prefix=$(exec_prefix)" \
  	"infodir=$(infodir)" \
+ 	"datarootdir=$(datarootdir)" \

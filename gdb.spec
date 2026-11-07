@@ -21,7 +21,7 @@ Summary(zh_CN.UTF-8):	[开发]C和其他语言的调试器
 Summary(zh_TW.UTF-8):	[.-A開發]C和.$)B其.-A他語.$)B言的調試器
 Name:		gdb
 Version:	18.1
-Release:	1
+Release:	2
 License:	GPL v3+
 Group:		Development/Debuggers
 Source0:	https://ftp.gnu.org/gnu/gdb/%{name}-%{version}.tar.xz
@@ -138,6 +138,17 @@ verir.
 момент часу. Працює з програмами на C та C++, зкомпільованими
 компіляторами GNU C (gcc, egcs, pgcc).
 
+%package minimal
+Summary:	A GNU source-level debugger for C, C++, Fortran, Go and other languages (minimal version)
+
+%description minimal
+GDB, the GNU debugger, allows you to debug programs written in C, C++,
+Fortran, Go, and other languages, by executing them in a controlled
+fashion and printing their data.
+
+This package provides a minimal version of GDB, tailored to be used by
+the PLD buildroot.  It should probably not be used by end users.
+
 %package gdbserver
 Summary:	A standalone server for GDB (the GNU source-level debugger)
 Summary(pl.UTF-8):	Samodzielny serwer GDB (debuggera GNU)
@@ -237,6 +248,30 @@ for dir in $(find gdb -name 'configure.in' -o -name 'configure.ac'); do
 	cd $olddir
 done
 cp -f /usr/share/automake/config.* .
+
+install -d build-minimal && cd build-minimal
+# don't --enable-shared here, there would be libs version mismatch with binutils
+%define configuredir ..
+%configure \
+	--without-babeltrace \
+	--without-expat \
+	--disable-tui \
+	--without-python \
+	--without-guile \
+	--disable-inprocess-agent \
+	--without-intel-pt \
+	--disable-unit-tests \
+	--disable-source-highlight \
+	--with-separate-debug-dir=/usr/lib/debug \
+	--with-system-readline
+
+%{__make} \
+	V=1
+
+%{__make} -C gdb libgdb.a \
+	V=1
+cd ..
+
 install -d build && cd build
 # don't --enable-shared here, there would be libs version mismatch with binutils
 %define configuredir ..
@@ -281,6 +316,13 @@ install -d build && cd build
 %install
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT%{_infodir}
+
+%{__make} -C build-minimal -j1 install \
+	DESTDIR=$RPM_BUILD_ROOT
+
+%{__mv} $RPM_BUILD_ROOT%{_bindir}/gdb{,.minimal}
+%{__rm} -r $RPM_BUILD_ROOT%{_bindir}/{gcore,gdb-add-index,gdbserver,gstack}
+%{__rm} -r $RPM_BUILD_ROOT{%{_includedir},%{_libdir},%{_datadir}}
 
 %{__make} -C build -j1 install install-info \
 	DESTDIR=$RPM_BUILD_ROOT
@@ -363,6 +405,11 @@ rm -rf $RPM_BUILD_ROOT
 %lang(pl) %{_mandir}/pl/man1/*
 %{_infodir}/annotate.info*
 %{_infodir}/gdb.info*
+
+%files minimal
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/gdb.minimal
+%attr(755,root,root) %{_bindir}/gdb-add-index
 
 %files gdbserver
 %defattr(644,root,root,755)
